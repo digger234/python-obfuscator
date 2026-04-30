@@ -152,13 +152,133 @@ def __pair__(blob):
    while slot + 1 < len(rows):
         rows[slot], rows[slot + 1] = rows[slot + 1], rows[slot]; slot += 2
    return bytes(rows)
+def __shroud__(blob, salt):
+   rows = bytearray(); tilt = ((salt >> 3) & 15) + 1
+   for slot, byte in enumerate(blob):
+        fog = byte ^ ((salt + slot * tilt + (slot >> 1)) & 255); rows.append(((fog << 4) & 240) | (fog >> 4))
+   return bytes(rows)
+def __unshroud__(blob, salt):
+   rows = bytearray(); tilt = ((salt >> 3) & 15) + 1
+   for slot, byte in enumerate(blob):
+        fog = ((byte >> 4) | ((byte << 4) & 255)) & 255; rows.append(fog ^ ((salt + slot * tilt + (slot >> 1)) & 255))
+   return bytes(rows)
+def __ravel__(blob, span):
+   rows = []; slot = 0; span = max(2, span)
+   while slot < len(blob):
+        part = blob[slot:slot + span]; rows.append(part[1::2] + part[::2]); slot += span
+   return b''.join(rows)
+def __unravel__(blob, span):
+   rows = []; slot = 0; span = max(2, span)
+   while slot < len(blob):
+        part = blob[slot:slot + span]; left = part[:len(part) // 2]; right = part[len(part) // 2:]; out = bytearray(); ash = 0; ember = 0
+        for turn in range(len(part)):
+             if turn & 1: out.append(left[ash]); ash += 1
+             else: out.append(right[ember]); ember += 1
+        rows.append(bytes(out)); slot += span
+   return b''.join(rows)
+def __thorn__(blob, span):
+   rows = []; slot = 0; span = max(2, span); flip = 0
+   while slot < len(blob):
+        part = blob[slot:slot + span]; rows.append(part[::-1] if flip & 1 else part); slot += span; flip += 1
+   return b''.join(rows)
+def __crest__(blob):
+   if not blob:
+        return (0, 0, b'', b'')
+   return (len(blob), sum(blob) & 0xffff, blob[:1], blob[-1:])
+def __grain__(blob, span):
+   rows = []; slot = 0
+   while slot < len(blob):
+        rows.append(__crest__(blob[slot:slot + span])); slot += span
+   return rows
+def __pulse__(rows):
+   glow = 0; slot = 0
+   for row in rows:
+        glow = (glow + ((slot + 1) * ((row[1] or 1) & 0xffff))) & 0xffffffff; slot += 32
+   return glow
+def __first__(rows):
+   return rows[0] if rows else (0, 0, b'', b'')
+def __last__(rows):
+   return rows[-1] if rows else (0, 0, b'', b'')
+def __chaff__(blob):
+   rows = __grain__(blob, 32)
+   return (len(blob), len(rows), __first__(rows), __last__(rows), __pulse__(rows))
+def __packa__(blob, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk):
+   blob = __gasket__(blob)
+   blob = __weld__(blob, slag)
+   blob = __snare__(blob, ashk, gritk)
+   blob = __whorl__(blob, lavak)
+   blob = __scald__(blob, smeltk)
+   blob = __shroud__(blob, veilk)
+   blob = __ravel__(blob, weftk)
+   blob = __thorn__(blob, thornk); return __pair__(blob)
+def __packb__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk):
+   blob = zlib.compress(blob, 9)
+   blob = __weld__(blob, smoke)
+   blob = __spine__(blob, crustk)
+   blob = __snare__(blob, emberk, cinderk)
+   blob = __shroud__(blob, veilk ^ 0x5A)
+   blob = __ravel__(blob, weftk + 1)
+   blob = __thorn__(blob, thornk + 1); return __pair__(blob)
+def __peeka__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk):
+   blob = __pair__(blob)
+   blob = __thorn__(blob, thornk + 1)
+   blob = __unravel__(blob, weftk + 1)
+   blob = __unshroud__(blob, veilk ^ 0x5A)
+   blob = __unsnare__(blob, emberk, cinderk)
+   blob = __spine__(blob, crustk)
+   blob = __weld__(blob, smoke); return zlib.decompress(blob)
+def __peekb__(blob, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk):
+   blob = __pair__(blob)
+   blob = __thorn__(blob, thornk)
+   blob = __unravel__(blob, weftk)
+   blob = __unshroud__(blob, veilk)
+   blob = __scald__(blob, smeltk)
+   blob = __unwhorl__(blob, lavak)
+   blob = __unsnare__(blob, ashk, gritk); return __weld__(blob, slag)
+def __corea__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk):
+   blob = __weld__(blob, leftk)
+   blob = zlib.compress(blob, 9)
+   blob = __weld__(blob, rightk)
+   blob = __snare__(blob, mistk, dustk)
+   blob = __shroud__(blob, cloakk)
+   blob = __ravel__(blob, lanek); return __thorn__(blob, spurk)
+def __coreb__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk):
+   blob = __thorn__(blob, spurk)
+   blob = __unravel__(blob, lanek)
+   blob = __unshroud__(blob, cloakk)
+   blob = __unsnare__(blob, mistk, dustk)
+   blob = __weld__(blob, rightk)
+   blob = zlib.decompress(blob); return __weld__(blob, leftk)
+def __wrapa__(blob, shellk, glassk, forgek, stampk):
+   blob = __weld__(blob, shellk)
+   blob = zlib.compress(blob, 9)
+   blob = __weld__(blob, glassk); return __snare__(blob, forgek, stampk)
+def __wrapb__(blob, shellk, glassk, forgek, stampk):
+   blob = __unsnare__(blob, forgek, stampk)
+   blob = __weld__(blob, glassk)
+   blob = zlib.decompress(blob); return __weld__(blob, shellk)
+def __marks__(code): return __glow__(code), __bloom__(code), __echo__(code), __magma__(code), __soul__(code), __wisp__(code)
+def __keys__(seed):
+   slag, smoke = __spark__(seed + b'slag', 1000000, 2147483647), __spark__(seed + b'smoke', 1000000, 2147483647)
+   ashk, gritk, lavak, crustk = __spark__(seed + b'ash', 17, 251), __spark__(seed + b'grit', 3, 29), __spark__(seed + b'lava', 1, 7), __spark__(seed + b'crust', 9, 33)
+   emberk, cinderk, smeltk, veilk = __spark__(seed + b'ember', 17, 251), __spark__(seed + b'cinder', 3, 29), __spark__(seed + b'smelt', 17, 251), __spark__(seed + b'veil', 17, 251)
+   weftk, thornk = __spark__(seed + b'weft', 4, 19), __spark__(seed + b'thorn', 2, 11)
+   return slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk
+def __corek__(seed):
+   leftk, rightk = __spark__(seed + b'glass', 1000000, 2147483647), __spark__(seed + b'forge', 1000000, 2147483647)
+   mistk, dustk, cloakk, lanek, spurk = __spark__(seed + b'mist', 17, 251), __spark__(seed + b'dust', 3, 29), __spark__(seed + b'cloak', 17, 251), __spark__(seed + b'lane', 4, 19), __spark__(seed + b'spur', 2, 11)
+   return leftk, rightk, mistk, dustk, cloakk, lanek, spurk
+def __wrapk__(seed):
+   shellk, glassk = __spark__(seed + b'shell', 1000000, 2147483647), __spark__(seed + b'glasswrap', 1000000, 2147483647)
+   forgek, stampk = __spark__(seed + b'forgewrap', 17, 251), __spark__(seed + b'stampwrap', 3, 29)
+   return shellk, glassk, forgek, stampk
 def __brand__(blob):
-   return hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest(), hashlib.md5(blob).hexdigest(), __flare__(blob), zlib.adler32(blob) ^ zlib.crc32(blob)
+    return hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest(), hashlib.md5(blob).hexdigest(), __flare__(blob), zlib.adler32(blob) ^ zlib.crc32(blob)
 def __carapace__(raw, seed, kind):
-   salt = __mist__(seed + kind + b'salt', len(raw) or 1); off = __spark__(seed + kind + b'off', 0x3040, 0x30ff); lift = __spark__(seed + kind + b'lift', 0x120, 0x780); key = __spark__(seed + kind + b'key', 11, 251)
-   wide = ''.join(chr((one ^ salt[slot]) + off) for slot, one in enumerate(raw)); ring = [((one ^ key) + lift) for one in raw]; text = raw.hex(); fog = __mist__(seed + kind + b'weave', len(text) or 1).hex()[:len(text)]
-   weave = ''.join(one + two for one, two in zip(fog, text)); veil = base64.b85encode(bytes(one ^ salt[slot] for slot, one in enumerate(raw))).decode('ascii'); shot, coal, soot, ember, glass = __brand__(raw)
-   return (kind.decode('ascii'), wide, off, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass)
+    salt = __mist__(seed + kind + b'salt', len(raw) or 1); off = __spark__(seed + kind + b'off', 0x3040, 0x30ff); lift = __spark__(seed + kind + b'lift', 0x120, 0x780); key = __spark__(seed + kind + b'key', 11, 251)
+    wide = ''.join(chr((one ^ salt[slot]) + off) for slot, one in enumerate(raw)); ring = [((one ^ key) + lift) for one in raw]; text = raw.hex(); fog = __mist__(seed + kind + b'weave', len(text) or 1).hex()[:len(text)]
+    weave = ''.join(one + two for one, two in zip(fog, text)); veil = base64.b85encode(bytes(one ^ salt[slot] for slot, one in enumerate(raw))).decode('ascii'); shot, coal, soot, ember, glass = __brand__(raw)
+    return (kind.decode('ascii'), wide, off, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass)
 def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
@@ -336,6 +456,52 @@ def __vein__(code):
             kind = b's' if isinstance(val, str) else b'b'
             store.append(__carapace__(raw, seed + len(store).to_bytes(4, 'little'), kind))
         return ast.Call(func=ast.Name(id=load, ctx=ast.Load()), args=[ast.Constant(seen[key])], keywords=[])
+    def __rift__(val):
+        size = len(val)
+        if size < 4:
+            return [val]
+        fog = hashlib.sha256(seed + type(val).__name__.encode('ascii', 'ignore') + size.to_bytes(4, 'little')).digest(); bag = []; slot = 0; at = 0
+        while slot < size:
+            left = size - slot; step = min(7, left); take = 1 + (fog[at % len(fog)] % step)
+            if left - take == 1 and take > 1:
+                take -= 1
+            bag.append(val[slot:slot + take]); slot += take; at += 1
+        return bag if len(bag) > 1 else [val]
+    def __fuse__(bag, kind):
+        rows = [__ember__(one) for one in bag]
+        if not rows:
+            return ast.Constant('' if kind == 's' else b'')
+        if len(rows) == 1:
+            return rows[0]
+        if len(rows) > 2:
+            base = ast.Constant('' if kind == 's' else b'')
+            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[base, __ember__('join')], keywords=[]), args=[ast.List(elts=rows, ctx=ast.Load())], keywords=[])
+        out = rows[0]
+        for one in rows[1:]:
+            out = ast.BinOp(left=out, op=ast.Add(), right=one)
+        return out
+    def __stray__(val):
+        return __fuse__(__rift__(val), 's')
+    def __haze__(val):
+        return __fuse__(__rift__(val), 'b')
+    def __count__(val):
+        off = 97 + ((abs(val) * 1315423911 + seed[0]) % 999903); key = 17 + ((abs(val) * 2654435761 + seed[1]) % 65519); ash = 33 + ((abs(val) * 2246822519 + seed[2]) % 65503)
+        if (seed[3] + abs(val)) & 1:
+            core = ((val ^ key) + ash) - off
+            return ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Constant(core), op=ast.Add(), right=ast.Constant(off)), op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key))
+        core = ((val + off) ^ key) + ash
+        return ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Constant(core), op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key)), op=ast.Sub(), right=ast.Constant(off))
+    def __float__(val):
+        return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
+    def __plex__(val):
+        return ast.Call(func=ast.Name(id='complex', ctx=ast.Load()), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
+    def __truth__(val):
+        left = (seed[4] & 1) + 1
+        return ast.Compare(left=ast.Constant(left), ops=[ast.Eq()], comparators=[ast.Constant(left if val else left + 1)])
+    def __void__():
+        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(None)), args=[], keywords=[])
+    def __dots__():
+        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[])
     def __slab__():
         raw = marshal.dumps(store)
         core = base64.b85encode(zlib.compress(raw, 9)).decode('ascii')
@@ -402,25 +568,25 @@ def {reef}(blob):
 def {wave}(blob):
  return (__import__('hashlib').sha256(blob).hexdigest(),__import__('hashlib').sha1(blob).hexdigest(),__import__('hashlib').md5(blob).hexdigest(),{reef}(blob),__import__('zlib').adler32(blob)^__import__('zlib').crc32(blob))
 def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m):
- rows={mire}(v,o)
- spin={sootf}(u)
- (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len(__import__('base64').b85decode(t.encode()))) and (_ for _ in ()).throw(RuntimeError('bad'))
- {brimf}(r)
- {huskf}(len(bytes.fromhex(p)),rows[0])
- spec={cask}(r)
- spec[1]!=(rows[0]*4) and (_ for _ in ()).throw(RuntimeError('bad'))
- ash={ashf}({dawn}(v,o,p),{dusk}(r))
- ash={ashf}(ash,{kiln}(u,l,f))
- ash={ashf}(ash,{loom}(t,p))
- fog={crustf}(ash)
- fog[0]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
- tips={flaref}(ash)
- tips[2]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
- spin={spinef}(ash)
- (spin[0]^spin[1])!=m and (_ for _ in ()).throw(RuntimeError('bad'))
- rows={wave}(ash)
- (rows[0]!=h or rows[1]!=s or rows[2]!=e or rows[3]!=g or rows[4]!=m) and (_ for _ in ()).throw(RuntimeError('bad'))
- return ash if k=='b' else ash.decode('utf-8')
+  rows={mire}(v,o)
+  spin={sootf}(u)
+  (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len(__import__('base64').b85decode(t.encode()))) and (_ for _ in ()).throw(RuntimeError('bad'))
+  {brimf}(r)
+  {huskf}(len(bytes.fromhex(p)),rows[0])
+  spec={cask}(r)
+  spec[1]!=(rows[0]*4) and (_ for _ in ()).throw(RuntimeError('bad'))
+  ash={ashf}({dawn}(v,o,p),{dusk}(r))
+  ash={ashf}(ash,{kiln}(u,l,f))
+  ash={ashf}(ash,{loom}(t,p))
+  fog={crustf}(ash)
+  fog[0]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  tips={flaref}(ash)
+  tips[2]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  spin={spinef}(ash)
+  (spin[0]^spin[1])!=m and (_ for _ in ()).throw(RuntimeError('bad'))
+  rows={wave}(ash)
+  (rows[0]!=h or rows[1]!=s or rows[2]!=e or rows[3]!=g or rows[4]!=m) and (_ for _ in ()).throw(RuntimeError('bad'))
+  return ash if k=='b' else ash.decode('utf-8')
 def {load}(i):
  global {keep}
  if {keep} is None:
@@ -704,37 +870,33 @@ def {load}(i):
             return node
         node = __basalt__(node, 'stone', set())
         if isinstance(node, ast.Constant) and node.value is None:
-            return ast.copy_location(ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(None)), args=[], keywords=[]), node)
+            return ast.copy_location(__void__(), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bool):
-            left = ast.Constant(1)
-            right = ast.Constant(1 if node.value else 0)
-            return ast.copy_location(ast.Compare(left=left, ops=[ast.Eq()], comparators=[right]), node)
+            return ast.copy_location(__truth__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value:
-            return ast.copy_location(__ember__(node.value), node)
+            return ast.copy_location(__stray__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bytes) and node.value:
-            return ast.copy_location(__ember__(node.value), node)
+            return ast.copy_location(__haze__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, type(Ellipsis)):
-            return ast.copy_location(ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[]), node)
+            return ast.copy_location(__dots__(), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, int):
-            off = 97 + ((abs(node.value) * 1315423911 + seed[0]) % 999903)
-            key = 17 + ((abs(node.value) * 2654435761 + seed[1]) % 65519)
-            ash = 33 + ((abs(node.value) * 2246822519 + seed[2]) % 65503)
-            core = ((node.value + off) ^ key) + ash
-            return ast.copy_location(ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Constant(core), op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key)), op=ast.Sub(), right=ast.Constant(off)), node)
+            return ast.copy_location(__count__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, float) and math.isfinite(node.value):
-            return ast.copy_location(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__ember__(node.value.hex())], keywords=[]), node)
+            return ast.copy_location(__float__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, complex):
-            return ast.copy_location(ast.Call(func=ast.Name(id='complex', ctx=ast.Load()), args=[ast.Constant(node.value.real), ast.Constant(node.value.imag)], keywords=[]), node)
+            if math.isfinite(node.value.real) and math.isfinite(node.value.imag):
+                return ast.copy_location(__plex__(node.value), node)
+            return node
         return node
     tree = __shape__(tree)
     ast.fix_missing_locations(tree)
     tree = __stone__(tree)
     ast.fix_missing_locations(tree)
     return tree, used
-def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, tuffk, bloomk, echok, magmak, soulk, wispk, used):
+def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, used):
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
-    blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, huskf, grovef, miref, shardy = [__mint__(used, seed, mint) for slot in range(56)]
+    blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef = [__mint__(used, seed, mint) for slot in range(60)]
     inner = f"""import base64,bz2,hashlib,lzma,marshal,sys,zlib
 {blob}={rack!r}
 {left}={slag}
@@ -971,12 +1133,41 @@ def {moss}(blob,salt):
   rows.append(byte^((salt+slot*tilt)&255))
  return bytes(rows)
 def {dune}(blob):
- rows=bytearray(blob)
- slot=0
- while slot+1 < len(rows):
-  rows[slot],rows[slot+1]=rows[slot+1],rows[slot]
-  slot += 2
- return bytes(rows)
+  rows=bytearray(blob)
+  slot=0
+  while slot+1 < len(rows):
+   rows[slot],rows[slot+1]=rows[slot+1],rows[slot]
+   slot += 2
+  return bytes(rows)
+def {cragf}(blob,salt):
+  rows=bytearray();tilt=((salt>>3)&15)+1
+  for slot,byte in enumerate(blob):
+   fog=((byte>>4)|((byte<<4)&255))&255
+   rows.append(fog^((salt+slot*tilt+(slot>>1))&255))
+  return bytes(rows)
+def {fenf}(blob,span):
+  rows=[];slot=0;span=max(2,span)
+  while slot < len(blob):
+   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray();ash=0;ember=0
+   for turn in range(len(part)):
+    if turn&1:
+     out.append(left[ash]);ash += 1
+    else:
+     out.append(right[ember]);ember += 1
+   rows.append(bytes(out));slot += span
+  return b''.join(rows)
+def {screef}(blob,span):
+  rows=[];slot=0;span=max(2,span);flip=0
+  while slot < len(blob):
+   part=blob[slot:slot+span];rows.append(part[::-1] if flip&1 else part);slot += span;flip += 1
+  return b''.join(rows)
+def {drusef}(blob):
+  rows=[];slot=0;glow=0
+  while slot < len(blob):
+   part=blob[slot:slot+32];row=(len(part),sum(part)&0xffff,part[:1],part[-1:]);rows.append(row);glow=(glow+((slot+1)*((row[1] or 1)&0xffff)))&0xffffffff;slot += 32
+  if not rows:
+   return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
+  return (len(blob),len(rows),rows[0],rows[-1],glow)
 def {gully}(blob):
  rows=[(byte^slot)&255 for slot,byte in enumerate(blob)]
  if not rows:
@@ -1024,6 +1215,7 @@ def {shalef}(blob):
 def {stampf}(blob):
  {hand}()
  shell=base64.b85decode({blob})
+ {drusef}(shell)!={chaffk!r} and (_ for _ in ()).throw(SystemExit)
  {guard}(shell,{__flare__(base64.b85decode(rack))},{stamp!r})
  {beryl}(shell)
  {gully}(shell)
@@ -1033,6 +1225,9 @@ def {stampf}(blob):
  {shalex}(shell)
  {split}(shell)
  shell={dune}(shell)
+ shell={screef}(shell,{thornk}+1)
+ shell={fenf}(shell,{weftk}+1)
+ shell={cragf}(shell,{veilk}^0x5A)
  shell={sink}(shell,{drift},{emberf})
  shell={talc}(shell,{cove})
  shell={heart}(shell,{right})
@@ -1040,6 +1235,9 @@ def {stampf}(blob):
   raise SystemExit
  shell=zlib.decompress(shell)
  shell={dune}(shell)
+ shell={screef}(shell,{thornk})
+ shell={fenf}(shell,{weftk})
+ shell={cragf}(shell,{veilk})
  shell={moss}(shell,{smeltk})
  shell={hold}(shell,{shale})
  shell={sink}(shell,{wake},{brim})
@@ -1070,38 +1268,77 @@ def {runf}():
  {shardy}({coref})
 {runf}()
 """
-    core = marshal.dumps(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True))
-    core = __gasket__(core)
-    leftk = __spark__(seed + b'glass', 1000000, 2147483647)
-    rightk = __spark__(seed + b'forge', 1000000, 2147483647)
-    mistk = __spark__(seed + b'mist', 17, 251)
-    dustk = __spark__(seed + b'dust', 3, 29)
+    ore = marshal.dumps(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True))
+    pack = __gasket__(ore)
+    leftk, rightk, mistk, dustk, cloakk, lanek, spurk = __corek__(seed)
+    probe = __corea__(pack, leftk, rightk, mistk, dustk, cloakk, lanek, spurk)
+    core = pack
     core = __weld__(core, leftk)
     core = zlib.compress(core, 9)
     core = __weld__(core, rightk)
     core = __snare__(core, mistk, dustk)
+    core = __shroud__(core, cloakk)
+    core = __ravel__(core, lanek)
+    core = __thorn__(core, spurk)
+    graink = __chaff__(core)
+    probe != core and (_ for _ in ()).throw(ValueError('core'))
+    __coreb__(probe, leftk, rightk, mistk, dustk, cloakk, lanek, spurk) != pack and (_ for _ in ()).throw(ValueError('core'))
     flag = hashlib.sha256(core).hexdigest()
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'wrap', mint) for slot in range(7)]
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
     anlz=('procmon','procmon64','procexp','procexp64','wireshark','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
-    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol'); cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','scanmem','artmoney','gameguardian')
+    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol')
+    cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','scanmem','artmoney','gameguardian')
     host=('discord.com','discordapp.com','webhook.site','api.telegram.org','telegram.org','pastebin.com','hastebin.com','transfer.sh','api.ipify.org','ip-api.com','ngrok.io','ngrok.app','pipedream.net','raw.githubusercontent.com','file.io')
-    key=('token','password','cookie','session','auth','credit','card','api_key','apikey','bearer','credential','license','webhook','private','secret'); decomp=('uncompyle6','decompyle3','pycdc','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py')
-    sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer'); mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
-    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection') + decomp; api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump'); dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
+    key=('token','password','cookie','session','auth','credit','card','api_key','apikey','bearer','credential','license','webhook','private','secret')
+    decomp=('uncompyle6','decompyle3','pycdc','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py')
+    sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer')
+    mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
+    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection') + decomp
+    api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump')
+    dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
     outer = f"""import base64,bz2,ctypes,gc,hashlib,lzma,marshal,os,platform,socket,sys,uuid,zlib
 tag=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
 base=id(globals().get('__builtins__'));trid=id(sys.settrace);prid=id(sys.setprofile);meta=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;path=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
-blob={base64.b85encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};shot={flag!r};mark={stamp!r}
+blob={base64.b85encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};veil={cloakk};span={lanek};spur={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 def bad():raise SystemExit
 def boom():
  global tag;tag=True;return True
 def wake():
- sys.tracebacklimit=0
- try:gc.collect()
- except:pass
- return 0
+  sys.tracebacklimit=0
+  try:gc.collect()
+  except:pass
+  return 0
+def cloak(blob,salt):
+  rows=bytearray();tilt=((salt>>3)&15)+1
+  for slot,byte in enumerate(blob):
+   fog=((byte>>4)|((byte<<4)&255))&255
+   rows.append(fog^((salt+slot*tilt+(slot>>1))&255))
+  return bytes(rows)
+def unlace(blob,span):
+  rows=[];slot=0;span=max(2,span)
+  while slot < len(blob):
+   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray();ash=0;ember=0
+   for turn in range(len(part)):
+    if turn&1:
+     out.append(left[ash]);ash += 1
+    else:
+     out.append(right[ember]);ember += 1
+   rows.append(bytes(out));slot += span
+  return b''.join(rows)
+def scree(blob,span):
+  rows=[];slot=0;span=max(2,span);flip=0
+  while slot < len(blob):
+   part=blob[slot:slot+span];rows.append(part[::-1] if flip&1 else part);slot += span;flip += 1
+  return b''.join(rows)
+def sift(blob):
+  rows=[];slot=0;glow=0
+  while slot < len(blob):
+   part=blob[slot:slot+32];row=(len(part),sum(part)&0xffff,part[:1],part[-1:]);rows.append(row);glow=(glow+((slot+1)*((row[1] or 1)&0xffff)))&0xffffffff;slot += 32
+  if not rows:
+   return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
+  return (len(blob),len(rows),rows[0],rows[-1],glow)
 def wash():
  for one in mods:
   try:sys.modules.pop(one,None)
@@ -1259,43 +1496,70 @@ def fire(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  return hold(code,globals(),globals())
 def fetch():
- shell=base64.b85decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
- shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);shell=zlib.decompress(shell);shell={heart}(shell,left)
- mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
- return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
+  shell=base64.b85decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+  sift(shell)!=grain and (_ for _ in ()).throw(SystemExit)
+  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);shell=zlib.decompress(shell);shell={heart}(shell,left)
+  mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
+  return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
 def rise():
  wake();wash();leash();mesh();hush()
  comb();pine();nail();iron();coal();frost();shard();ember()
  tag and bad();core=fetch();tag and bad();code=read(core);tag and bad();fire(code)
 rise()
 """
-    wrap = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
-    wrap = __gasket__(wrap)
-    shellk = __spark__(seed + b'shell', 1000000, 2147483647)
-    glassk = __spark__(seed + b'glasswrap', 1000000, 2147483647)
-    forgek = __spark__(seed + b'forgewrap', 17, 251)
-    stampk = __spark__(seed + b'stampwrap', 3, 29)
+    ore = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
+    pack = __gasket__(ore)
+    shellk, glassk, forgek, stampk = __wrapk__(seed)
+    probe = __wrapa__(pack, shellk, glassk, forgek, stampk)
+    wrap = pack
     wrap = __weld__(wrap, shellk)
     wrap = zlib.compress(wrap, 9)
     wrap = __weld__(wrap, glassk)
     wrap = __snare__(wrap, forgek, stampk)
+    probe != wrap and (_ for _ in ()).throw(ValueError('wrap'))
+    __wrapb__(probe, shellk, glassk, forgek, stampk) != pack and (_ for _ in ()).throw(ValueError('wrap'))
     crest = hashlib.sha256(wrap).hexdigest()
     crust = f"import base64,bz2,hashlib,lzma,zlib;{shell}={base64.b85encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{stampf}={crest!r}"
     cave = f"def {heart}(blob,key):rows=bytearray();glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;[(glow:=((glow+drift+slot+tint)&255),rows.append(byte^glow^((tint+slot)&255))) for slot,byte in enumerate(blob)];return bytes(rows)"
     ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));readn=''.join(('PyMarshal_','ReadObjectFromString'));runn=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in ('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','uncompyle6','decompyle3','pycdc')];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({shell});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});blob=zlib.decompress(blob);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);read=getattr(ct.pythonapi,readn);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob);code=read(ct.cast(box,ct.c_char_p),len(blob));run=getattr(ct.pythonapi,runn);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
     return "\n\n" + "\n".join([crust, cave, ember])
 def __glass__(tree, path, used):
-   code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True); stem = marshal.dumps(code); blaze, coal, soot, quartz, glass = __brand__(stem); tuffk = __glow__(code); bloomk = __bloom__(code); echok = __echo__(code); magmak = __magma__(code); soulk = __soul__(code); wispk = __wisp__(code); seed = hashlib.sha256(stem).digest()
-   slag = __spark__(seed + b'slag', 1000000, 2147483647); smoke = __spark__(seed + b'smoke', 1000000, 2147483647); ashk = __spark__(seed + b'ash', 17, 251); gritk = __spark__(seed + b'grit', 3, 29); lavak = __spark__(seed + b'lava', 1, 7); crustk = __spark__(seed + b'crust', 9, 33); emberk = __spark__(seed + b'ember', 17, 251); cinderk = __spark__(seed + b'cinder', 3, 29); smeltk = __spark__(seed + b'smelt', 17, 251)
-   raw = __gasket__(stem); raw = __weld__(raw, slag); raw = __snare__(raw, ashk, gritk); raw = __whorl__(raw, lavak); raw = __scald__(raw, smeltk); raw = __pair__(raw); raw = zlib.compress(raw, 9); raw = __weld__(raw, smoke); raw = __spine__(raw, crustk); raw = __snare__(raw, emberk, cinderk); raw = __pair__(raw)
-   peek = __pair__(raw); peek = __unsnare__(peek, emberk, cinderk); peek = __spine__(peek, crustk); peek = __weld__(peek, smoke); peek = zlib.decompress(peek); peek = __pair__(peek); peek = __scald__(peek, smeltk); peek = __unwhorl__(peek, lavak); peek = __unsnare__(peek, ashk, gritk); peek = __weld__(peek, slag); mode = peek[0]; peek = (zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:]); peek != stem and (_ for _ in ()).throw(ValueError('pack'))
+   code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
+   stem = marshal.dumps(code)
+   brand = __brand__(stem)
+   blaze = brand[0]
+   quartz = brand[3]
+   tuffk, bloomk, echok, magmak, soulk, wispk = __marks__(code)
+   seed = hashlib.sha256(stem).digest()
+   slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk = __keys__(seed)
+   probe = __packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
+   probe = __packb__(probe, smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
+   raw = __gasket__(stem); raw = __weld__(raw, slag); raw = __snare__(raw, ashk, gritk); raw = __whorl__(raw, lavak); raw = __scald__(raw, smeltk); raw = __shroud__(raw, veilk); raw = __ravel__(raw, weftk); raw = __thorn__(raw, thornk); raw = __pair__(raw)
+   raw = zlib.compress(raw, 9); raw = __weld__(raw, smoke); raw = __spine__(raw, crustk); raw = __snare__(raw, emberk, cinderk); raw = __shroud__(raw, veilk ^ 0x5A); raw = __ravel__(raw, weftk + 1); raw = __thorn__(raw, thornk + 1); raw = __pair__(raw)
+   probe != raw and (_ for _ in ()).throw(ValueError('pack'))
+   chaffk = __chaff__(raw)
+   if len(raw) < 8:
+      raise ValueError('pack')
+   if not raw[:1] + raw[-1:]:
+      raise ValueError('pack')
+   if __chaff__(raw) != chaffk:
+      raise ValueError('pack')
+   peek = __peeka__(raw, smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
+   peek = __peekb__(peek, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
+   mode = peek[0]
+   peek = (zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:])
+   peek != stem and (_ for _ in ()).throw(ValueError('pack'))
    stamp = hashlib.sha256(raw).hexdigest()
-   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, tuffk, bloomk, echok, magmak, soulk, wispk, used)
+   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, used)
 def __forge__(path):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
    with open(path, 'r', encoding='utf-8') as ore: code = ore.read()
-   raw = code.encode('utf-8'); st = time.time(); tree, used = __vein__(code); out = __glass__(tree, path, used); dst = os.path.splitext(path)[0] + "_obf.py"
+   raw = code.encode('utf-8')
+   st = time.time()
+   tree, used = __vein__(code)
+   out = __glass__(tree, path, used)
+   dst = os.path.splitext(path)[0] + "_obf.py"
    with open(dst, 'w', encoding='utf-8', newline='\n') as ore: ore.write(out if out else "")
    return dst, time.time() - st, len(raw), len(out.encode('utf-8'))
 def __obsidian__():
