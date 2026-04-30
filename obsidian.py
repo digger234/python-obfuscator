@@ -48,13 +48,17 @@ def __flare__(blob):
         at += 16
    return glow
 def __mint__(used, seed, mint):
-   ring = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f))
+   ring = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x1680, 0x169f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
    while True:
-        fog = hashlib.sha256(seed + mint[0].to_bytes(4, 'little')).digest(); wide = 2 + (fog[0] & 1); rows = ['__']; slot = 0; at = 1
+        fog = hashlib.sha256(seed + mint[0].to_bytes(4, 'little')).digest(); wide = 2 + (fog[0] & 3); rows = ['__']; slot = 0; at = 1
         while slot < wide:
+             if at + 2 >= len(fog):
+                  fog += hashlib.sha256(fog + seed + mint[0].to_bytes(4, 'little')).digest()
              left, right = ring[fog[at] % len(ring)]; one = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1))); at += 3
              if not one.isidentifier(): continue
              rows.append(one); slot += 1
+        tail = chr(0x3041 + (fog[29 % len(fog)] % (0x3096 - 0x3041 + 1)))
+        tail.isidentifier() and rows.append(tail)
         rows.append('__'); name = ''.join(rows); mint[0] += 1
         if name in used: continue
         if name.isidentifier(): used.add(name); return name
@@ -158,29 +162,72 @@ def __carapace__(raw, seed, kind):
 def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
-    used = set()
-    bind = set()
     store = []
     seen = {}
     dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip'}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name):
-            used.add(node.id)
-            if isinstance(node.ctx, (ast.Store, ast.Del)):
-                bind.add(node.id)
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            used.add(node.name)
-            bind.add(node.name)
-        elif isinstance(node, ast.arg):
-            used.add(node.arg)
-            bind.add(node.arg)
-        elif isinstance(node, ast.alias):
-            name = node.asname or node.name.split('.')[0]
-            used.add(name)
-            bind.add(name)
-        elif isinstance(node, ast.ExceptHandler) and node.name:
-            bind.add(node.name)
+    ward = {'__name__','__file__','__package__','__spec__','__loader__','__builtins__','__doc__','__annotations__','__cached__','__path__','__slots__','__class__'}
+    def __gather__(root):
+        seen = set()
+        bind = set()
+        frost = set()
+        for node in ast.walk(root):
+            if isinstance(node, ast.Name):
+                seen.add(node.id)
+                if isinstance(node.ctx, (ast.Store, ast.Del)):
+                    bind.add(node.id)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                seen.add(node.name)
+                bind.add(node.name)
+            elif isinstance(node, ast.arg):
+                seen.add(node.arg)
+                bind.add(node.arg)
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    name = alias.asname or alias.name.split('.')[0]
+                    seen.add(name); bind.add(name); frost.add(name)
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name == '*':
+                        continue
+                    name = alias.asname or alias.name
+                    seen.add(name); bind.add(name); frost.add(name)
+            elif isinstance(node, ast.ExceptHandler) and node.name:
+                seen.add(node.name)
+                bind.add(node.name)
+        return seen, bind, frost
+    used, bind, frost = __gather__(tree)
     mint = [0]
+    gear = {}
+    room = [0]
+    wall = [0]
+    lock = []
+    def __token__(name):
+        if not isinstance(name, str) or not name:
+            return False
+        if name in dust or name in ward or name in frost:
+            return False
+        if name.startswith('__') and name.endswith('__'):
+            return False
+        if not name.isidentifier() or __import__('keyword').iskeyword(name):
+            return False
+        return True
+    def __pick__(name):
+        if name not in gear:
+            fog = name.encode('utf-8', 'ignore') or b'x'
+            gear[name] = __mint__(used, seed + fog + len(gear).to_bytes(4, 'little'), mint); used.add(gear[name])
+        return gear[name]
+    def __locks__(args):
+        bag = set()
+        for one in args.posonlyargs + args.args + args.kwonlyargs:
+            one.arg and bag.add(one.arg)
+        args.vararg and args.vararg.arg and bag.add(args.vararg.arg)
+        args.kwarg and args.kwarg.arg and bag.add(args.kwarg.arg)
+        return bag
+    def __held__(name):
+        for row in reversed(lock):
+            if name in row:
+                return True
+        return False
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf = [__mint__(used, seed, mint) for slot in range(22)]
     tick = [0]
     def __basalt__(node, kind, skip):
@@ -265,6 +312,22 @@ def __vein__(code):
         if isinstance(op, ast.MatMult):
             return ast.MatMult()
         return None
+    def __latch__(node):
+        vals = list(node.values)
+        if not vals:
+            return ast.Constant(True)
+        out = vals[0]
+        if isinstance(node.op, ast.And):
+            for one in vals[1:]:
+                name = __mint__(used, seed + b'and' + len(vals).to_bytes(2, 'little'), mint)
+                out = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=one, orelse=ast.Name(id=name, ctx=ast.Load()))), args=[out], keywords=[])
+            return out
+        if isinstance(node.op, ast.Or):
+            for one in vals[1:]:
+                name = __mint__(used, seed + b'or' + len(vals).to_bytes(2, 'little'), mint)
+                out = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=ast.Name(id=name, ctx=ast.Load()), orelse=one)), args=[out], keywords=[])
+            return out
+        return node
     def __ember__(val):
         key = ('s', val) if isinstance(val, str) else ('b', val)
         if key not in seen:
@@ -411,19 +474,67 @@ def {load}(i):
         if isinstance(node, ast.Module):
             node.body = __core__(node.body, 'shape', True)
             return node
+        if isinstance(node, ast.Global):
+            node.names = [__pick__(one) if __token__(one) else one for one in node.names]
+            return node
+        if isinstance(node, ast.Nonlocal):
+            node.names = [__pick__(one) if __token__(one) else one for one in node.names]
+            return node
         if isinstance(node, ast.FunctionDef):
+            if wall[0] == 0 and __token__(node.name):
+                node.name = __pick__(node.name)
+            hold = __locks__(node.args)
+            lock.append(hold); room[0] += 1
             node = __basalt__(node, 'shape', {'body'})
             node.body = __core__(node.body, 'shape', False)
+            room[0] -= 1; lock.pop()
             return node
         if isinstance(node, ast.AsyncFunctionDef):
+            if wall[0] == 0 and __token__(node.name):
+                node.name = __pick__(node.name)
+            hold = __locks__(node.args)
+            lock.append(hold); room[0] += 1
             node = __basalt__(node, 'shape', {'body'})
             node.body = __core__(node.body, 'shape', False)
+            room[0] -= 1; lock.pop()
             return node
         if isinstance(node, ast.ClassDef):
+            if wall[0] == 0 and __token__(node.name):
+                node.name = __pick__(node.name)
             node = __basalt__(node, 'shape', {'body'})
+            wall[0] += 1
             node.body = __core__(node.body, 'shape', False)
+            wall[0] -= 1
+            return node
+        if isinstance(node, ast.ExceptHandler):
+            node = __basalt__(node, 'shape', set())
+            if node.name and __token__(node.name) and not (wall[0] > 0 and room[0] == 0):
+                node.name = __pick__(node.name)
+            return node
+        if isinstance(node, ast.MatchStar):
+            if node.name and __token__(node.name):
+                node.name = __pick__(node.name)
+            return node
+        if isinstance(node, ast.MatchAs):
+            node = __basalt__(node, 'shape', set())
+            if node.name and __token__(node.name):
+                node.name = __pick__(node.name)
+            return node
+        if isinstance(node, ast.MatchMapping):
+            node = __basalt__(node, 'shape', set())
+            if node.rest and __token__(node.rest):
+                node.rest = __pick__(node.rest)
+            return node
+        if isinstance(node, ast.Lambda):
+            hold = __locks__(node.args)
+            lock.append(hold); room[0] += 1
+            node = __basalt__(node, 'shape', set())
+            room[0] -= 1; lock.pop()
+            node.body = __gloom__(node.body)
             return node
         if isinstance(node, ast.Name):
+            if not (wall[0] > 0 and room[0] == 0) and not __held__(node.id) and __token__(node.id):
+                node.id = __pick__(node.id)
             if isinstance(node.ctx, ast.Load) and node.id in dust and node.id not in bind:
                 return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('builtins')], keywords=[]), __ember__(node.id)], keywords=[])
             return node
@@ -519,14 +630,14 @@ def {load}(i):
             return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=ast.arg(arg=name), defaults=[]), body=ast.Name(id=name, ctx=ast.Load())), args=[], keywords=[ast.keyword(arg=one.value, value=two) for one, two in zip(node.keys, node.values)])
         if isinstance(node, ast.Call):
             keys = []
-            lock = {'super','eval','exec','globals','locals','vars','dir','hasattr','getattr','setattr','__import__','type','isinstance','issubclass'}
+            gate = {'super','eval','exec','globals','locals','vars','dir','hasattr','getattr','setattr','__import__','type','isinstance','issubclass'}
             for one in node.keywords:
                 if one.arg is None:
                     keys.append(one)
                 else:
                     keys.append(ast.keyword(arg=None, value=ast.Dict(keys=[__ember__(one.arg)], values=[one.value])))
             node.keywords = keys
-            if not (isinstance(node.func, ast.Name) and node.func.id in lock):
+            if not (isinstance(node.func, ast.Name) and node.func.id in gate):
                 node.func = __gloom__(node.func)
             return node
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and len(node.comparators) == 1:
@@ -534,6 +645,32 @@ def {load}(i):
             op = look.get(type(node.ops[0]))
             if op:
                 return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.left, __ember__(op)], keywords=[]), args=[node.comparators[0]], keywords=[])
+        if isinstance(node, ast.BoolOp):
+            return __latch__(node)
+        if isinstance(node, ast.For):
+            node.iter = __gloom__(node.iter)
+            return node
+        if isinstance(node, ast.AsyncFor):
+            node.iter = __gloom__(node.iter)
+            return node
+        if isinstance(node, ast.With):
+            for item in node.items:
+                item.context_expr = __gloom__(item.context_expr)
+            return node
+        if isinstance(node, ast.AsyncWith):
+            for item in node.items:
+                item.context_expr = __gloom__(item.context_expr)
+            return node
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            for gen in node.generators:
+                gen.iter = __gloom__(gen.iter)
+                gen.ifs = [__gloom__(one) for one in gen.ifs]
+            return node
+        if isinstance(node, ast.DictComp):
+            for gen in node.generators:
+                gen.iter = __gloom__(gen.iter)
+                gen.ifs = [__gloom__(one) for one in gen.ifs]
+            return node
         if isinstance(node, ast.If):
             node.test = __gloom__(node.test)
             return node
@@ -552,9 +689,6 @@ def {load}(i):
         if isinstance(node, ast.Raise) and node.exc is not None:
             node.exc = __gloom__(node.exc)
             return node
-        if isinstance(node, ast.Lambda):
-            node.body = __gloom__(node.body)
-            return node
         if isinstance(node, ast.FormattedValue):
             node.value = __gloom__(node.value)
             return node
@@ -569,13 +703,19 @@ def {load}(i):
             node.body = __core__(node.body, 'stone', True)
             return node
         node = __basalt__(node, 'stone', set())
+        if isinstance(node, ast.Constant) and node.value is None:
+            return ast.copy_location(ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(None)), args=[], keywords=[]), node)
+        if isinstance(node, ast.Constant) and isinstance(node.value, bool):
+            left = ast.Constant(1)
+            right = ast.Constant(1 if node.value else 0)
+            return ast.copy_location(ast.Compare(left=left, ops=[ast.Eq()], comparators=[right]), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value:
             return ast.copy_location(__ember__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bytes) and node.value:
             return ast.copy_location(__ember__(node.value), node)
-        if isinstance(node, ast.Constant) and isinstance(node.value, bool):
-            return node
-        if isinstance(node, ast.Constant) and isinstance(node.value, int) and not (-1 <= node.value <= 1):
+        if isinstance(node, ast.Constant) and isinstance(node.value, type(Ellipsis)):
+            return ast.copy_location(ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[]), node)
+        if isinstance(node, ast.Constant) and isinstance(node.value, int):
             off = 97 + ((abs(node.value) * 1315423911 + seed[0]) % 999903)
             key = 17 + ((abs(node.value) * 2654435761 + seed[1]) % 65519)
             ash = 33 + ((abs(node.value) * 2246822519 + seed[2]) % 65503)
@@ -583,6 +723,8 @@ def {load}(i):
             return ast.copy_location(ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Constant(core), op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key)), op=ast.Sub(), right=ast.Constant(off)), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, float) and math.isfinite(node.value):
             return ast.copy_location(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__ember__(node.value.hex())], keywords=[]), node)
+        if isinstance(node, ast.Constant) and isinstance(node.value, complex):
+            return ast.copy_location(ast.Call(func=ast.Name(id='complex', ctx=ast.Load()), args=[ast.Constant(node.value.real), ast.Constant(node.value.imag)], keywords=[]), node)
         return node
     tree = __shape__(tree)
     ast.fix_missing_locations(tree)
