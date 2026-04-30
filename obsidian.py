@@ -928,7 +928,7 @@ def {runf}():
  {shardy}({coref})
 {runf}()
 """
-    core = inner.encode('utf-8')
+    core = marshal.dumps(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True))
     core = __gasket__(core)
     leftk = __spark__(seed + b'glass', 1000000, 2147483647)
     rightk = __spark__(seed + b'forge', 1000000, 2147483647)
@@ -939,10 +939,208 @@ def {runf}():
     core = __weld__(core, rightk)
     core = __snare__(core, mistk, dustk)
     flag = hashlib.sha256(core).hexdigest()
-    glass, forge, stampf, heart = [__mint__(used, seed + b'wrap', mint) for slot in range(4)]
-    crust = f"import base64,bz2,hashlib,lzma,zlib;{blob}={base64.b85encode(core)!r};{glass}={leftk};{forge}={rightk};{stampf}={flag!r}"
+    shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'wrap', mint) for slot in range(7)]
+    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
+    debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
+    anlz=('procmon','procmon64','procexp','procexp64','wireshark','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
+    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol'); cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','scanmem','artmoney','gameguardian')
+    host=('discord.com','discordapp.com','webhook.site','api.telegram.org','telegram.org','pastebin.com','hastebin.com','transfer.sh','api.ipify.org','ip-api.com','ngrok.io','ngrok.app','pipedream.net','raw.githubusercontent.com','file.io')
+    key=('token','password','cookie','session','auth','credit','card','api_key','apikey','bearer','credential','license','webhook','private','secret'); decomp=('uncompyle6','decompyle3','pycdc','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py')
+    sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer'); mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
+    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection') + decomp; api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump'); dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
+    outer = f"""import base64,bz2,ctypes,gc,hashlib,lzma,marshal,os,platform,socket,sys,uuid,zlib
+tag=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
+base=id(globals().get('__builtins__'));trid=id(sys.settrace);prid=id(sys.setprofile);meta=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;path=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
+blob={base64.b85encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};shot={flag!r};mark={stamp!r}
+def bad():raise SystemExit
+def boom():
+ global tag;tag=True;return True
+def wake():
+ sys.tracebacklimit=0
+ try:gc.collect()
+ except:pass
+ return 0
+def wash():
+ for one in mods:
+  try:sys.modules.pop(one,None)
+  except:pass
+ try:rows=list(sys.modules)
+ except:rows=[]
+ for one in rows:
+  low=str(one).lower()
+  for word in hint+decomp+sbx:
+   if word in low:
+    try:del sys.modules[one]
+    except:pass
+    break
+ return 0
+def leash():
+ if hasattr(sys,'meta_path'):
+  try:
+   for one in list(sys.meta_path):
+    low=(getattr(one,'__module__','')+' '+type(one).__name__).lower()
+    for word in hint+decomp:
+     if word in low:
+      try:sys.meta_path.remove(one)
+      except:pass
+      break
+  except:pass
+ if hasattr(sys,'path_hooks'):
+  try:
+   for one in list(sys.path_hooks):
+    low=(getattr(one,'__module__','')+' '+type(one).__name__).lower()
+    for word in hint+decomp:
+     if word in low:
+      try:sys.path_hooks.remove(one)
+      except:pass
+      break
+  except:pass
+ return 0
+def gate(name,home,need):
+ hold=getattr(home,name,None)
+ if hold is None or not callable(hold):return boom()
+ if getattr(hold,'__name__',name)!=name:return boom()
+ rows=need if isinstance(need,tuple) else (need,)
+ if getattr(hold,'__module__',None) not in rows:return boom()
+ if hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return boom()
+ return hold
+def mesh():
+ built=__import__('builtins')
+ gate('exec',built,('builtins',));gate('eval',built,('builtins',));gate('compile',built,('builtins',));gate('open',built,('builtins','io','_io'));gate('__import__',built,('builtins',));gate('loads',marshal,('marshal',));gate('decompress',zlib,('zlib',));gate('decompress',bz2,('bz2','_bz2'));gate('decompress',lzma,('lzma','_lzma'))
+ for one in (eval,exec,compile,__import__,open,type,getattr,setattr):
+  if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return boom()
+ return 0
+def hush():
+ for one in (lambda:sys.gettrace() is None,lambda:sys.getprofile() is None,lambda:id(eval)==id(eval),lambda:id(exec)==id(exec),lambda:id(compile)==id(compile),lambda:type(open).__name__=='builtin_function_or_method',lambda:type(print).__name__=='builtin_function_or_method',lambda:__import__.__module__ in ('builtins',None)):
+  try:
+   if not one():return boom()
+  except:return boom()
+ return 0
+def comb():
+ built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print')
+ if isinstance(built,dict):
+  for one in rows:
+   if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return boom()
+ else:
+  for one in rows:
+   hold=getattr(built,one,None)
+   if hold is None or hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return boom()
+ return 0
+def pine():
+ if id(sys.settrace)!=trid or id(sys.setprofile)!=prid:return boom()
+ hold=id(globals().get('__builtins__'))
+ if base and hold!=base:return boom()
+ if hasattr(sys,'meta_path') and len(sys.meta_path)>meta+2:return boom()
+ if hasattr(sys,'path_hooks') and len(sys.path_hooks)>path+2:return boom()
+ return 0
+def nail():
+ for one in (exec,eval,compile):
+  try:one.__code__;return boom()
+  except AttributeError:pass
+  except:return boom()
+ return 0
+def iron():
+ if os.name!='nt':return 0
+ try:
+  if ctypes.windll.kernel32.IsDebuggerPresent():return boom()
+ except:pass
+ try:
+  slot=ctypes.c_int(0);ctypes.windll.kernel32.CheckRemoteDebuggerPresent(ctypes.windll.kernel32.GetCurrentProcess(),ctypes.byref(slot))
+  if slot.value:return boom()
+ except:pass
+ return 0
+def coal():
+ if os.name!='nt':return 0
+ try:
+  hold=ctypes.windll.ntdll.NtQueryInformationProcess;flag=ctypes.c_ulong(0);side=hold(ctypes.windll.kernel32.GetCurrentProcess(),0x1F,ctypes.byref(flag),ctypes.sizeof(flag),None)
+  if not side and not flag.value:return boom()
+ except:pass
+ return 0
+def frost():
+ if os.name!='nt':return 0
+ try:
+  getm=ctypes.windll.kernel32.GetModuleHandleA;geta=ctypes.windll.kernel32.GetProcAddress
+  for one in dll:
+   hold=getm(one.encode())
+   if not hold:continue
+   for name in api:
+    try:ptr=geta(hold,name.encode())
+    except:ptr=0
+    if not ptr:continue
+    row=ctypes.cast(ptr,ctypes.POINTER(ctypes.c_ubyte))
+    if row[0] in (0xE9,0xEB) or (row[0]==0xFF and row[1]==0x25):return boom()
+ except:pass
+ return 0
+class Box(ctypes.Structure):_fields_=[('ContextFlags',ctypes.c_ulong),('Dr0',ctypes.c_ulonglong),('Dr1',ctypes.c_ulonglong),('Dr2',ctypes.c_ulonglong),('Dr3',ctypes.c_ulonglong),('Dr6',ctypes.c_ulonglong),('Dr7',ctypes.c_ulonglong)]
+def shard():
+ if os.name!='nt':return 0
+ try:
+  box=Box();box.ContextFlags=0x10;ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
+  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):return boom()
+ except:pass
+ return 0
+def ember():
+ rows=[]
+ try:rows.extend(str(one).lower() for one in sys.modules)
+ except:pass
+ try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'meta_path',()))
+ except:pass
+ try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'path_hooks',()))
+ except:pass
+ text=' '.join(str(one).lower() for one in sys.argv);rows.append(text)
+ for word in hint+debug+anlz+vm+decomp+sbx:
+  if any(word in one for one in rows):return boom()
+ for word in cmd+host:
+  if word in text:return boom()
+ bits=[]
+ for one in sys.argv:bits.extend(part.lower() for part in str(one).replace('/',' ').replace('\\\\',' ').replace(':',' ').replace('-',' ').split())
+ for word in key:
+  if word in bits:return boom()
+ try:
+  low=' '.join((socket.gethostname(),platform.node(),str(os.environ.get('USERNAME','')),str(os.environ.get('COMPUTERNAME','')))).lower()
+  for word in vm+sbx:
+   if word in low:return boom()
+ except:pass
+ try:
+  low=':'.join(['{{:02x}}'.format((uuid.getnode()>>(slot*8))&255) for slot in range(6)][::-1][:3]).lower()
+  if any(low.startswith(one) for one in mac):return boom()
+ except:pass
+ return 0
+def read(blob):
+ left=marshal.loads(blob)
+ if getattr(left,'co_filename','')!=mark:return boom()
+ name=''.join(('PyMarshal_','ReadObjectFromString'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
+ box=ctypes.create_string_buffer(blob);right=hold(ctypes.cast(box,ctypes.c_char_p),len(blob))
+ if getattr(right,'co_filename','')!=mark or type(left) is not type(right) or getattr(left,'co_name','')!=getattr(right,'co_name',''):return boom()
+ return right
+def fire(code):
+ name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
+ return hold(code,globals(),globals())
+def fetch():
+ shell=base64.b85decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+ shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);shell=zlib.decompress(shell);shell={heart}(shell,left)
+ mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
+ return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
+def rise():
+ wake();wash();leash();mesh();hush()
+ comb();pine();nail();iron();coal();frost();shard();ember()
+ tag and bad();core=fetch();tag and bad();code=read(core);tag and bad();fire(code)
+rise()
+"""
+    wrap = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
+    wrap = __gasket__(wrap)
+    shellk = __spark__(seed + b'shell', 1000000, 2147483647)
+    glassk = __spark__(seed + b'glasswrap', 1000000, 2147483647)
+    forgek = __spark__(seed + b'forgewrap', 17, 251)
+    stampk = __spark__(seed + b'stampwrap', 3, 29)
+    wrap = __weld__(wrap, shellk)
+    wrap = zlib.compress(wrap, 9)
+    wrap = __weld__(wrap, glassk)
+    wrap = __snare__(wrap, forgek, stampk)
+    crest = hashlib.sha256(wrap).hexdigest()
+    crust = f"import base64,bz2,hashlib,lzma,zlib;{shell}={base64.b85encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{stampf}={crest!r}"
     cave = f"def {heart}(blob,key):rows=bytearray();glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;[(glow:=((glow+drift+slot+tint)&255),rows.append(byte^glow^((tint+slot)&255))) for slot,byte in enumerate(blob)];return bytes(rows)"
-    ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));api=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in ('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','uncompyle6','decompyle3','pycdc')];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({blob});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{mistk}-((slot+1)*{dustk}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});blob=zlib.decompress(blob);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=blob[1:];text=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob).decode();code=built['compile'](text,{stamp!r},'exec');run=getattr(ct.pythonapi,api);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
+    ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));readn=''.join(('PyMarshal_','ReadObjectFromString'));runn=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in ('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','uncompyle6','decompyle3','pycdc')];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({shell});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});blob=zlib.decompress(blob);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);read=getattr(ct.pythonapi,readn);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob);code=read(ct.cast(box,ct.c_char_p),len(blob));run=getattr(ct.pythonapi,runn);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
     return "\n\n" + "\n".join([crust, cave, ember])
 def __glass__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True); stem = marshal.dumps(code); blaze, coal, soot, quartz, glass = __brand__(stem); tuffk = __glow__(code); bloomk = __bloom__(code); echok = __echo__(code); magmak = __magma__(code); soulk = __soul__(code); wispk = __wisp__(code); seed = hashlib.sha256(stem).digest()
