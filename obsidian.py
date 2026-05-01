@@ -68,7 +68,7 @@ def __vine__(data):
    if isinstance(data, (list, tuple)): return b''.join(__vine__(one) for one in data)
    if isinstance(data, bytes): return data
    if isinstance(data, str): return data.encode('utf-8')
-   if isinstance(data, int): return data.to_bytes(8, 'little', signed=True)
+   if isinstance(data, int): return data.to_bytes(max(1, (data.bit_length() + 8) // 8), 'little', signed=True)
    if data is None: return b'N'
    if isinstance(data, float): return __import__('struct').pack('<d', data)
    if isinstance(data, bool): return b'T' if data else b'F'
@@ -564,6 +564,7 @@ def __vein__(code):
         return False
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf = [__mint__(used, seed, mint) for slot in range(22)]
     tick = [0]
+    gate = [0]
     def __basalt__(node, kind, skip):
         for field, value in ast.iter_fields(node):
             if field in skip:
@@ -622,7 +623,7 @@ def __vein__(code):
         real = []
         junk = []
         for slot, one in enumerate(body):
-            cond = ast.Compare(left=ast.Subscript(value=ast.Attribute(value=ast.Name(id=err, ctx=ast.Load()), attr='args', ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(rock)])
+            cond = ast.Compare(left=ast.Subscript(value=ast.Attribute(value=ast.Name(id=err, ctx=ast.Load()), attr='args', ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(rock + 1)])
             real.append(ast.If(test=cond, body=[one], orelse=[]))
             tick[0] += 1
             fake = __spark__(seed + b'ledgejunk' + tick[0].to_bytes(4, 'little'), 10**5, 10**8)
@@ -992,6 +993,9 @@ def {load}(i):
             tail = bag
             if tail:
                 tail = __smoke__(tail)
+                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8:
+                    gate[0] += 1
+                    tail = __ledge__(tail)
                 tail = __ridge__(tail)
                 junk = __cinder__()
                 for j in junk[:len(junk)//2]:
@@ -1287,7 +1291,7 @@ def {load}(i):
     tree = __stone__(tree)
     ast.fix_missing_locations(tree)
     return tree, used
-def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, used):
+def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, used):
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
     blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef = [__mint__(used, seed, mint) for slot in range(60)]
@@ -1389,7 +1393,7 @@ def {vinef}(data):
  if isinstance(data,str):
   return data.encode('utf-8')
  if isinstance(data,int):
-  return data.to_bytes(8,'little',signed=True)
+  return data.to_bytes(max(1,(data.bit_length()+8)//8),'little',signed=True)
  if data is None:
   return b'N'
  if isinstance(data,float):
@@ -1633,6 +1637,7 @@ def {shalef}(blob):
 def {stampf}(blob):
  {hand}()
  shell=base64.b85decode({blob})
+ hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (_ for _ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (_ for _ in ()).throw(SystemExit)
  {guard}(shell,{__flare__(base64.b85decode(rack))},{stamp!r})
  {beryl}(shell)
@@ -2037,7 +2042,25 @@ def __glass__(tree, path, used):
    blaze = brand[0]
    quartz = brand[3]
    tuffk, bloomk, echok, magmak, soulk, wispk = __marks__(code)
+   __talus__(code, (tuffk, bloomk, echok, magmak, soulk, wispk))
    seed = hashlib.sha256(stem).digest()
+   norm, mark = __marl__(path, seed); seed = hashlib.sha256(seed + norm.encode('utf-8', 'replace') + mark.to_bytes(2, 'little')).digest()
+   meta = __metadata__(seed); seed = hashlib.sha256(seed + repr((meta[1], meta[2], meta[6])).encode('utf-8', 'replace')).digest()
+   scarp, sand = __scarp__(blaze, seed); seed = hashlib.sha256(seed + scarp + sand).digest()
+   mire = __mire__(blaze, seed); seed = hashlib.sha256(seed + mire.encode('ascii')).digest()
+   loam = __loam__(seed); seed = hashlib.sha256(seed + loam.encode('utf-8', 'replace')).digest()
+   silt = __silt__(seed, len(stem)); seed = hashlib.sha256(seed + silt.to_bytes(8, 'little')).digest()
+   clay = __clay__(seed, ('base64', 'marshal', 'zlib', 'bz2', 'lzma')); seed = hashlib.sha256(seed + repr(clay).encode('ascii')).digest()
+   quarry, qkey = __quarry__(blaze, seed); seed = hashlib.sha256(seed + quarry.encode('ascii') + qkey.encode('ascii')).digest()
+   desert = __desert__(seed, 4); seed = hashlib.sha256(seed + repr(desert).encode('ascii')).digest()
+   shrine = __shrine__(seed, blaze); seed = hashlib.sha256(seed + shrine).digest()
+   hills = __hills__(seed, 8); seed = hashlib.sha256(seed + hills.encode('utf-8', 'replace')).digest()
+   mortar, trio = __mortar__(seed, stem[:64]); seed = hashlib.sha256(seed + mortar + repr(trio).encode('ascii')).digest()
+   render, shade = __render__(seed, blaze); seed = hashlib.sha256(seed + render.encode('ascii') + shade.encode('ascii')).digest()
+   temper, metal = __temper__(seed, len(stem)); seed = hashlib.sha256(seed + repr((temper, metal)).encode('ascii')).digest()
+   anneal, perm = __anneal__(seed, list(brand)); seed = hashlib.sha256(seed + repr(anneal).encode('utf-8', 'replace') + repr(perm).encode('ascii')).digest()
+   ore = hashlib.sha512(__vine__((norm, mark, meta, scarp, sand, mire, loam, silt, clay, quarry, qkey, desert, shrine, hills, mortar, trio, render, shade, temper, metal, anneal, perm))).digest()
+   seed = hashlib.sha256(seed + ore).digest()
    slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk = __keys__(seed)
    probe = __packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
    probe = __packb__(probe, smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
@@ -2057,7 +2080,8 @@ def __glass__(tree, path, used):
    peek = (zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:])
    peek != stem and (_ for _ in ()).throw(ValueError('pack'))
    stamp = hashlib.sha256(raw).hexdigest()
-   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, used)
+   mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
+   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, used)
 def __forge__(path):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
