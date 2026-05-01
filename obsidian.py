@@ -492,6 +492,504 @@ def __metadata__(seed):
     rubble = __rubble__(seed + b'meta', 4)
     grout = __grout__(seed + b'meta', 8)
     return (watermarks, chain, traps, marks, stones, rubble, grout)
+def __mix__(seed, row):
+    if not isinstance(row, bytes):
+        row = __vine__(row)
+    return hashlib.blake2b(seed + row, digest_size=32).digest()
+def __hist__(rows):
+    bag = {}
+    for one in rows:
+        bag[one] = bag.get(one, 0) + 1
+    return tuple(sorted(bag.items(), key=lambda row: (str(row[0]), row[1])))
+def __walks__(tree):
+    bag = []
+    edge = []
+    deep = []
+    hold = [(tree, 0, 'root')]
+    while hold:
+        node, depth, name = hold.pop()
+        kind = type(node).__name__
+        bag.append(kind)
+        deep.append((kind, depth, name))
+        for field, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                for item in reversed(value):
+                    if isinstance(item, ast.AST):
+                        edge.append((kind, field, type(item).__name__))
+                        hold.append((item, depth + 1, field))
+            elif isinstance(value, ast.AST):
+                edge.append((kind, field, type(value).__name__))
+                hold.append((value, depth + 1, field))
+    return tuple(bag), tuple(edge), tuple(deep)
+def __shapeid__(tree, seed):
+    bag, edge, deep = __walks__(tree)
+    wide = max((row[1] for row in deep), default=0)
+    head = tuple(row[0] for row in deep[:32])
+    tail = tuple(row[0] for row in deep[-32:])
+    fog = __mix__(seed, (__hist__(bag), __hist__(edge), wide, head, tail))
+    return (len(bag), len(edge), wide, zlib.crc32(__vine__(head)) & 0xffffffff, zlib.adler32(__vine__(tail)) & 0xffffffff, fog.hex())
+def __lits__(tree, seed):
+    nums = []
+    texts = []
+    raw = []
+    flags = [0, 0, 0, 0]
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant):
+            val = node.value
+            raw.append(type(val).__name__)
+            if isinstance(val, str):
+                texts.append((len(val), zlib.crc32(val.encode('utf-8', 'replace')) & 0xffffffff))
+            elif isinstance(val, bytes):
+                texts.append((len(val), zlib.crc32(val) & 0xffffffff))
+            elif isinstance(val, bool):
+                flags[0 if val else 1] += 1
+            elif isinstance(val, int):
+                nums.append((val.bit_length(), val & 0xffff, (val >> 16) & 0xffff))
+            elif isinstance(val, float):
+                flags[2] += 1
+            elif isinstance(val, complex):
+                flags[3] += 1
+    fog = __mix__(seed, (tuple(nums[:256]), tuple(texts[:256]), __hist__(raw), tuple(flags), len(nums), len(texts)))
+    return (len(nums), len(texts), tuple(flags), __hist__(raw), fog.hex())
+def __names__(tree, seed):
+    load = []
+    store = []
+    attr = []
+    call = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name):
+            if isinstance(node.ctx, ast.Store):
+                store.append(node.id)
+            elif isinstance(node.ctx, ast.Load):
+                load.append(node.id)
+        elif isinstance(node, ast.Attribute):
+            attr.append(node.attr)
+        elif isinstance(node, ast.Call):
+            call.append(type(node.func).__name__)
+    fog = __mix__(seed, (__hist__(load), __hist__(store), __hist__(attr), __hist__(call), len(load), len(store), len(attr), len(call)))
+    return (len(set(load)), len(set(store)), len(set(attr)), len(call), fog.hex())
+def __flows__(tree, seed):
+    bag = []
+    span = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.If, ast.IfExp)):
+            bag.append('if')
+        elif isinstance(node, (ast.For, ast.AsyncFor)):
+            bag.append('for')
+        elif isinstance(node, ast.While):
+            bag.append('while')
+        elif isinstance(node, ast.Try):
+            bag.append('try'); span.append((len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody)))
+        elif isinstance(node, (ast.With, ast.AsyncWith)):
+            bag.append('with'); span.append((len(node.items), len(node.body)))
+        elif isinstance(node, (ast.Match,)):
+            bag.append('match'); span.append((len(node.cases), 0))
+        elif isinstance(node, (ast.BoolOp, ast.Compare)):
+            bag.append(type(node).__name__)
+    fog = __mix__(seed, (__hist__(bag), tuple(span[:256]), len(bag), len(span)))
+    return (len(bag), len(span), __hist__(bag), fog.hex())
+def __ops__(code, seed):
+    raw = bytearray()
+    freq = {}
+    steps = []
+    for one in __drip__(code):
+        data = one.co_code
+        raw.extend(data)
+        steps.append((len(data), one.co_stacksize, one.co_flags, len(one.co_consts), len(one.co_names)))
+        for byte in data:
+            freq[byte] = freq.get(byte, 0) + 1
+    pairs = {}
+    data = bytes(raw)
+    for i in range(max(0, len(data) - 1)):
+        pair = data[i] << 8 | data[i + 1]
+        pairs[pair] = pairs.get(pair, 0) + 1
+    top = tuple(sorted(freq.items(), key=lambda row: (-row[1], row[0]))[:64])
+    chain = tuple(sorted(pairs.items(), key=lambda row: (-row[1], row[0]))[:64])
+    fog = __mix__(seed, (top, chain, tuple(steps), len(data), zlib.crc32(data) & 0xffffffff, zlib.adler32(data) & 0xffffffff))
+    return (len(data), top, chain, tuple(steps), fog.hex())
+def __consts__(code, seed):
+    kind = []
+    lens = []
+    nums = []
+    for one in __drip__(code):
+        for val in one.co_consts:
+            kind.append(type(val).__name__)
+            if isinstance(val, (str, bytes)):
+                lens.append(len(val))
+            elif isinstance(val, int):
+                nums.append((val.bit_length(), val & 0xffff))
+            elif isinstance(val, type(one)):
+                lens.append(len(val.co_code))
+    fog = __mix__(seed, (__hist__(kind), tuple(lens[:512]), tuple(nums[:512]), len(kind)))
+    return (len(kind), __hist__(kind), tuple(lens[:128]), fog.hex())
+def __calls__(tree, seed):
+    bag = []
+    argc = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            argc.append((len(node.args), len(node.keywords)))
+            if isinstance(node.func, ast.Name):
+                bag.append(('n', node.func.id))
+            elif isinstance(node.func, ast.Attribute):
+                bag.append(('a', node.func.attr))
+            else:
+                bag.append(('x', type(node.func).__name__))
+    fog = __mix__(seed, (__hist__(bag), tuple(argc[:512]), len(bag)))
+    return (len(bag), __hist__(bag), tuple(argc[:128]), fog.hex())
+def __scope__(tree, seed):
+    funcs = []
+    cls = []
+    args = []
+    deco = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            funcs.append((node.name, len(node.body), len(node.decorator_list), len(node.args.args), len(node.args.kwonlyargs)))
+            args.extend(one.arg for one in node.args.args + node.args.kwonlyargs)
+            node.args.vararg and args.append(node.args.vararg.arg)
+            node.args.kwarg and args.append(node.args.kwarg.arg)
+            deco.extend(type(one).__name__ for one in node.decorator_list)
+        elif isinstance(node, ast.ClassDef):
+            cls.append((node.name, len(node.body), len(node.bases), len(node.decorator_list)))
+    fog = __mix__(seed, (tuple(funcs), tuple(cls), __hist__(args), __hist__(deco)))
+    return (len(funcs), len(cls), __hist__(args), fog.hex())
+def __imps__(tree, seed):
+    bag = []
+    alias = []
+    levels = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for one in node.names:
+                bag.append(one.name)
+                alias.append(one.asname or '')
+        elif isinstance(node, ast.ImportFrom):
+            bag.append(node.module or '')
+            levels.append(node.level)
+            for one in node.names:
+                alias.append((one.name, one.asname or ''))
+    fog = __mix__(seed, (__hist__(bag), __hist__(alias), tuple(levels), len(bag)))
+    return (len(bag), len(alias), __hist__(bag), fog.hex())
+def __sets__(tree, seed):
+    bag = []
+    dims = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            bag.append(('assign', len(node.targets)))
+            dims.append((len(node.targets), type(node.value).__name__))
+        elif isinstance(node, ast.AnnAssign):
+            bag.append(('ann', int(node.value is not None)))
+            dims.append((1, type(node.annotation).__name__))
+        elif isinstance(node, ast.AugAssign):
+            bag.append(('aug', type(node.op).__name__))
+            dims.append((1, type(node.value).__name__))
+        elif isinstance(node, ast.NamedExpr):
+            bag.append(('walrus', type(node.value).__name__))
+    fog = __mix__(seed, (__hist__(bag), tuple(dims[:512]), len(dims)))
+    return (len(bag), tuple(dims[:128]), fog.hex())
+def __subs__(tree, seed):
+    bag = []
+    dims = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Subscript):
+            bag.append(type(node.slice).__name__)
+            dims.append((type(node.value).__name__, type(node.slice).__name__, type(node.ctx).__name__))
+        elif isinstance(node, ast.Slice):
+            dims.append((int(node.lower is not None), int(node.upper is not None), int(node.step is not None)))
+    fog = __mix__(seed, (__hist__(bag), tuple(dims[:512]), len(dims)))
+    return (len(bag), tuple(dims[:128]), fog.hex())
+def __bins__(tree, seed):
+    bag = []
+    unary = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.BinOp):
+            bag.append((type(node.op).__name__, type(node.left).__name__, type(node.right).__name__))
+        elif isinstance(node, ast.UnaryOp):
+            unary.append(type(node.op).__name__)
+    fog = __mix__(seed, (__hist__(bag), __hist__(unary), len(bag), len(unary)))
+    return (len(bag), len(unary), __hist__(bag), fog.hex())
+def __cmps__(tree, seed):
+    bag = []
+    lens = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Compare):
+            bag.append(tuple(type(one).__name__ for one in node.ops))
+            lens.append(len(node.comparators))
+    fog = __mix__(seed, (__hist__(bag), tuple(lens), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __forms__(tree, seed):
+    bag = []
+    spec = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.JoinedStr):
+            bag.append(len(node.values))
+        elif isinstance(node, ast.FormattedValue):
+            spec.append((node.conversion, type(node.value).__name__, int(node.format_spec is not None)))
+    fog = __mix__(seed, (tuple(bag[:512]), tuple(spec[:512]), len(bag), len(spec)))
+    return (len(bag), len(spec), tuple(spec[:128]), fog.hex())
+def __traps__(tree, seed):
+    bag = []
+    names = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Try):
+            bag.append((len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody)))
+        elif isinstance(node, ast.ExceptHandler):
+            names.append((type(node.type).__name__ if node.type else '', node.name or '', len(node.body)))
+        elif isinstance(node, ast.Raise):
+            names.append(('raise', type(node.exc).__name__ if node.exc else '', type(node.cause).__name__ if node.cause else ''))
+    fog = __mix__(seed, (tuple(bag[:256]), tuple(names[:256]), len(bag), len(names)))
+    return (len(bag), len(names), fog.hex())
+def __pats__(tree, seed):
+    bag = []
+    vals = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Match):
+            bag.append(('match', len(node.cases)))
+        elif type(node).__name__.startswith('Match'):
+            bag.append(type(node).__name__)
+            if hasattr(node, 'name'):
+                vals.append(getattr(node, 'name') or '')
+            if hasattr(node, 'rest'):
+                vals.append(getattr(node, 'rest') or '')
+    fog = __mix__(seed, (__hist__(bag), __hist__(vals), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __rets__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Return):
+            bag.append(('return', type(node.value).__name__ if node.value else ''))
+        elif isinstance(node, ast.Yield):
+            bag.append(('yield', type(node.value).__name__ if node.value else ''))
+        elif isinstance(node, ast.YieldFrom):
+            bag.append(('yieldfrom', type(node.value).__name__))
+        elif isinstance(node, ast.Await):
+            bag.append(('await', type(node.value).__name__))
+    fog = __mix__(seed, (__hist__(bag), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __loops__(tree, seed):
+    bag = []
+    marks = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.AsyncFor)):
+            bag.append(('for', type(node.target).__name__, type(node.iter).__name__, len(node.body), len(node.orelse)))
+        elif isinstance(node, ast.While):
+            bag.append(('while', type(node.test).__name__, len(node.body), len(node.orelse)))
+        elif isinstance(node, (ast.Break, ast.Continue)):
+            marks.append(type(node).__name__)
+    fog = __mix__(seed, (tuple(bag[:256]), __hist__(marks), len(bag), len(marks)))
+    return (len(bag), len(marks), fog.hex())
+def __comps__(tree, seed):
+    bag = []
+    gens = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            bag.append((type(node).__name__, len(node.generators)))
+            for gen in node.generators:
+                gens.append((type(gen.target).__name__, type(gen.iter).__name__, len(gen.ifs), int(gen.is_async)))
+    fog = __mix__(seed, (tuple(bag[:256]), tuple(gens[:512]), len(bag), len(gens)))
+    return (len(bag), len(gens), fog.hex())
+def __anns__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.arg) and node.annotation is not None:
+            bag.append(('arg', node.arg, type(node.annotation).__name__))
+        elif isinstance(node, ast.AnnAssign):
+            bag.append(('ann', type(node.target).__name__, type(node.annotation).__name__))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.returns is not None:
+            bag.append(('ret', node.name, type(node.returns).__name__))
+    fog = __mix__(seed, (__hist__(bag), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __line__(code, seed):
+    bag = []
+    pos = []
+    for one in __drip__(code):
+        bag.append((one.co_firstlineno, len(one.co_linetable), len(one.co_exceptiontable)))
+        try:
+            for item in one.co_positions():
+                pos.append(tuple(-1 if v is None else v for v in item))
+        except:
+            pass
+    fog = __mix__(seed, (tuple(bag), tuple(pos[:1024]), len(pos)))
+    return (len(bag), len(pos), fog.hex())
+def __free__(code, seed):
+    bag = []
+    names = []
+    for one in __drip__(code):
+        bag.append((len(one.co_freevars), len(one.co_cellvars), len(one.co_varnames), len(one.co_names)))
+        names.extend(one.co_freevars)
+        names.extend(one.co_cellvars)
+    fog = __mix__(seed, (tuple(bag), __hist__(names), len(names)))
+    return (len(bag), len(set(names)), fog.hex())
+def __wins__(code, seed):
+    bag = []
+    for one in __drip__(code):
+        data = one.co_code
+        for at in range(0, max(0, len(data) - 3), 2):
+            bag.append(data[at:at + 4])
+            if len(bag) >= 2048:
+                break
+        if len(bag) >= 2048:
+            break
+    fog = __mix__(seed, (tuple(bag), len(bag)))
+    return (len(bag), zlib.crc32(b''.join(bag)) & 0xffffffff if bag else 0, fog.hex())
+def __refs__(tree, seed):
+    pairs = []
+    stack = [(tree, '')]
+    while stack:
+        node, last = stack.pop()
+        now = type(node).__name__
+        if last:
+            pairs.append((last, now))
+        for child in ast.iter_child_nodes(node):
+            stack.append((child, now))
+    fog = __mix__(seed, (__hist__(pairs), len(pairs)))
+    return (len(pairs), __hist__(pairs), fog.hex())
+def __depths__(tree, seed):
+    levels = {}
+    hold = [(tree, 0)]
+    while hold:
+        node, depth = hold.pop()
+        levels[depth] = levels.get(depth, 0) + 1
+        for child in ast.iter_child_nodes(node):
+            hold.append((child, depth + 1))
+    rows = tuple(sorted(levels.items()))
+    fog = __mix__(seed, rows)
+    return (len(rows), rows, fog.hex())
+def __tiles__(tree, seed):
+    bag = []
+    rows = list(ast.walk(tree))
+    for at in range(0, max(0, len(rows) - 2), 3):
+        bag.append(tuple(type(one).__name__ for one in rows[at:at + 3]))
+        if len(bag) >= 1024:
+            break
+    fog = __mix__(seed, (__hist__(bag), len(rows)))
+    return (len(rows), len(bag), fog.hex())
+def __vmap__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        rows.append((one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, one.co_stacksize, one.co_flags))
+    fog = __mix__(seed, tuple(rows))
+    return (len(rows), tuple(rows[:256]), fog.hex())
+def __pool__(code, seed):
+    names = []
+    vars = []
+    files = []
+    for one in __drip__(code):
+        names.extend(one.co_names)
+        vars.extend(one.co_varnames)
+        files.append((one.co_name, one.co_filename))
+    fog = __mix__(seed, (__hist__(names), __hist__(vars), __hist__(files)))
+    return (len(set(names)), len(set(vars)), len(files), fog.hex())
+def __salt__(tree, code, seed):
+    a = __depths__(tree, seed + b'a')
+    b = __tiles__(tree, seed + b'b')
+    c = __vmap__(code, seed + b'c')
+    d = __pool__(code, seed + b'd')
+    return __mix__(seed + b'salt', (a, b, c, d))
+def __ctxs__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        ctx = getattr(node, 'ctx', None)
+        if ctx is not None:
+            bag.append((type(node).__name__, type(ctx).__name__))
+    fog = __mix__(seed, (__hist__(bag), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __drops__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Delete):
+            bag.append(('del', len(node.targets)))
+        elif isinstance(node, ast.Pass):
+            bag.append(('pass', 0))
+        elif isinstance(node, ast.Assert):
+            bag.append(('assert', int(node.msg is not None)))
+        elif isinstance(node, ast.Expr):
+            bag.append(('expr', type(node.value).__name__))
+    fog = __mix__(seed, (__hist__(bag), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __wths__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.With, ast.AsyncWith)):
+            for item in node.items:
+                bag.append((type(item.context_expr).__name__, type(item.optional_vars).__name__ if item.optional_vars else '', len(node.body)))
+    fog = __mix__(seed, (__hist__(bag), len(bag)))
+    return (len(bag), __hist__(bag), fog.hex())
+def __body__(tree, seed):
+    bag = []
+    for node in ast.walk(tree):
+        body = getattr(node, 'body', None)
+        if isinstance(body, list):
+            bag.append((type(node).__name__, len(body), tuple(type(one).__name__ for one in body[:8])))
+        orelse = getattr(node, 'orelse', None)
+        if isinstance(orelse, list) and orelse:
+            bag.append((type(node).__name__ + 'else', len(orelse), tuple(type(one).__name__ for one in orelse[:8])))
+    fog = __mix__(seed, (tuple(bag[:1024]), len(bag)))
+    return (len(bag), tuple(bag[:128]), fog.hex())
+def __ring__(tree, code, seed):
+    left = __ctxs__(tree, seed + b'l')
+    right = __drops__(tree, seed + b'r')
+    mid = __wths__(tree, seed + b'm')
+    core = __body__(tree, seed + b'c')
+    bits = []
+    for one in __drip__(code):
+        bits.append((hashlib.sha1(one.co_code).hexdigest(), len(one.co_consts), len(one.co_names)))
+    fog = __mix__(seed, (left, right, mid, core, tuple(bits)))
+    return (len(bits), fog.hex())
+def __ords__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        names = tuple((slot, name, len(name), zlib.crc32(name.encode('utf-8', 'replace')) & 0xffffffff) for slot, name in enumerate(one.co_names))
+        vars = tuple((slot, name, len(name), zlib.adler32(name.encode('utf-8', 'replace')) & 0xffffffff) for slot, name in enumerate(one.co_varnames))
+        const = []
+        for slot, val in enumerate(one.co_consts):
+            if isinstance(val, (str, bytes)):
+                raw = val.encode('utf-8', 'replace') if isinstance(val, str) else val
+                const.append((slot, type(val).__name__, len(raw), zlib.crc32(raw) & 0xffffffff))
+            elif isinstance(val, int):
+                const.append((slot, 'int', val.bit_length(), val & 0xffffffff))
+            else:
+                const.append((slot, type(val).__name__, 0, 0))
+        rows.append((one.co_name, names[:128], vars[:128], tuple(const[:128])))
+    fog = __mix__(seed, tuple(rows))
+    return (len(rows), fog.hex())
+def __glyphs__(tree, seed):
+    import unicodedata as uni
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name): rows.append(node.id)
+        elif isinstance(node, ast.Attribute): rows.append(node.attr)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): rows.append(node.name)
+        elif isinstance(node, ast.arg): rows.append(node.arg)
+        elif isinstance(node, ast.alias): rows.append(node.asname or node.name)
+    bag = []
+    for name in rows:
+        cat = []
+        for ch in name[:64]:
+            try: cat.append((uni.category(ch), uni.name(ch).split()[0], ord(ch) & 0xff))
+            except: cat.append(('?', '?', ord(ch) & 0xff))
+        bag.append((len(name), tuple(cat)))
+    wide = sum(any(ord(ch) > 127 for ch in name) for name in rows)
+    high = max((len(name) for name in rows), default=0)
+    fog = __mix__(seed, (__hist__(bag), len(rows), len(set(rows)), wide, high))
+    return (len(rows), len(set(rows)), wide, high, fog.hex())
+def __sig__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        tab = getattr(one, 'co_linetable', getattr(one, 'co_lnotab', b'')); exc = getattr(one, 'co_exceptiontable', b'')
+        arg = (one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, one.co_stacksize, one.co_flags)
+        raw = (hashlib.sha256(one.co_code).hexdigest(), hashlib.sha1(tab).hexdigest(), hashlib.sha1(exc).hexdigest())
+        con = tuple((slot, type(val).__name__, len(val.co_code) if isinstance(val, type(one)) else len(val) if isinstance(val, (str, bytes, tuple)) else val.bit_length() if isinstance(val, int) else 0) for slot, val in enumerate(one.co_consts[:128]))
+        rows.append((getattr(one, 'co_qualname', one.co_name), one.co_name, one.co_filename, one.co_firstlineno, arg, raw, con, tuple(one.co_freevars), tuple(one.co_cellvars)))
+    fog = __mix__(seed, tuple(rows))
+    return (len(rows), fog.hex())
+def __atlas__(tree, code, stem, path, seed):
+    rows = [fn(tree, seed + tag) for tag, fn in ((b'shape', __shapeid__), (b'lits', __lits__), (b'names', __names__), (b'flows', __flows__), (b'calls', __calls__), (b'scope', __scope__), (b'imps', __imps__), (b'sets', __sets__), (b'subs', __subs__), (b'bins', __bins__), (b'cmps', __cmps__), (b'forms', __forms__), (b'traps', __traps__), (b'pats', __pats__), (b'rets', __rets__), (b'loops', __loops__), (b'comps', __comps__), (b'anns', __anns__), (b'refs', __refs__), (b'depths', __depths__), (b'tiles', __tiles__), (b'ctxs', __ctxs__), (b'drops', __drops__), (b'wths', __wths__), (b'body', __body__), (b'glyphs', __glyphs__))]
+    rows.extend(fn(code, seed + tag) for tag, fn in ((b'ops', __ops__), (b'consts', __consts__), (b'line', __line__), (b'free', __free__), (b'wins', __wins__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ords', __ords__), (b'sig', __sig__)))
+    rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
+    mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
+    core = __vine__((tuple(rows), mark))
+    fog = hashlib.sha512(core).digest()
+    salt = __mist__(seed + b'atlas' + fog, 64)
+    return hashlib.blake2b(fog + salt + core[:4096], digest_size=64).digest()
 def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
@@ -2001,6 +2499,8 @@ def __glass__(tree, path, used):
    tuffk, bloomk, echok, magmak, soulk, wispk = __marks__(code)
    __talus__(code, (tuffk, bloomk, echok, magmak, soulk, wispk))
    seed = hashlib.sha256(stem).digest()
+   atlas = __atlas__(tree, code, stem, path, seed)
+   seed = hashlib.sha256(seed + atlas).digest()
    norm, mark = __marl__(path, seed); seed = hashlib.sha256(seed + norm.encode('utf-8', 'replace') + mark.to_bytes(2, 'little')).digest()
    meta = __metadata__(seed); seed = hashlib.sha256(seed + repr((meta[1], meta[2], meta[6])).encode('utf-8', 'replace')).digest()
    scarp, sand = __scarp__(blaze, seed); seed = hashlib.sha256(seed + scarp + sand).digest()
@@ -2016,7 +2516,7 @@ def __glass__(tree, path, used):
    render, shade = __render__(seed, blaze); seed = hashlib.sha256(seed + render.encode('ascii') + shade.encode('ascii')).digest()
    temper, metal = __temper__(seed, len(stem)); seed = hashlib.sha256(seed + repr((temper, metal)).encode('ascii')).digest()
    anneal, perm = __anneal__(seed, list(brand)); seed = hashlib.sha256(seed + repr(anneal).encode('utf-8', 'replace') + repr(perm).encode('ascii')).digest()
-   ore = hashlib.sha512(__vine__((norm, mark, meta, scarp, sand, mire, loam, silt, clay, quarry, qkey, desert, shrine, hills, mortar, trio, render, shade, temper, metal, anneal, perm))).digest()
+   ore = hashlib.sha512(__vine__((atlas, norm, mark, meta, scarp, sand, mire, loam, silt, clay, quarry, qkey, desert, shrine, hills, mortar, trio, render, shade, temper, metal, anneal, perm))).digest()
    seed = hashlib.sha256(seed + ore).digest()
    slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk = __keys__(seed)
    probe = __packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
