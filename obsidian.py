@@ -120,7 +120,11 @@ def __wisp__(code):
    for one in __drip__(code): rows.append((one.co_name, one.co_filename, one.co_argcount, one.co_firstlineno, len(one.co_consts)))
    blob = __vine__(tuple(rows)); return (len(rows), hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest())
 def __gasket__(blob):
-   pick = min(((0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, preset=9))), key=lambda row: len(row[1])); return bytes([pick[0]]) + pick[1]
+   if len(blob) < 512:
+        pick = min(((0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+   else:
+        pick = min(((0, zlib.compress(blob, 6)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+   return bytes([pick[0]]) + pick[1]
 def __weld__(blob, key):
    rows = bytearray(); glow = key & 255; drift = ((key >> 8) & 255) or 73; tint = ((key >> 16) & 255) or 19
    for slot, byte in enumerate(blob):
@@ -204,13 +208,13 @@ def __chaff__(blob):
    rows = __grain__(blob, 32)
    return (len(blob), len(rows), __first__(rows), __last__(rows), __pulse__(rows))
 def __packa__(blob, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk): return __pair__(__thorn__(__ravel__(__shroud__(__scald__(__whorl__(__snare__(__weld__(__gasket__(blob), slag), ashk, gritk), lavak), smeltk), veilk), weftk), thornk))
-def __packb__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk): return __pair__(__thorn__(__ravel__(__shroud__(__snare__(__spine__(__weld__(zlib.compress(blob, 9), smoke), crustk), emberk, cinderk), veilk ^ 0x5A), weftk + 1), thornk + 1))
-def __peeka__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk): return zlib.decompress(__weld__(__spine__(__unsnare__(__unshroud__(__unravel__(__thorn__(__pair__(blob), thornk + 1), weftk + 1), veilk ^ 0x5A), emberk, cinderk), crustk), smoke))
+def __packb__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk): return __pair__(__thorn__(__ravel__(__shroud__(__snare__(__spine__(__weld__(__gasket__(blob), smoke), crustk), emberk, cinderk), veilk ^ 0x5A), weftk + 1), thornk + 1))
+def __peeka__(blob, smoke, crustk, emberk, cinderk, veilk, weftk, thornk): peek=__weld__(__spine__(__unsnare__(__unshroud__(__unravel__(__thorn__(__pair__(blob), thornk + 1), weftk + 1), veilk ^ 0x5A), emberk, cinderk), crustk), smoke); mode=peek[0]; return (zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:])
 def __peekb__(blob, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk): return __weld__(__unsnare__(__unwhorl__(__scald__(__unshroud__(__unravel__(__thorn__(__pair__(blob), thornk), weftk), veilk), smeltk), lavak), ashk, gritk), slag)
-def __corea__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): return __thorn__(__ravel__(__shroud__(__snare__(__weld__(zlib.compress(__weld__(blob, leftk), 9), rightk), mistk, dustk), cloakk), lanek), spurk)
-def __coreb__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): return __weld__(zlib.decompress(__weld__(__unsnare__(__unshroud__(__unravel__(__thorn__(blob, spurk), lanek), cloakk), mistk, dustk), rightk)), leftk)
-def __wrapa__(blob, shellk, glassk, forgek, stampk): return __snare__(__weld__(zlib.compress(__weld__(blob, shellk), 9), glassk), forgek, stampk)
-def __wrapb__(blob, shellk, glassk, forgek, stampk): return __weld__(zlib.decompress(__weld__(__unsnare__(blob, forgek, stampk), glassk)), shellk)
+def __corea__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): return __thorn__(__ravel__(__shroud__(__snare__(__weld__(__gasket__(__weld__(blob, leftk)), rightk), mistk, dustk), cloakk), lanek), spurk)
+def __coreb__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): peek=__weld__(__unsnare__(__unshroud__(__unravel__(__thorn__(blob, spurk), lanek), cloakk), mistk, dustk), rightk); mode=peek[0]; return __weld__((zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:]), leftk)
+def __wrapa__(blob, shellk, glassk, forgek, stampk): return __snare__(__weld__(__gasket__(__weld__(blob, shellk)), glassk), forgek, stampk)
+def __wrapb__(blob, shellk, glassk, forgek, stampk): peek=__weld__(__unsnare__(blob, forgek, stampk), glassk); mode=peek[0]; return __weld__((zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:]), shellk)
 def __marks__(code): return __glow__(code), __bloom__(code), __echo__(code), __magma__(code), __soul__(code), __wisp__(code)
 def __keys__(seed):
    slag, smoke = __spark__(seed + b'slag', 1000000, 2147483647), __spark__(seed + b'smoke', 1000000, 2147483647)
@@ -1647,7 +1651,7 @@ def {stampf}(blob):
  shell={heart}(shell,{right})
  if len(shell)<4:
   raise SystemExit
- shell=zlib.decompress(shell)
+ mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
  shell={dune}(shell)
  shell={screef}(shell,{thornk})
  shell={fenf}(shell,{weftk})
@@ -1688,7 +1692,7 @@ def {runf}():
     probe = __corea__(pack, leftk, rightk, mistk, dustk, cloakk, lanek, spurk)
     core = pack
     core = __weld__(core, leftk)
-    core = zlib.compress(core, 9)
+    core = __gasket__(core)
     core = __weld__(core, rightk)
     core = __snare__(core, mistk, dustk)
     core = __shroud__(core, cloakk)
@@ -1912,7 +1916,7 @@ def fire(code):
 def fetch():
   shell=base64.b85decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   sift(shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);shell=zlib.decompress(shell);shell={heart}(shell,left)
+  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
   mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
 def rise():
@@ -1927,7 +1931,7 @@ rise()
     probe = __wrapa__(pack, shellk, glassk, forgek, stampk)
     wrap = pack
     wrap = __weld__(wrap, shellk)
-    wrap = zlib.compress(wrap, 9)
+    wrap = __gasket__(wrap)
     wrap = __weld__(wrap, glassk)
     wrap = __snare__(wrap, forgek, stampk)
     probe != wrap and (_ for _ in ()).throw(ValueError('wrap'))
@@ -1935,12 +1939,12 @@ rise()
     crest = hashlib.sha256(wrap).hexdigest()
     crust = f"import base64,bz2,hashlib,lzma,zlib;{shell}={base64.b85encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{stampf}={crest!r}"
     cave = f"def {heart}(blob,key):rows=bytearray();glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;[(glow:=((glow+drift+slot+tint)&255),rows.append(byte^glow^((tint+slot)&255))) for slot,byte in enumerate(blob)];return bytes(rows)"
-    ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));readn=''.join(('PyMarshal_','ReadObjectFromString'));runn=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({shell});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});blob=zlib.decompress(blob);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);read=getattr(ct.pythonapi,readn);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob);code=read(ct.cast(box,ct.c_char_p),len(blob));run=getattr(ct.pythonapi,runn);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
+    ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));readn=''.join(('PyMarshal_','ReadObjectFromString'));runn=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({shell});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);read=getattr(ct.pythonapi,readn);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob);code=read(ct.cast(box,ct.c_char_p),len(blob));run=getattr(ct.pythonapi,runn);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
     return "\n\n" + __sear__(__flux__("\n".join([crust, cave, ember]), seed), seed)
 def __sear__(text, seed):
     raw = text.encode('utf-8')
     crc = zlib.crc32(raw) & 0xFFFFFFFF
-    fog = lzma.compress(raw, preset=9)
+    fog = __gasket__(raw)
     zinc = secrets.randbelow(254) + 1
     gold = secrets.randbelow(200) + 7
     iron = secrets.randbelow(254) + 1
@@ -1949,9 +1953,7 @@ def __sear__(text, seed):
         iron = secrets.randbelow(254) + 1
     while lead == gold:
         lead = secrets.randbelow(200) + 7
-    silk = bytes((b ^ zinc ^ ((slot * gold) & 0xFF)) & 0xFF for slot, b in enumerate(fog))
-    wool = bytes((b ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(silk))
-    melt = base64.b85encode(wool).decode('ascii')
+    melt = base64.b85encode(bytes((b ^ zinc ^ ((slot * gold) & 0xFF) ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(fog))).decode('ascii')
     watermark = __shingle__(seed, 8)
     ident = __gravel__(seed)
     utext = __corals__(seed, 12)
@@ -1965,10 +1967,14 @@ def __sear__(text, seed):
     fire = "''.join(('c','r','c','3','2'))"
     earth = "''.join(('b','u','i','l','t','i','n','s'))"
     air = "''.join(('e','x','e','c'))"
-    wind = "''.join(('l','z','m','a'))"
+    wind = "''.join(('z','l','i','b'))"
     metal = "''.join(('d','e','c','o','m','p','r','e','s','s'))"
     wood = "''.join(('b','a','s','e','6','4'))"
     void = "''.join(('b','8','5','d','e','c','o','d','e'))"
+    ice = "''.join(('b','z','2'))"
+    rock = "''.join(('l','z','m','a'))"
+    coal = f"bytes((__deptrai__^{iron}^((__meooooooooooo__*{lead})&255)^{zinc}^((__meooooooooooo__*{gold})&255))&255 for __meooooooooooo__,__deptrai__ in enumerate(getattr(__import__({wood}),{void})(_.encode())))"
+    ash = f"(lambda __p:(getattr(__import__({wind}),{metal}),getattr(__import__({ice}),{metal}),getattr(__import__({rock}),{metal}))[__p[0]](__p[1:]))({coal})"
 
     inner = (
         f"(lambda _:"
@@ -1977,13 +1983,7 @@ def __sear__(text, seed):
         f"and (_ for _ in ()).throw(SystemExit),"
         f"getattr(__import__({earth}),{air})(__yeppppppp__,globals())"
         f")[-1])"
-        f"(getattr(__import__({wind}),{metal})("
-        f"bytes((__deptrai__^{zinc}^((__meoooooooooo__*{gold})&255))&255 for __meoooooooooo__,__deptrai__ in enumerate("
-        f"bytes((__deptrai__^{iron}^((__meoooooooooo__*{lead})&255))&255 for __meoooooooooo__,__deptrai__ in enumerate("
-        f"getattr(__import__({wood}),{void})(_.encode())"
-        f"))"
-        f"))"
-        f"))"
+        f"({ash})"
         f")({melt!r})"
     )
     return pack + ";" + inner
@@ -2005,14 +2005,14 @@ def __flux__(code, seed):
    dye, weave, knot = secrets.randbelow(8999) + 1000, secrets.randbelow(449) * 2 + 101, secrets.randbelow(899) + 100
    vex = [b ^ ((dye + i * weave + knot) & 0xFF) for i, b in enumerate(tape)]; rune, eth = bytearray(), rind
    for byte in code.encode('utf-8'): rune.append((byte ^ eth ^ husk ^ pulp) & 0xFF); eth = (eth * bark + cork) % 256
-   shard = base64.b85encode(lzma.compress(bytes(rune), preset=9)).decode('ascii')
+   shard = base64.b85encode(zlib.compress(bytes(rune), 4)).decode('ascii')
    ops = {f'__{t}__': 'pass' for t in tags}
-   ops['__lx__'] = f'__rock__=__import__("lzma").decompress(__import__("base64").b85decode("{shard}".encode()));__dust__=bytearray();[(__dust__.append((__sand__^self.__acc__[0]^self.__fog__^self.__haze__)&255),self.__acc__.__setitem__(0,(self.__acc__[0]*self.__bark__+self.__cork__)%256)) for __sand__ in __rock__];self.__stk__.append(__dust__.decode("utf-8"))'
+   ops['__lx__'] = f'__rock__=__import__("zlib").decompress(__import__("base64").b85decode("{shard}".encode()));__dust__=bytearray();[(__dust__.append((__sand__^self.__acc__[0]^self.__fog__^self.__haze__)&255),self.__acc__.__setitem__(0,(self.__acc__[0]*self.__bark__+self.__cork__)%256)) for __sand__ in __rock__];self.__stk__.append(__dust__.decode("utf-8"))'
    ops['__ex__'] = 'exec(self.__stk__.pop(),globals())'; ops['__st__'] = 'self.__acc__[0]=self.__stk__.pop()&0xFF'
    ops['__ad__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();self.__stk__.append(((__left__^__right__)+2*(__left__&__right__))&0xFF)'
    ops['__sb__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();__flip__=(256-__right__)&0xFF;self.__stk__.append(((__left__^__flip__)+2*(__left__&__flip__))&0xFF)'
    ops['__ml__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();self.__stk__.append((__left__*__right__)%256)'
-   ops['__np__'] = "self.__acc__[0]^=0x42 if getattr(__import__('sys'),'gettrace',lambda:None)() else 0"
+   ops['__np__'] = "getattr(__import__('sys'),'gettrace',lambda:None)() and (_ for _ in ()).throw(SystemExit);self.__acc__[0]^=0x42"
    ops['__at__'] = "[__import__('os')._exit(1) for _ in [None] if __import__('os').name=='nt' and getattr(getattr(__import__('ctypes'),'windll',None),'kernel32',None) and getattr(__import__('ctypes').windll.kernel32,''.join(('IsDebugger','Present')),lambda:0)()]"
    ops['__dp__'] = 'self.__stk__.append(self.__stk__[-1]) if self.__stk__ else None'
    ops['__sw__'] = '(self.__stk__.__setitem__(-1,self.__stk__[-2]),self.__stk__.__setitem__(-2,self.__stk__[-1])) if len(self.__stk__)>1 else None'
@@ -2025,9 +2025,9 @@ def __flux__(code, seed):
    ops['__mi__'] = f'__byte__=0 if self.__ptr__>=len(self.__ore__) else (self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__left__=self.__stk__.pop();self.__stk__.append((__left__*__byte__)%256)'
    cls = seam(); out = f"import sys\nimport os\nclass {cls}:\n    def {lode}(self):self.__stk__=[];self.__acc__=[0];self.__fog__={husk};self.__haze__={pulp};self.__bark__={bark};self.__cork__={cork}\n"
    for tag, body in ops.items(): out += f"    def {tag}(self):\n        {body}\n"
-   out += f"    def {pith}(self,__rock__):\n        self.__ore__=__rock__;self.__ptr__=0;self.__dye__=[{dye}];__catcatcat__={{}}\n"
-   for tag in tags:
-       for val in grid[tag]: out += f"        __catcatcat__[{val}]=self.__{tag}__\n"
+   out += f"    def {pith}(self,__rock__):\n        self.__ore__=__rock__;self.__ptr__=0;self.__dye__=[{dye}]\n"
+   grids = ",".join(f"{val}:self.__{tag}__" for tag in tags for val in grid[tag])
+   out += f"        __catcatcat__={{{grids}}}\n"
    out += f"        while self.__ptr__<len(self.__ore__):__byte__=(self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__catcatcat__.get(__byte__,self.__np__)()\n{cls}().{pith}({vex})"
    return out
 def __glass__(tree, path, used):
@@ -2042,7 +2042,7 @@ def __glass__(tree, path, used):
    probe = __packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
    probe = __packb__(probe, smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
    raw = __gasket__(stem); raw = __weld__(raw, slag); raw = __snare__(raw, ashk, gritk); raw = __whorl__(raw, lavak); raw = __scald__(raw, smeltk); raw = __shroud__(raw, veilk); raw = __ravel__(raw, weftk); raw = __thorn__(raw, thornk); raw = __pair__(raw)
-   raw = zlib.compress(raw, 9); raw = __weld__(raw, smoke); raw = __spine__(raw, crustk); raw = __snare__(raw, emberk, cinderk); raw = __shroud__(raw, veilk ^ 0x5A); raw = __ravel__(raw, weftk + 1); raw = __thorn__(raw, thornk + 1); raw = __pair__(raw)
+   raw = __gasket__(raw); raw = __weld__(raw, smoke); raw = __spine__(raw, crustk); raw = __snare__(raw, emberk, cinderk); raw = __shroud__(raw, veilk ^ 0x5A); raw = __ravel__(raw, weftk + 1); raw = __thorn__(raw, thornk + 1); raw = __pair__(raw)
    probe != raw and (_ for _ in ()).throw(ValueError('pack'))
    chaffk = __chaff__(raw)
    if len(raw) < 8:
