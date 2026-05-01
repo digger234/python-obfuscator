@@ -971,6 +971,33 @@ def __glyphs__(tree, seed):
     high = max((len(name) for name in rows), default=0)
     fog = __mix__(seed, (__hist__(bag), len(rows), len(set(rows)), wide, high))
     return (len(rows), len(set(rows)), wide, high, fog.hex())
+def __alph__(tree, seed):
+    text = []
+    raw = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str): text.append(node.value)
+        elif isinstance(node, ast.Constant) and isinstance(node.value, bytes): raw.append(node.value)
+    bag = []
+    for val in text[:512]:
+        enc = base64.b85encode(zlib.compress(val.encode('utf-8', 'replace'), 6))
+        bag.append((len(val), __hist__(val[:128]), __hist__(enc[:128]), zlib.crc32(enc) & 0xffffffff))
+    for val in raw[:512]:
+        enc = base64.b85encode(zlib.compress(val, 6))
+        bag.append((len(val), __hist__(val[:128]), __hist__(enc[:128]), zlib.adler32(enc) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(bag), len(text), len(raw)))
+    return (len(text), len(raw), fog.hex())
+def __span__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        rows.append((type(node).__name__, getattr(node, 'lineno', 0), getattr(node, 'col_offset', 0), getattr(node, 'end_lineno', 0) or 0, getattr(node, 'end_col_offset', 0) or 0))
+    fog = __mix__(seed, (tuple(rows[:2048]), len(rows), __hist__((row[0], row[3] - row[1], row[4] - row[2]) for row in rows)))
+    return (len(rows), fog.hex())
+def __gram__(tree, seed):
+    rows = [type(one).__name__ for one in ast.walk(tree)]
+    pair = tuple(zip(rows, rows[1:]))[:2048]
+    trio = tuple(zip(rows, rows[1:], rows[2:]))[:2048]
+    fog = __mix__(seed, (__hist__(pair), __hist__(trio), len(rows)))
+    return (len(rows), fog.hex())
 def __sig__(code, seed):
     rows = []
     for one in __drip__(code):
@@ -982,7 +1009,7 @@ def __sig__(code, seed):
     fog = __mix__(seed, tuple(rows))
     return (len(rows), fog.hex())
 def __atlas__(tree, code, stem, path, seed):
-    rows = [fn(tree, seed + tag) for tag, fn in ((b'shape', __shapeid__), (b'lits', __lits__), (b'names', __names__), (b'flows', __flows__), (b'calls', __calls__), (b'scope', __scope__), (b'imps', __imps__), (b'sets', __sets__), (b'subs', __subs__), (b'bins', __bins__), (b'cmps', __cmps__), (b'forms', __forms__), (b'traps', __traps__), (b'pats', __pats__), (b'rets', __rets__), (b'loops', __loops__), (b'comps', __comps__), (b'anns', __anns__), (b'refs', __refs__), (b'depths', __depths__), (b'tiles', __tiles__), (b'ctxs', __ctxs__), (b'drops', __drops__), (b'wths', __wths__), (b'body', __body__), (b'glyphs', __glyphs__))]
+    rows = [fn(tree, seed + tag) for tag, fn in ((b'shape', __shapeid__), (b'lits', __lits__), (b'names', __names__), (b'flows', __flows__), (b'calls', __calls__), (b'scope', __scope__), (b'imps', __imps__), (b'sets', __sets__), (b'subs', __subs__), (b'bins', __bins__), (b'cmps', __cmps__), (b'forms', __forms__), (b'traps', __traps__), (b'pats', __pats__), (b'rets', __rets__), (b'loops', __loops__), (b'comps', __comps__), (b'anns', __anns__), (b'refs', __refs__), (b'depths', __depths__), (b'tiles', __tiles__), (b'ctxs', __ctxs__), (b'drops', __drops__), (b'wths', __wths__), (b'body', __body__), (b'glyphs', __glyphs__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))]
     rows.extend(fn(code, seed + tag) for tag, fn in ((b'ops', __ops__), (b'consts', __consts__), (b'line', __line__), (b'free', __free__), (b'wins', __wins__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ords', __ords__), (b'sig', __sig__)))
     rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
     mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
@@ -1627,7 +1654,7 @@ def {load}(i):
         if isinstance(node, ast.Tuple) and isinstance(node.ctx, ast.Load) and not any(isinstance(one, ast.Starred) for one in node.elts):
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('builtins')], keywords=[]), __ember__('tuple')], keywords=[]), args=[ast.List(elts=node.elts, ctx=ast.Load())], keywords=[])
         if isinstance(node, ast.Slice):
-            return ast.Call(func=ast.Name(id='slice', ctx=ast.Load()), args=[node.lower or ast.Constant(None), node.upper or ast.Constant(None), node.step or ast.Constant(None)], keywords=[])
+            return ast.Call(func=ast.Name(id='slice', ctx=ast.Load()), args=[__gloom__(node.lower) if node.lower else ast.Constant(None), __gloom__(node.upper) if node.upper else ast.Constant(None), __gloom__(node.step) if node.step else ast.Constant(None)], keywords=[])
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Attribute) and isinstance(node.targets[0].ctx, ast.Store):
             bag = node.targets[0]
             return ast.Expr(value=ast.Call(func=ast.Name(id='setattr', ctx=ast.Load()), args=[bag.value, __ember__(bag.attr), node.value], keywords=[]))
@@ -1644,6 +1671,12 @@ def {load}(i):
                 else:
                     bag.append(ast.Delete(targets=[target]))
             return bag
+        if isinstance(node, ast.Assign):
+            node.value = __gloom__(node.value)
+            return node
+        if isinstance(node, ast.AnnAssign) and node.value is not None:
+            node.value = __gloom__(node.value)
+            return node
         if isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Attribute):
             op = __anvil__(node.op)
             if op is not None:
@@ -1656,6 +1689,9 @@ def {load}(i):
                 bag = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.target.value, __ember__('__getitem__')], keywords=[]), args=[node.target.slice], keywords=[])
                 val = ast.BinOp(left=bag, op=op, right=node.value)
                 return ast.Expr(value=ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.target.value, __ember__('__setitem__')], keywords=[]), args=[node.target.slice, val], keywords=[]))
+        if isinstance(node, ast.AugAssign):
+            node.value = __gloom__(node.value)
+            return node
         if isinstance(node, ast.Import):
             bag = []
             for alias in node.names:
@@ -1717,14 +1753,25 @@ def {load}(i):
                 item.context_expr = __gloom__(item.context_expr)
             return node
         if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            node.elt = __gloom__(node.elt)
             for gen in node.generators:
                 gen.iter = __gloom__(gen.iter)
                 gen.ifs = [__gloom__(one) for one in gen.ifs]
             return node
         if isinstance(node, ast.DictComp):
+            node.key = __gloom__(node.key); node.value = __gloom__(node.value)
             for gen in node.generators:
                 gen.iter = __gloom__(gen.iter)
                 gen.ifs = [__gloom__(one) for one in gen.ifs]
+            return node
+        if isinstance(node, ast.Match):
+            node.subject = __gloom__(node.subject)
+            for case in node.cases:
+                if case.guard is not None:
+                    case.guard = __gloom__(case.guard)
+            return node
+        if isinstance(node, ast.NamedExpr):
+            node.value = __gloom__(node.value)
             return node
         if isinstance(node, ast.If):
             node.test = __gloom__(node.test)
@@ -1748,6 +1795,15 @@ def {load}(i):
             node.value = __gloom__(node.value)
             return node
         if isinstance(node, ast.Starred):
+            node.value = __gloom__(node.value)
+            return node
+        if isinstance(node, ast.Yield) and node.value is not None:
+            node.value = __gloom__(node.value)
+            return node
+        if isinstance(node, ast.YieldFrom):
+            node.value = __gloom__(node.value)
+            return node
+        if isinstance(node, ast.Await):
             node.value = __gloom__(node.value)
             return node
         if isinstance(node, ast.Call) and node.keywords:
