@@ -120,7 +120,9 @@ def __wisp__(code):
    for one in __drip__(code): rows.append((one.co_name, one.co_filename, one.co_argcount, one.co_firstlineno, len(one.co_consts)))
    blob = __vine__(tuple(rows)); return (len(rows), hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest())
 def __gasket__(blob):
-   if len(blob) < 512:
+   if len(blob) > 4096:
+        pick = (0, zlib.compress(blob, 6))
+   elif len(blob) < 512:
         pick = min(((0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
    else:
         pick = min(((0, zlib.compress(blob, 6)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
@@ -175,10 +177,7 @@ def __ravel__(blob, span):
 def __unravel__(blob, span):
    rows = []; slot = 0; span = max(2, span)
    while slot < len(blob):
-        part = blob[slot:slot + span]; left = part[:len(part) // 2]; right = part[len(part) // 2:]; out = bytearray(); ash = 0; ember = 0
-        for turn in range(len(part)):
-             if turn & 1: out.append(left[ash]); ash += 1
-             else: out.append(right[ember]); ember += 1
+        part = blob[slot:slot + span]; left = part[:len(part) // 2]; right = part[len(part) // 2:]; out = bytearray(len(part)); out[::2] = right; out[1::2] = left
         rows.append(bytes(out)); slot += span
    return b''.join(rows)
 def __thorn__(blob, span):
@@ -497,6 +496,7 @@ def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
     store = []
+    plain = []
     seen = {}
     dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip'}
     ward = {'__name__','__file__','__package__','__spec__','__loader__','__builtins__','__doc__','__annotations__','__cached__','__path__','__slots__','__class__'}
@@ -831,6 +831,7 @@ def __vein__(code):
             raw = val.encode('utf-8') if isinstance(val, str) else val
             kind = b's' if isinstance(val, str) else b'b'
             store.append(__carapace__(raw, seed + len(store).to_bytes(4, 'little'), kind))
+            plain.append(val)
         return ast.Call(func=ast.Name(id=load, ctx=ast.Load()), args=[ast.Constant(seen[key])], keywords=[])
     def __rift__(val):
         size = len(val)
@@ -879,7 +880,7 @@ def __vein__(code):
     def __dots__():
         return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[])
     def __slab__():
-        raw = marshal.dumps(store)
+        raw = marshal.dumps(tuple(plain))
         core = base64.b85encode(zlib.compress(raw, 9)).decode('ascii')
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
@@ -887,6 +888,7 @@ def __vein__(code):
         text = f"""{blob}={core!r}
 {proof}={gold!r}
 {keep}=None
+{tint}={{}}
 def {dawn}(v,o,p):
  rows=bytes.fromhex(p)
  len(rows)!=len(v) and (_ for _ in ()).throw(RuntimeError('bad'))
@@ -966,8 +968,8 @@ def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m):
 def {load}(i):
  global {keep}
  if {keep} is None:
-   {tint}=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32({tint})+__import__('zlib').adler32({tint})!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
-   {keep}=tuple({rune}(*row) for row in {barkf}(__import__('zlib').decompress(__import__('base64').b85decode({blob}.encode()))))
+   row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
+   {keep}=tuple({barkf}(__import__('zlib').decompress(__import__('base64').b85decode({blob}.encode()))))
  return {keep}[i]
 """
         return ast.parse(text).body
@@ -1570,12 +1572,7 @@ def {cragf}(blob,salt):
 def {fenf}(blob,span):
   rows=[];slot=0;span=max(2,span)
   while slot < len(blob):
-   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray();ash=0;ember=0
-   for turn in range(len(part)):
-    if turn&1:
-     out.append(left[ash]);ash += 1
-    else:
-     out.append(right[ember]);ember += 1
+   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray(len(part));out[::2]=right;out[1::2]=left
    rows.append(bytes(out));slot += span
   return b''.join(rows)
 def {screef}(blob,span):
@@ -1742,12 +1739,7 @@ def cloak(blob,salt):
 def unlace(blob,span):
   rows=[];slot=0;span=max(2,span)
   while slot < len(blob):
-   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray();ash=0;ember=0
-   for turn in range(len(part)):
-    if turn&1:
-     out.append(left[ash]);ash += 1
-    else:
-     out.append(right[ember]);ember += 1
+   part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray(len(part));out[::2]=right;out[1::2]=left
    rows.append(bytes(out));slot += span
   return b''.join(rows)
 def scree(blob,span):
@@ -1993,48 +1985,13 @@ def __sear__(text, seed):
     )
     return pack + ";" + inner
 def __flux__(code, seed):
-   seam = lambda: "".join(secrets.choice([chr(i) for i in range(97, 122)]) for _ in range(6))
-   lode, pith = "__init__", seam(); rind, husk, pulp = secrets.randbelow(254) + 1, secrets.randbelow(254) + 1, secrets.randbelow(254) + 1
-   bark, cork = 5, secrets.randbelow(44) * 2 + 11
-   tags = ['lx','ex','st','ad','sb','ml','np','li','ai','si','mi','at','dp','sw','rt','pp','rv']
-   slab = list(range(256)); secrets.SystemRandom().shuffle(slab); grid = {k:[] for k in tags}
-   for slot, val in enumerate(slab): grid[tags[slot % len(tags)]].append(val)
-   pick = lambda t: secrets.choice(grid[t]); acc = secrets.randbelow(254) + 1; tape = [pick('li'), acc]
-   for _ in range(secrets.randbelow(5) + 8):
-       kind, func = secrets.choice([('ad',lambda a,b:((a^b)+2*(a&b))&0xFF), ('sb',lambda a,b:((a^((256-b)&0xFF))+2*(a&((256-b)&0xFF)))&0xFF), ('ml',lambda a,b:(a*b)%256)]); val = secrets.randbelow(254) + 1
-       tape.extend([pick({'ad':'ai','sb':'si','ml':'mi'}[kind]), val]); acc = func(acc, val)
-   tape.extend([pick('li'), (rind - acc) % 256, pick('ad'), pick('st')])
-   for _ in range(secrets.randbelow(3) + 2):
-       tape.extend([pick('at'), pick('np'), pick('dp'), pick('pp'), pick('rv'), pick('np')])
-   tape.extend([pick('lx'), pick('ex')])
-   dye, weave, knot = secrets.randbelow(8999) + 1000, secrets.randbelow(449) * 2 + 101, secrets.randbelow(899) + 100
-   vex = [b ^ ((dye + i * weave + knot) & 0xFF) for i, b in enumerate(tape)]; rune, eth = bytearray(), rind
-   for byte in code.encode('utf-8'): rune.append((byte ^ eth ^ husk ^ pulp) & 0xFF); eth = (eth * bark + cork) % 256
-   shard = base64.b85encode(zlib.compress(bytes(rune), 4)).decode('ascii')
-   ops = {f'__{t}__': 'pass' for t in tags}
-   ops['__lx__'] = f'__rock__=__import__("zlib").decompress(__import__("base64").b85decode("{shard}".encode()));__dust__=bytearray();[(__dust__.append((__sand__^self.__acc__[0]^self.__fog__^self.__haze__)&255),self.__acc__.__setitem__(0,(self.__acc__[0]*self.__bark__+self.__cork__)%256)) for __sand__ in __rock__];self.__stk__.append(__dust__.decode("utf-8"))'
-   ops['__ex__'] = 'exec(self.__stk__.pop(),globals())'; ops['__st__'] = 'self.__acc__[0]=self.__stk__.pop()&0xFF'
-   ops['__ad__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();self.__stk__.append(((__left__^__right__)+2*(__left__&__right__))&0xFF)'
-   ops['__sb__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();__flip__=(256-__right__)&0xFF;self.__stk__.append(((__left__^__flip__)+2*(__left__&__flip__))&0xFF)'
-   ops['__ml__'] = '__right__=self.__stk__.pop();__left__=self.__stk__.pop();self.__stk__.append((__left__*__right__)%256)'
-   ops['__np__'] = "getattr(__import__('sys'),'gettrace',lambda:None)() and (_ for _ in ()).throw(SystemExit);self.__acc__[0]^=0x42"
-   ops['__at__'] = "[__import__('os')._exit(1) for _ in [None] if __import__('os').name=='nt' and getattr(getattr(__import__('ctypes'),'windll',None),'kernel32',None) and getattr(__import__('ctypes').windll.kernel32,''.join(('IsDebugger','Present')),lambda:0)()]"
-   ops['__dp__'] = 'self.__stk__.append(self.__stk__[-1]) if self.__stk__ else None'
-   ops['__sw__'] = '(self.__stk__.__setitem__(-1,self.__stk__[-2]),self.__stk__.__setitem__(-2,self.__stk__[-1])) if len(self.__stk__)>1 else None'
-   ops['__rt__'] = 'self.__stk__.insert(0,self.__stk__.pop()) if len(self.__stk__)>1 else None'
-   ops['__pp__'] = 'self.__stk__.pop() if self.__stk__ else None'
-   ops['__rv__'] = 'self.__stk__.reverse()'
-   ops['__li__'] = f'__byte__=0 if self.__ptr__>=len(self.__ore__) else (self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;self.__stk__.append(__byte__)'
-   ops['__ai__'] = f'__byte__=0 if self.__ptr__>=len(self.__ore__) else (self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__left__=self.__stk__.pop();self.__stk__.append(((__left__^__byte__)+2*(__left__&__byte__))&0xFF)'
-   ops['__si__'] = f'__byte__=0 if self.__ptr__>=len(self.__ore__) else (self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__left__=self.__stk__.pop();__flip__=(256-__byte__)&0xFF;self.__stk__.append(((__left__^__flip__)+2*(__left__&__flip__))&0xFF)'
-   ops['__mi__'] = f'__byte__=0 if self.__ptr__>=len(self.__ore__) else (self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__left__=self.__stk__.pop();self.__stk__.append((__left__*__byte__)%256)'
-   cls = seam(); out = f"import sys\nimport os\nclass {cls}:\n    def {lode}(self):self.__stk__=[];self.__acc__=[0];self.__fog__={husk};self.__haze__={pulp};self.__bark__={bark};self.__cork__={cork}\n"
-   for tag, body in ops.items(): out += f"    def {tag}(self):\n        {body}\n"
-   out += f"    def {pith}(self,__rock__):\n        self.__ore__=__rock__;self.__ptr__=0;self.__dye__=[{dye}]\n"
-   grids = ",".join(f"{val}:self.__{tag}__" for tag in tags for val in grid[tag])
-   out += f"        __catcatcat__={{{grids}}}\n"
-   out += f"        while self.__ptr__<len(self.__ore__):__byte__=(self.__ore__[self.__ptr__]^((self.__dye__[0]+self.__ptr__*{weave}+{knot})&0xFF))&0xFF;self.__ptr__+=1;__catcatcat__.get(__byte__,self.__np__)()\n{cls}().{pith}({vex})"
-   return out
+   raw = marshal.dumps(compile(code, __gravel__(seed + b'flux'), 'exec', optimize=2, dont_inherit=True))
+   key = __spark__(seed + b'fluxkey', 1000000, 2147483647)
+   fog = __weld__(__gasket__(raw), key)
+   shot = hashlib.sha256(fog).hexdigest()
+   tag = __spark__(seed + b'fluxtag', 1, 7)
+   blob = base64.b85encode(fog).decode('ascii')
+   return f"import base64,bz2,hashlib,lzma,marshal,zlib\n__={blob!r};_={key};___={shot!r};____={tag}\ndef _____(b,k):\n r=bytearray();g=k&255;d=((k>>8)&255) or 73;t=((k>>16)&255) or 19\n for i,x in enumerate(b):g=(g+d+i+t)&255;r.append(x^g^((t+i)&255))\n return bytes(r)\nb=base64.b85decode(__.encode());hashlib.sha256(b).hexdigest()!=___ and (_ for _ in ()).throw(SystemExit);b=_____.__call__(b,_);m=b[0];m not in (0,1,2) and (_ for _ in ()).throw(SystemExit);b=(zlib.decompress,bz2.decompress,lzma.decompress)[m](b[1:]);____ not in range(1,8) and (_ for _ in ()).throw(SystemExit);exec(marshal.loads(b),globals())"
 def __glass__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
