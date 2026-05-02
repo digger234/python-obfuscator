@@ -3034,7 +3034,7 @@ def __vein__(code):
     seed = hashlib.sha256(code.encode('utf-8')).digest()
     plain = []
     seen = {}
-    dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip'}
+    dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip','Ellipsis','NotImplemented'}
     dust.update({'BaseException','BaseExceptionGroup','Exception','ExceptionGroup','ArithmeticError','BufferError','LookupError','AssertionError','AttributeError','EOFError','FloatingPointError','GeneratorExit','ImportError','ModuleNotFoundError','IndexError','KeyError','KeyboardInterrupt','MemoryError','NameError','NotImplementedError','OSError','OverflowError','RecursionError','ReferenceError','RuntimeError','StopAsyncIteration','StopIteration','SyntaxError','IndentationError','TabError','SystemError','SystemExit','TypeError','UnboundLocalError','UnicodeError','UnicodeEncodeError','UnicodeDecodeError','UnicodeTranslateError','ValueError','ZeroDivisionError','BlockingIOError','ChildProcessError','ConnectionError','BrokenPipeError','ConnectionAbortedError','ConnectionRefusedError','ConnectionResetError','FileExistsError','FileNotFoundError','InterruptedError','IsADirectoryError','NotADirectoryError','PermissionError','ProcessLookupError','TimeoutError','Warning','UserWarning','DeprecationWarning','PendingDeprecationWarning','SyntaxWarning','RuntimeWarning','FutureWarning','ImportWarning','UnicodeWarning','BytesWarning','ResourceWarning'})
     ward = {'__name__','__file__','__package__','__spec__','__loader__','__builtins__','__doc__','__annotations__','__cached__','__path__','__slots__','__class__'}
     def __gather__(root):
@@ -3102,6 +3102,8 @@ def __vein__(code):
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, opbox, biobox = [__mint__(used, seed, mint) for slot in range(36)]
     tick = [0]
     gate = [0]
+    lam = [0]
+    pac = [0]
     def __cast__(node, kind, skip):
         for field, value in ast.iter_fields(node):
             if field in skip:
@@ -3169,15 +3171,42 @@ def __vein__(code):
         handler = ast.ExceptHandler(type=ast.Name(id='Exception', ctx=ast.Load()), name=err, body=real + junk)
         wrap = ast.Try(body=[bump, raiser], handlers=[handler], orelse=[], finalbody=[])
         return [init, wrap]
+    def __vault__(tag):
+        tick[0] += 1
+        left = __spark__(seed + b'vaulta' + tag + tick[0].to_bytes(4, 'little'), 10**6, 10**9)
+        right = __spark__(seed + b'vaultb' + tag + tick[0].to_bytes(4, 'little'), 10**6, 10**9)
+        return left, right, left ^ right
+    def __crash__():
+        return ast.Subscript(value=ast.Tuple(elts=[], ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load())
+    def __guard__(left, right, mark):
+        return ast.Compare(left=ast.BinOp(left=ast.Name(id=left, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=right, ctx=ast.Load())), ops=[ast.Eq()], comparators=[ast.Name(id=mark, ctx=ast.Load())])
+    def __lambda__(body, args, vals, tag, vararg=None, kwarg=None, keys=None):
+        left, right, mark = __mint__(used, seed, mint), __mint__(used, seed, mint), __mint__(used, seed, mint)
+        a, b, c = __vault__(tag)
+        rows = [ast.arg(arg=one) for one in args]
+        rows.extend((ast.arg(arg=left), ast.arg(arg=right), ast.arg(arg=mark)))
+        lock = [ast.Constant(a), ast.Constant(b), ast.Constant(c)]
+        call = lock + list(vals) if (vararg or kwarg) and not args else list(vals) + lock
+        body = ast.IfExp(test=__guard__(left, right, mark), body=body, orelse=__crash__())
+        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=rows, vararg=ast.arg(arg=vararg) if vararg else None, kwonlyargs=[], kw_defaults=[], kwarg=ast.arg(arg=kwarg) if kwarg else None, defaults=[]), body=body), args=call, keywords=keys or [])
+    def __carry__(node, tag):
+        name = __mint__(used, seed, mint)
+        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Name(id=name, ctx=ast.Load())), args=[node], keywords=[])
+    def __pace__(mod):
+        pac[0] += 1
+        return pac[0] % mod == 0
+    def __duo__(body, left, right, tag):
+        a = __mint__(used, seed, mint)
+        b = __mint__(used, seed, mint)
+        return __lambda__(body(a, b), [a, b], [left, right], tag)
     def __gorge__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
         coal = __mint__(used, seed, mint)
         rock = __spark__(seed + b'gorge' + tick[0].to_bytes(4, 'little'), 10**4, 10**7)
-        nest = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Name(id=slag, ctx=ast.Load())), args=[ast.Constant(rock)], keywords=[])
+        nest = __carry__(ast.Constant(rock), b'gorge')
         for _ in range(__spark__(seed + b'gorgedepth' + tick[0].to_bytes(4, 'little'), 2, 5)):
-            wrap = __mint__(used, seed, mint)
-            nest = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=wrap)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Name(id=wrap, ctx=ast.Load())), args=[nest], keywords=[])
+            nest = __carry__(nest, b'gorgeloop')
         return ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=nest)
     def __ridge__(body):
         if not body:
@@ -3315,8 +3344,10 @@ def __vein__(code):
         for one in ast.walk(node):
             if isinstance(one, (ast.Await, ast.Yield, ast.YieldFrom)):
                 return node
-        name = __mint__(used, seed, mint)
-        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Name(id=name, ctx=ast.Load())), args=[node], keywords=[])
+        lam[0] += 1
+        if lam[0] & 1:
+            return node
+        return __carry__(node, b'gloom')
     def __anvil__(op):
         if isinstance(op, ast.Add):
             return ast.Add()
@@ -3353,12 +3384,12 @@ def __vein__(code):
         if isinstance(node.op, ast.And):
             for one in vals[1:]:
                 name = __mint__(used, seed + b'and' + len(vals).to_bytes(2, 'little'), mint)
-                out = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=one, orelse=ast.Name(id=name, ctx=ast.Load()))), args=[out], keywords=[])
+                out = __lambda__(ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=one, orelse=ast.Name(id=name, ctx=ast.Load())), [name], [out], b'and')
             return out
         if isinstance(node.op, ast.Or):
             for one in vals[1:]:
                 name = __mint__(used, seed + b'or' + len(vals).to_bytes(2, 'little'), mint)
-                out = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=ast.Name(id=name, ctx=ast.Load()), orelse=one)), args=[out], keywords=[])
+                out = __lambda__(ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=ast.Name(id=name, ctx=ast.Load()), orelse=one), [name], [out], b'or')
             return out
         return node
     def __ember__(val):
@@ -3410,9 +3441,9 @@ def __vein__(code):
         left = (seed[4] & 1) + 1
         return ast.Compare(left=ast.Constant(left), ops=[ast.Eq()], comparators=[ast.Constant(left if val else left + 1)])
     def __void__():
-        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(None)), args=[], keywords=[])
+        return __carry__(ast.Constant(None), b'none')
     def __dot__():
-        return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[])
+        return __carry__(ast.Constant(Ellipsis), b'dot')
     def __slab__():
         raw = marshal.dumps(tuple(plain))
         core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
@@ -3732,6 +3763,8 @@ def {load}(i):
         if isinstance(node, ast.Attribute) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__(node.attr)], keywords=[])
         if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load):
+            if __pace__(8):
+                return __duo__(lambda a, b: ast.Subscript(value=ast.Name(id=a, ctx=ast.Load()), slice=ast.Name(id=b, ctx=ast.Load()), ctx=ast.Load()), node.value, node.slice, b'item')
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__('__getitem__')], keywords=[]), args=[node.slice], keywords=[])
         if isinstance(node, ast.List) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('list')], keywords=[]), args=[ast.Tuple(elts=node.elts, ctx=ast.Load())], keywords=[])
@@ -3799,10 +3832,10 @@ def {load}(i):
             return bag
         if isinstance(node, ast.Set) and node.elts:
             name = __mint__(used, seed, mint)
-            return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], vararg=ast.arg(arg=name), kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('set')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[])), args=node.elts, keywords=[])
+            return __lambda__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('set')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), [], node.elts, b'set', vararg=name)
         if isinstance(node, ast.Dict) and node.keys and all(isinstance(one, ast.Constant) and isinstance(one.value, str) and one.value.isidentifier() and not __import__('keyword').iskeyword(one.value) for one in node.keys if one is not None):
             name = __mint__(used, seed, mint)
-            return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=ast.arg(arg=name), defaults=[]), body=ast.Name(id=name, ctx=ast.Load())), args=[], keywords=[ast.keyword(arg=one.value, value=two) for one, two in zip(node.keys, node.values)])
+            return __lambda__(ast.Name(id=name, ctx=ast.Load()), [], [], b'dict', kwarg=name, keys=[ast.keyword(arg=one.value, value=two) for one, two in zip(node.keys, node.values)])
         if isinstance(node, ast.Call):
             keys = []
             gate = {'super','eval','exec','globals','locals','vars','dir','hasattr','getattr','setattr','__import__','type','isinstance','issubclass'}
@@ -3813,15 +3846,23 @@ def {load}(i):
                     keys.append(ast.keyword(arg=None, value=ast.Dict(keys=[__ember__(one.arg)], values=[one.value])))
             node.keywords = keys
             if not (isinstance(node.func, ast.Name) and node.func.id in gate):
+                if __pace__(16):
+                    name = __mint__(used, seed, mint)
+                    return __lambda__(ast.Call(func=ast.Name(id=name, ctx=ast.Load()), args=node.args, keywords=node.keywords), [name], [node.func], b'call')
                 node.func = __gloom__(node.func)
             return node
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and len(node.comparators) == 1:
             look = {ast.Eq: '__eq__', ast.NotEq: '__ne__', ast.Lt: '__lt__', ast.LtE: '__le__', ast.Gt: '__gt__', ast.GtE: '__ge__'}
             op = look.get(type(node.ops[0]))
             if op:
+                if __pace__(8):
+                    return __duo__(lambda a, b: ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=a, ctx=ast.Load()), __ember__(op)], keywords=[]), args=[ast.Name(id=b, ctx=ast.Load())], keywords=[]), node.left, node.comparators[0], b'cmp')
                 return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.left, __ember__(op)], keywords=[]), args=[node.comparators[0]], keywords=[])
-        if isinstance(node, ast.BinOp) and (op := {ast.Add: 'add', ast.Sub: 'sub', ast.Mult: 'mul', ast.Div: 'truediv', ast.FloorDiv: 'floordiv', ast.Mod: 'mod', ast.Pow: 'pow', ast.LShift: 'lshift', ast.RShift: 'rshift', ast.BitOr: 'or_', ast.BitXor: 'xor', ast.BitAnd: 'and_'}.get(type(node.op))): return ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[node.left, node.right], keywords=[])
-        if isinstance(node, ast.UnaryOp) and (name := __mint__(used, seed, mint)): return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=name)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.UnaryOp(op=node.op, operand=ast.Name(id=name, ctx=ast.Load()))), args=[node.operand], keywords=[])
+        if isinstance(node, ast.BinOp) and (op := {ast.Add: 'add', ast.Sub: 'sub', ast.Mult: 'mul', ast.Div: 'truediv', ast.FloorDiv: 'floordiv', ast.Mod: 'mod', ast.Pow: 'pow', ast.LShift: 'lshift', ast.RShift: 'rshift', ast.BitOr: 'or_', ast.BitXor: 'xor', ast.BitAnd: 'and_'}.get(type(node.op))):
+            if __pace__(8):
+                return __duo__(lambda a, b: ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[ast.Name(id=a, ctx=ast.Load()), ast.Name(id=b, ctx=ast.Load())], keywords=[]), node.left, node.right, b'bin')
+            return ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[node.left, node.right], keywords=[])
+        if isinstance(node, ast.UnaryOp) and (name := __mint__(used, seed, mint)): return __lambda__(ast.UnaryOp(op=node.op, operand=ast.Name(id=name, ctx=ast.Load())), [name], [node.operand], b'unary')
         if isinstance(node, ast.BoolOp):
             return __latch__(node)
         if isinstance(node, ast.For):

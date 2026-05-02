@@ -95,53 +95,55 @@ def obf(name, tool):
     return True, out, info
 def check(out, src, cfg):
     orig, ostdout, ostderr = run([src], data=cfg["input"], timeout=cfg["timeout"])
+    st = time.time()
     code, stdout, stderr = run([out], data=cfg["input"], timeout=cfg["timeout"])
+    took = time.time() - st
     if code == -1:
         if stdout.strip():
-            return True, "OK (timeout - has output)", stdout, stderr
+            return True, "OK (timeout - has output)", stdout, stderr, took
         if cfg["exit"]:
-            return True, "OK (timeout - interactive)", stdout, stderr
-        return False, "TIMEOUT (no output)", stdout, stderr
+            return True, "OK (timeout - interactive)", stdout, stderr, took
+        return False, "TIMEOUT (no output)", stdout, stderr, took
     if code == -2:
-        return False, f"Run error: {stderr}", stdout, stderr
+        return False, f"Run error: {stderr}", stdout, stderr, took
     low = stderr.lower()
     if any(one in low for one in ['file integrity failed', 'tamper detected', 'debugger detected']):
-        return False, f"Protection triggered: {tail(stderr)}", stdout, stderr
+        return False, f"Protection triggered: {tail(stderr)}", stdout, stderr, took
     if "Traceback" in stderr:
         if "EOFError" in stderr or "KeyboardInterrupt" in stderr:
             if stdout.strip():
-                return True, "PASS (EOF after output)", stdout, stderr
-            return False, "EOF without output", stdout, stderr
-        return False, f"Runtime error: {tail(stderr)}", stdout, stderr
+                return True, "PASS (EOF after output)", stdout, stderr, took
+            return False, "EOF without output", stdout, stderr, took
+        return False, f"Runtime error: {tail(stderr)}", stdout, stderr, took
     on = norm(ostdout)
     sn = norm(stdout)
     if code == 0:
         if sn == on:
-            return True, "PASS (output matches)", stdout, stderr
+            return True, "PASS (output matches)", stdout, stderr, took
         if stdout.strip() and ostdout.strip():
             hit = rate(ostdout, stdout)
             if hit >= 0.5:
-                return True, f"PASS ({int(hit*100)}% key match)", stdout, stderr
-            return False, f"Output mismatch ({int(hit*100)}% key match)", stdout, stderr
+                return True, f"PASS ({int(hit*100)}% key match)", stdout, stderr, took
+            return False, f"Output mismatch ({int(hit*100)}% key match)", stdout, stderr, took
         if stdout.strip():
-            return True, "PASS", stdout, stderr
+            return True, "PASS", stdout, stderr, took
         if ostdout.strip():
-            return False, "FAIL (original has output, obf has none)", stdout, stderr
-        return True, "PASS (no output expected)", stdout, stderr
+            return False, "FAIL (original has output, obf has none)", stdout, stderr, took
+        return True, "PASS (no output expected)", stdout, stderr, took
     if stdout.strip():
         if ostdout.strip():
             if sn == on:
-                return True, "PASS (output matches, exit after)", stdout, stderr
+                return True, "PASS (output matches, exit after)", stdout, stderr, took
             hit = rate(ostdout, stdout)
             if hit >= 0.5:
-                return True, f"PASS ({int(hit*100)}% key match, exit after)", stdout, stderr
-            return False, f"Output mismatch ({int(hit*100)}% key match)", stdout, stderr
+                return True, f"PASS ({int(hit*100)}% key match, exit after)", stdout, stderr, took
+            return False, f"Output mismatch ({int(hit*100)}% key match)", stdout, stderr, took
         if cfg["exit"] or code == 1:
-            return True, "PASS (exit after output)", stdout, stderr
-        return False, f"Exit {code} with output", stdout, stderr
+            return True, "PASS (exit after output)", stdout, stderr, took
+        return False, f"Exit {code} with output", stdout, stderr, took
     if stderr.strip():
-        return False, f"Exit {code}: {tail(stderr)}", stdout, stderr
-    return False, f"Exit {code} (no output)", stdout, stderr
+        return False, f"Exit {code}: {tail(stderr)}", stdout, stderr, took
+    return False, f"Exit {code} (no output)", stdout, stderr, took
 def clean(tool):
     box = os.path.join(DIR, "__pycache__")
     if not os.path.isdir(box):
@@ -176,9 +178,7 @@ def main():
             continue
         print(f"{GREEN}OK{RESET} ({info['time']:.1f}s) [{info['src']/1024:.1f}KB -> {info['out']/1024:.1f}KB | {info['olines']} lines]")
         print(f"  {CYAN}[2/2] Running obfuscated code...{RESET}", end=" ", flush=True)
-        st = time.time()
-        ok, state, stdout, stderr = check(result, path(name), cfg)
-        took = time.time() - st
+        ok, state, stdout, stderr, took = check(result, path(name), cfg)
         if ok:
             print(f"{GREEN}{state}{RESET} ({took:.1f}s)")
             done[name] = ("PASS", state, "")
