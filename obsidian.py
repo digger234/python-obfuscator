@@ -9,7 +9,9 @@ import os
 import sys
 import time
 import secrets
+import warnings
 import zlib
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 try:
     from pystyle import Col, Colorate, Colors
 except:
@@ -63,6 +65,86 @@ def __mint__(used, seed, mint):
         rows.append('__'); name = ''.join(rows); mint[0] += 1
         if name in used: continue
         if name.isidentifier(): used.add(name); return name
+def __rune__(used, seed, mark):
+   ring = ((0x4e00, 0x9faf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x16a0, 0x16ff), (0x1780, 0x17ff), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df))
+   salt = mark if isinstance(mark, bytes) else repr(mark).encode('utf-8')
+   turn = 0
+   while True:
+        fog = __mist__(seed + salt + turn.to_bytes(4, 'little'), 96)
+        wide = 2 + (fog[0] % 5)
+        rows = ['__']
+        at = 1
+        while len(rows) <= wide:
+             left, right = ring[fog[at % len(fog)] % len(ring)]
+             char = chr(left + (int.from_bytes(fog[(at + 1) % len(fog):(at + 3) % len(fog)] or fog[:2], 'little') % (right - left + 1)))
+             at += 3
+             if char.isidentifier():
+                  rows.append(char)
+        rows.append('__')
+        name = ''.join(rows)
+        turn += 1
+        if name in used:
+             continue
+        if name.isidentifier() and not __import__('keyword').iskeyword(name):
+             used.add(name)
+             return name
+def __sigil__(seed, count):
+   used = set()
+   rows = []
+   for slot in range(count):
+        rows.append(__rune__(used, seed, slot.to_bytes(4, 'little')))
+   return rows
+def __crown__(raw):
+   glow = 0
+   bend = 0
+   for slot, byte in enumerate(raw):
+        glow = (glow + byte + slot) & 0xffffffff
+        bend ^= ((byte + 1) * (slot + 3)) & 0xffffffff
+        bend = ((bend << 5) | (bend >> 27)) & 0xffffffff
+   return (len(raw), sum(raw) & 0xffffffff, raw[:1], raw[-1:], glow, bend)
+def __chant__(text, seed):
+   raw = text.encode('utf-8')
+   fog = __mist__(seed + raw + len(raw).to_bytes(4, 'little'), len(raw) or 1)
+   key = __spark__(seed + raw + b'chant', 1, 255)
+   rows = tuple((byte ^ fog[slot] ^ key) for slot, byte in enumerate(raw))
+   return (rows, key, fog.hex(), __crown__(raw))
+def __prism__(name, data):
+   row, key, fog, mark = data
+   return f"{name}({row!r},{key},{fog!r},{mark!r})"
+def __plume__(name):
+   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw.decode('utf-8')"
+   return f"exec({text!r})"
+def __ivory__(seed, used, words, func):
+   rows = []
+   book = {}
+   for slot, word in enumerate(words):
+        name = __rune__(used, seed, word.encode('utf-8') + slot.to_bytes(4, 'little'))
+        data = __chant__(word, seed + slot.to_bytes(4, 'little'))
+        rows.append(f"{name}={__prism__(func, data)}")
+        book[word] = name
+   return rows, book
+def __script__(seed, words):
+   used = set()
+   func = __rune__(used, seed, b'func')
+   rows = [__plume__(func)]
+   hold, book = __ivory__(seed + b'book', used, words, func)
+   rows.extend(hold)
+   return ';'.join(rows), book
+def __lotus__(book, name):
+   return book[name]
+def __lily__(seed, text):
+   used = set()
+   func = __rune__(used, seed, b'lily')
+   data = __chant__(text, seed + b'text')
+   return __plume__(func), __prism__(func, data)
+def __opal__(seed, raw):
+   fog = __mist__(seed + b'opal', len(raw) or 1)
+   key = __spark__(seed + b'opalkey', 1, 255)
+   rows = tuple(byte ^ fog[slot] ^ key for slot, byte in enumerate(raw))
+   return rows, key, fog.hex(), __crown__(raw)
+def __orchid__(name):
+   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw"
+   return f"exec({text!r})"
 def __tuff__(code): return (code.co_code, code.co_consts, code.co_names, code.co_varnames, code.co_freevars, code.co_cellvars)
 def __vine__(data):
    if isinstance(data, (list, tuple)): return b''.join(__vine__(one) for one in data)
@@ -235,7 +317,13 @@ def __carapace__(raw, seed, kind):
     salt = __mist__(seed + kind + b'salt', len(raw) or 1); off = __spark__(seed + kind + b'off', 0x3040, 0x30ff); lift = __spark__(seed + kind + b'lift', 0x120, 0x780); key = __spark__(seed + kind + b'key', 11, 251)
     wide = ''.join(chr((one ^ salt[slot]) + off) for slot, one in enumerate(raw)); ring = [((one ^ key) + lift) for one in raw]; text = raw.hex(); fog = __mist__(seed + kind + b'weave', len(text) or 1).hex()[:len(text)]
     weave = ''.join(one + two for one, two in zip(fog, text)); veil = base64.b85encode(bytes(one ^ salt[slot] for slot, one in enumerate(raw))).decode('ascii'); shot, coal, soot, ember, glass = __brand__(raw)
-    return (kind.decode('ascii'), wide, off, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass)
+    mask = __mist__(seed + kind + b'mask', len(raw) or 1)
+    glyph = ''.join(chr((one ^ mask[slot]) + off + 257) for slot, one in enumerate(raw))
+    maze = ''.join(chr((one ^ mask[slot]) + off + 257) + chr(0x3041 + ((mask[slot] + one + slot) % 80)) for slot, one in enumerate(raw))
+    cord = tuple((one + key + slot * 3) & 255 for slot, one in enumerate(raw))
+    path = base64.b85encode(bytes((one + key + slot) & 255 for slot, one in enumerate(raw))).decode('ascii')
+    crest = __crown__(raw)
+    return (kind.decode('ascii'), wide, off, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass, glyph, off + 257, mask.hex(), maze, cord, path, crest)
 def __scarp__(text, seed):
     salt = __mist__(seed + b'scarp', 16)
     bag = []
@@ -673,6 +761,10 @@ def __seal__(plan):
     return (base64.b85encode(tab).decode('ascii'), base64.b85encode(inv).decode('ascii'), base64.b85encode(salt).decode('ascii'), pace, sig)
 def __audit__(plan):
     tab, inv, salt, pace, sig = plan
+    if len(tab) != 256 or len(inv) != 256 or len(salt) < 16:
+        raise ValueError('codex')
+    if tuple(inv[tab[slot]] for slot in range(256)) != tuple(range(256)):
+        raise ValueError('codex')
     if __mirror__(tab) != inv:
         raise ValueError('codex')
     if sorted(tab) != list(range(256)) or sorted(inv) != list(range(256)):
@@ -1918,7 +2010,6 @@ def __chart__(tree, code, stem, path, seed):
 def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
-    store = []
     plain = []
     seen = {}
     dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip'}
@@ -1985,7 +2076,7 @@ def __vein__(code):
             if name in row:
                 return True
         return False
-    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf = [__mint__(used, seed, mint) for slot in range(22)]
+    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef = [__mint__(used, seed, mint) for slot in range(34)]
     tick = [0]
     gate = [0]
     def __cast__(node, kind, skip):
@@ -2250,19 +2341,16 @@ def __vein__(code):
     def __ember__(val):
         key = ('s', val) if isinstance(val, str) else ('b', val)
         if key not in seen:
-            seen[key] = len(store)
-            raw = val.encode('utf-8') if isinstance(val, str) else val
-            kind = b's' if isinstance(val, str) else b'b'
-            store.append(__carapace__(raw, seed + len(store).to_bytes(4, 'little'), kind))
+            seen[key] = len(plain)
             plain.append(val)
         return ast.Call(func=ast.Name(id=load, ctx=ast.Load()), args=[ast.Constant(seen[key])], keywords=[])
     def __rift__(val):
         size = len(val)
-        if size < 4:
+        if size < 128:
             return [val]
         fog = hashlib.sha256(seed + type(val).__name__.encode('ascii', 'ignore') + size.to_bytes(4, 'little')).digest(); bag = []; slot = 0; at = 0
         while slot < size:
-            left = size - slot; step = min(7, left); take = 1 + (fog[at % len(fog)] % step)
+            left = size - slot; step = min(191 if size > 512 else 127, left); take = 96 + (fog[at % len(fog)] % max(1, step - 95)); take = min(take, left)
             if left - take == 1 and take > 1:
                 take -= 1
             bag.append(val[slot:slot + take]); slot += take; at += 1
@@ -2304,7 +2392,7 @@ def __vein__(code):
         return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=ast.Constant(Ellipsis)), args=[], keywords=[])
     def __slab__():
         raw = marshal.dumps(tuple(plain))
-        core = base64.b85encode(zlib.compress(raw, 9)).decode('ascii')
+        core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
         check = zlib.crc32(test) + zlib.adler32(test)
@@ -2355,6 +2443,62 @@ def {huskf}(left,right):
 def {barkf}(blob):
  ct=__import__('ctypes');name=''.join(('PyMarshal_','ReadObjectFromString'));read=getattr(ct.pythonapi,name);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob)
  return read(ct.cast(box,ct.c_char_p),len(blob))
+def {pearlf}(v,a,n):
+ veil=bytes.fromhex(n)
+ len(veil)!=len(v) and (_ for _ in ()).throw(RuntimeError('bad'))
+ return bytes(((ord(one)-a)^veil[slot]) for slot,one in enumerate(v))
+def {mazef}(q,a,n,need):
+ veil=bytes.fromhex(n)
+ len(veil)!=need and (_ for _ in ()).throw(RuntimeError('bad'))
+ len(q)!=(need*2) and (_ for _ in ()).throw(RuntimeError('bad'))
+ return bytes(((ord(q[slot*2])-a)^veil[slot]) for slot in range(need))
+def {cordf}(c,f):
+ all(isinstance(one,int) for one in c) or (_ for _ in ()).throw(RuntimeError('bad'))
+ return bytes(((one-f-(slot*3))&255) for slot,one in enumerate(c))
+def {pathf}(d,f):
+ row=__import__('base64').b85decode(d.encode())
+ return bytes(((one-f-slot)&255) for slot,one in enumerate(row))
+def {lockf}(ash):
+ glow=0
+ bend=0
+ for slot,byte in enumerate(ash):
+  glow=(glow+byte+slot)&0xffffffff
+  bend^=((byte+1)*(slot+3))&0xffffffff
+  bend=((bend<<5)|(bend>>27))&0xffffffff
+ return (len(ash),sum(ash)&0xffffffff,ash[:1],ash[-1:],glow,bend)
+def {rayf}(q):
+ rows=q[1::2]
+ return (len(rows),sum(ord(one) for one in rows)&0xffffffff,rows[:1],rows[-1:])
+def {beadf}(q):
+ if len(q)&1:
+  raise RuntimeError('bad')
+ row=q[1::2]
+ for one in row:
+  ord(one)<0x3041 and (_ for _ in ()).throw(RuntimeError('bad'))
+ return len(row)
+def {combf}(left,right):
+ left!=right and (_ for _ in ()).throw(RuntimeError('bad'))
+ return right
+def {silkf}(blob):
+ left=blob[::2]
+ right=blob[1::2]
+ return (len(blob),sum(left)&0xffffffff,sum(right)&0xffffffff,left[:1],right[-1:])
+def {knotf}(v,need):
+ len(v)!=need and (_ for _ in ()).throw(RuntimeError('bad'))
+ return (v[:1],v[-1:],need)
+def {amberf}(blob):
+ if not blob:return (0,(),0)
+ head=blob[:4]
+ tail=blob[-4:] if len(blob)>=4 else blob
+ rows=[]
+ for slot,byte in enumerate(head+tail):
+  rows.append(((slot+1)*byte)&0xffff)
+ return (len(blob),tuple(rows),sum(rows)&0xffffffff)
+def {glazef}(blob,mark):
+ mark[0]!=len(blob) and (_ for _ in ()).throw(RuntimeError('bad'))
+ len(mark[1])>8 and (_ for _ in ()).throw(RuntimeError('bad'))
+ (sum(mark[1])&0xffffffff)!=mark[2] and (_ for _ in ()).throw(RuntimeError('bad'))
+ return blob
 def {reef}(blob):
  glow=0
  slot=0
@@ -2367,8 +2511,8 @@ def {reef}(blob):
   slot += 16
  return glow
 def {wave}(blob):
- return (__import__('hashlib').sha256(blob).hexdigest(),__import__('hashlib').sha1(blob).hexdigest(),__import__('hashlib').md5(blob).hexdigest(),{reef}(blob),__import__('zlib').adler32(blob)^__import__('zlib').crc32(blob))
-def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m):
+ return (__import__('hashlib').sha256(blob).hexdigest(),{reef}(blob),__import__('zlib').adler32(blob)^__import__('zlib').crc32(blob))
+def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,a,n,q,c,d,x):
   rows={mire}(v,o)
   spin={sootf}(u)
   (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len(__import__('base64').b85decode(t.encode()))) and (_ for _ in ()).throw(RuntimeError('bad'))
@@ -2376,23 +2520,40 @@ def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m):
   {huskf}(len(bytes.fromhex(p)),rows[0])
   spec={cask}(r)
   spec[1]!=(rows[0]*4) and (_ for _ in ()).throw(RuntimeError('bad'))
-  ash={ashf}({dawn}(v,o,p),{dusk}(r))
+  ash={dawn}(v,o,p)
+  ash={ashf}(ash,{dusk}(r))
   ash={ashf}(ash,{kiln}(u,l,f))
   ash={ashf}(ash,{loom}(t,p))
   fog={crustf}(ash)
   fog[0]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
   tips={flaref}(ash)
   tips[2]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  {knotf}(y,rows[0])
+  {beadf}(q)!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  pearl={pearlf}(y,a,n)
+  {ashf}(pearl,ash)
+  pearl={mazef}(q,a,n,rows[0])
+  {ashf}(pearl,ash)
+  pearl={cordf}(c,f)
+  {ashf}(pearl,ash)
+  pearl={pathf}(d,f)
+  {ashf}(pearl,ash)
+  {combf}({lockf}(ash),x)
+  mark={rayf}(q)
+  mark[0]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  lace={silkf}(ash)
+  lace[0]!=rows[0] and (_ for _ in ()).throw(RuntimeError('bad'))
+  {glazef}(ash,{amberf}(ash))
   spin={spinef}(ash)
   (spin[0]^spin[1])!=m and (_ for _ in ()).throw(RuntimeError('bad'))
   rows={wave}(ash)
-  (rows[0]!=h or rows[1]!=s or rows[2]!=e or rows[3]!=g or rows[4]!=m) and (_ for _ in ()).throw(RuntimeError('bad'))
+  (rows[0]!=h or rows[1]!=g or rows[2]!=m) and (_ for _ in ()).throw(RuntimeError('bad'))
   return ash if k=='b' else ash.decode('utf-8')
 def {load}(i):
  global {keep}
  if {keep} is None:
    row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
-   {keep}=tuple({barkf}(__import__('zlib').decompress(__import__('base64').b85decode({blob}.encode()))))
+   {keep}=tuple({barkf}(__import__('zlib').decompress({rune}(*{blob}))))
  return {keep}[i]
 """
         return ast.parse(text).body
@@ -2440,7 +2601,7 @@ def {load}(i):
                 bag.extend(one)
             else:
                 bag.append(one)
-        if keepfuture and store:
+        if keepfuture and plain:
             at = 0
             while at < len(bag) and isinstance(bag[at], ast.ImportFrom) and bag[at].module == '__future__':
                 at += 1
@@ -2748,7 +2909,7 @@ def {load}(i):
 def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, veil, used):
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
-    blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef, codonf, evalf = [__mint__(used, seed, mint) for slot in range(62)]
+    blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, cache, scan, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef, codonf, evalf = [__mint__(used, seed, mint) for slot in range(64)]
     inner = f"""import base64,bz2,hashlib,lzma,marshal,sys,zlib
 {blob}={rack!r}
 {left}={slag}
@@ -2768,15 +2929,13 @@ def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk
 {flake}={soulk!r}
 {peat}={wispk!r}
 {codonf}={veil!r}
+{cache}={{}}
 def {heart}(blob,key):
- rows=bytearray()
- glow=key&255
- drift=((key>>8)&255) or 73
- tint=((key>>16)&255) or 19
- for slot,byte in enumerate(blob):
-  glow=(glow+drift+slot+tint)&255
-  rows.append(byte^glow^((tint+slot)&255))
- return bytes(rows)
+ glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob)
+ if not need:return b''
+ base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512))
+ mask=(base*((need>>9)+1))[:need]
+ return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')
 def {bone}(name,home,need):
  hold=getattr(home,name,None)
  if hold is None:
@@ -2920,12 +3079,14 @@ def {briar}(code):
   rows.append((one.co_name,one.co_filename,one.co_argcount,one.co_firstlineno,len(one.co_consts)))
  blob={vinef}(tuple(rows))
  return (len(rows),hashlib.sha256(blob).hexdigest(),hashlib.sha1(blob).hexdigest())
+def {scan}(code):
+ mark=id(code)
+ if mark in {cache}:return {cache}[mark]
+ row=({shardf}(code),{basaltf}(code),{hollow}(code),{marrow}(code),{briar}(code))
+ {cache}[mark]=row
+ return row
 def {huskf}(code):
- {shardf}(code)!={rift} and (_ for _ in ()).throw(SystemExit)
- {basaltf}(code)!={cull} and (_ for _ in ()).throw(SystemExit)
- {hollow}(code)!={thorn} and (_ for _ in ()).throw(SystemExit)
- {marrow}(code)!={flake} and (_ for _ in ()).throw(SystemExit)
- {briar}(code)!={peat} and (_ for _ in ()).throw(SystemExit)
+ {scan}(code)!=({rift},{cull},{thorn},{flake},{peat}) and (_ for _ in ()).throw(SystemExit)
  return code
 def {grovef}(ct,name,restype,argtypes):
  hold=getattr(ct.pythonapi,name,None)
@@ -2934,12 +3095,10 @@ def {grovef}(ct,name,restype,argtypes):
  hold.restype=restype;hold.argtypes=argtypes
  return hold
 def {miref}(blob):
- ct=__import__('ctypes');left=marshal.loads(blob);{huskf}(left);name=''.join(('PyMarshal_','ReadObjectFromString'));read={grovef}(ct,name,ct.py_object,[ct.c_char_p,ct.c_long]);box=ct.create_string_buffer(blob);right=read(ct.cast(box,ct.c_char_p),len(blob))
- {huskf}(right)
- {shardf}(left)!={shardf}(right) and (_ for _ in ()).throw(SystemExit)
- {basaltf}(left)!={basaltf}(right) and (_ for _ in ()).throw(SystemExit)
- {marrow}(left)!={marrow}(right) and (_ for _ in ()).throw(SystemExit)
- {briar}(left)!={briar}(right) and (_ for _ in ()).throw(SystemExit)
+ ct=__import__('ctypes');left=marshal.loads(blob);row={scan}(left);row!=({rift},{cull},{thorn},{flake},{peat}) and (_ for _ in ()).throw(SystemExit);name=''.join(('PyMarshal_','ReadObjectFromString'));read={grovef}(ct,name,ct.py_object,[ct.c_char_p,ct.c_long]);box=ct.create_string_buffer(blob);right=read(ct.cast(box,ct.c_char_p),len(blob))
+ hold={scan}(right)
+ hold!=({rift},{cull},{thorn},{flake},{peat}) and (_ for _ in ()).throw(SystemExit)
+ row!=hold and (_ for _ in ()).throw(SystemExit)
  return right
 def {evalf}(code):
  {hand}();{huskf}(code);ct=__import__('ctypes');name=''.join(('PyEval_','EvalCode'));run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
@@ -3097,10 +3256,10 @@ def {shardy}(blob):
  return bytes(rows)
 def {stampf}(blob):
  {hand}()
- shell=base64.b85decode({blob})
+ shell=base64.b64decode({blob})
  hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (_ for _ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (_ for _ in ()).throw(SystemExit)
- {guard}(shell,{__flare__(base64.b85decode(rack))},{stamp!r})
+ {guard}(shell,{__flare__(base64.b64decode(rack))},{stamp!r})
  {beryl}(shell)
  {gully}(shell)
  {obsf}(shell)
@@ -3186,7 +3345,8 @@ def {runf}():
     outer = f"""import base64,bz2,ctypes,gc,hashlib,lzma,marshal,os,platform,socket,sys,uuid,zlib
 tag=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
 base=id(globals().get('__builtins__'));trid=id(sys.settrace);prid=id(sys.setprofile);meta=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;path=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
-blob={base64.b85encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};veil={cloakk};span={lanek};spur={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
+__yepppppp__=base^trid^prid;__meoooo__=(meta<<8)^path;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
+blob={base64.b64encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};veil={cloakk};span={lanek};spur={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 def bad():raise SystemExit
 def boom():
  global tag;tag=True;return True
@@ -3196,11 +3356,14 @@ def wake():
   except:pass
   return 0
 def cloak(blob,salt):
-  rows=bytearray();tilt=((salt>>3)&15)+1
-  for slot,byte in enumerate(blob):
-   fog=((byte>>4)|((byte<<4)&255))&255
-   rows.append(fog^((salt+slot*tilt+(slot>>1))&255))
-  return bytes(rows)
+  tilt=((salt>>3)&15)+1;tab=bytes((((one>>4)|((one<<4)&255))&255) for one in range(256));row=blob.translate(tab);need=len(row)
+  base=bytes(((salt+slot*tilt+(slot>>1))&255) for slot in range(512));mask=(base*((need>>9)+1))[:need]
+  return (int.from_bytes(row,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')
+def peel(blob,add,step):
+ row=bytearray(blob)
+ for at in range(256):
+  key=(-add-((at+1)*step))&255;tab=bytes(((one+key)&255) for one in range(256));row[at::256]=row[at::256].translate(tab)
+ return bytes(row)
 def unlace(blob,span):
   rows=[];slot=0;span=max(2,span)
   while slot < len(blob):
@@ -3291,6 +3454,7 @@ def pine():
  if base and hold!=base:return boom()
  if hasattr(sys,'meta_path') and len(sys.meta_path)>meta+2:return boom()
  if hasattr(sys,'path_hooks') and len(sys.path_hooks)>path+2:return boom()
+ if ((hold^id(sys.settrace)^id(sys.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return boom()
  return 0
 def nail():
  for one in (exec,eval,compile):
@@ -3376,9 +3540,9 @@ def fire(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  return hold(code,globals(),globals())
 def fetch():
-  shell=base64.b85decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+  shell=base64.b64decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   sift(shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=bytes((byte-add-((slot+1)*step))&255 for slot,byte in enumerate(shell));shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
+  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=peel(shell,add,step);shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
   mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
 def rise():
@@ -3399,10 +3563,14 @@ rise()
     probe != wrap and (_ for _ in ()).throw(ValueError('wrap'))
     __wrapb__(probe, shellk, glassk, forgek, stampk) != pack and (_ for _ in ()).throw(ValueError('wrap'))
     crest = hashlib.sha256(wrap).hexdigest()
-    crust = f"import base64,bz2,hashlib,lzma,zlib;{shell}={base64.b85encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{stampf}={crest!r}"
-    cave = f"def {heart}(blob,key):rows=bytearray();glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;[(glow:=((glow+drift+slot+tint)&255),rows.append(byte^glow^((tint+slot)&255))) for slot,byte in enumerate(blob)];return bytes(rows)"
-    ember = f"built=vars(__import__('builtins'));sys=__import__('sys');os=__import__('os');ct=__import__('ctypes');left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'));readn=''.join(('PyMarshal_','ReadObjectFromString'));runn=''.join(('PyEval_','EvalCode'));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];tmp=ct.c_int(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=base64.b85decode({shell});(hashlib.sha256(blob).hexdigest()!={stampf} or getattr(built['exec'],'__module__','builtins')!='builtins' or getattr(built['eval'],'__module__','builtins')!='builtins' or getattr(built['compile'],'__module__','builtins')!='builtins' or getattr(built['__import__'],'__module__','builtins')!='builtins' or getattr(built['open'],'__module__','_io') not in ('_io','io','builtins') or sys.gettrace() or sys.getprofile() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](blob[1:]);read=getattr(ct.pythonapi,readn);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob);code=read(ct.cast(box,ct.c_char_p),len(blob));run=getattr(ct.pythonapi,runn);run.restype=ct.py_object;run.argtypes=[ct.py_object,ct.py_object,ct.py_object];run(code,globals(),globals())"
-    return "\n\n" + __sear__(__flux__("\n".join([crust, cave, ember]), seed), seed)
+    mark = (len(wrap), zlib.crc32(wrap) & 0xffffffff, zlib.adler32(wrap) & 0xffffffff, hashlib.sha1(wrap).hexdigest(), crest, sys.version_info[:2])
+    grain = __spark__(seed + b'outer', 1, 255)
+    word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','b64decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','exec','eval','compile','__import__','open')
+    word = tuple(tuple(ord(char) ^ grain for char in item) for item in word)
+    crust = f"{shell}={base64.b64encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
+    cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')"
+    ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=getattr(b,{bone}({storm}[9]))({shell});({guard}(blob,z,h,sys)!={seal} or getattr(built[{bone}({storm}[30])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[31])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[32])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[33])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[34])],'__module__','_io') not in ('_io','io','builtins') or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[mode](blob[1:]);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[mode](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];box=getattr(ct,{bone}({storm}[26]))(blob);code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),len(blob));run=getattr(getattr(ct,{bone}({storm}[15])),runn);run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
+    return "\n\n" + __cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed)
 def __sear__(text, seed):
     raw = text.encode('utf-8')
     crc = zlib.crc32(raw) & 0xFFFFFFFF
@@ -3415,48 +3583,69 @@ def __sear__(text, seed):
         iron = secrets.randbelow(254) + 1
     while lead == gold:
         lead = secrets.randbelow(200) + 7
-    melt = base64.b85encode(bytes((b ^ zinc ^ ((slot * gold) & 0xFF) ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(fog))).decode('ascii')
+    melt = base64.b64encode(bytes((b ^ zinc ^ ((slot * gold) & 0xFF) ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(fog))).decode('ascii')
     watermark = __shingle__(seed, 8)
     ident = __gravel__(seed)
     utext = __coral__(seed, 12)
     chain = __chalk__(seed, 3)
+    lace, knot = __lily__(seed + b'searlace', '|'.join(chain[:2]))
+    text, book = __script__(seed + b'searword', ('zlib', 'crc32', 'builtins', 'exec', 'decompress', 'base64', 'b64decode', 'bz2', 'lzma'))
+    name = __sigil__(seed + b'searname', 4)
     bags = []
     bags.append(f"{ident}={utext!r}")
     bags.append(f"_={watermark!r}")
-    bags.append(f"__={'|'.join(chain[:2])!r}")
+    bags.append(f"__={knot}")
     pack = ';'.join(bags)
-    water = "''.join(('z','l','i','b'))"
-    fire = "''.join(('c','r','c','3','2'))"
-    earth = "''.join(('b','u','i','l','t','i','n','s'))"
-    air = "''.join(('e','x','e','c'))"
-    wind = "''.join(('z','l','i','b'))"
-    metal = "''.join(('d','e','c','o','m','p','r','e','s','s'))"
-    wood = "''.join(('b','a','s','e','6','4'))"
-    void = "''.join(('b','8','5','d','e','c','o','d','e'))"
-    ice = "''.join(('b','z','2'))"
-    rock = "''.join(('l','z','m','a'))"
-    coal = f"bytes((__deptrai__^{iron}^((__meooooooooooo__*{lead})&255)^{zinc}^((__meooooooooooo__*{gold})&255))&255 for __meooooooooooo__,__deptrai__ in enumerate(getattr(__import__({wood}),{void})(_.encode())))"
+    water = __lotus__(book, 'zlib')
+    fire = __lotus__(book, 'crc32')
+    earth = __lotus__(book, 'builtins')
+    air = __lotus__(book, 'exec')
+    wind = __lotus__(book, 'zlib')
+    metal = __lotus__(book, 'decompress')
+    wood = __lotus__(book, 'base64')
+    void = __lotus__(book, 'b64decode')
+    ice = __lotus__(book, 'bz2')
+    rock = __lotus__(book, 'lzma')
+    coal = f"(lambda q,m:(int.from_bytes(q,'little')^int.from_bytes((m*((len(q)>>8)+1))[:len(q)],'little')).to_bytes(len(q),'little'))(getattr(__import__({wood}),{void})({name[2]}.encode()),bytes((({name[0]}*{lead})&255)^{iron}^(({name[0]}*{gold})&255)^{zinc} for {name[0]} in range(256)))"
     ash = f"(lambda __p:(getattr(__import__({wind}),{metal}),getattr(__import__({ice}),{metal}),getattr(__import__({rock}),{metal}))[__p[0]](__p[1:]))({coal})"
 
     inner = (
-        f"(lambda _:"
-        f"(lambda __yeppppppp__:("
-        f"(getattr(__import__({water}),{fire})(__yeppppppp__)&0xFFFFFFFF)!={crc} "
+        f"(lambda {name[2]}:"
+        f"(lambda {name[3]}:("
+        f"(getattr(__import__({water}),{fire})({name[3]})&0xFFFFFFFF)!={crc} "
         f"and (_ for _ in ()).throw(SystemExit),"
-        f"getattr(__import__({earth}),{air})(__yeppppppp__,globals())"
+        f"getattr(__import__({earth}),{air})({name[3]},globals())"
         f")[-1])"
         f"({ash})"
         f")({melt!r})"
     )
-    return pack + ";" + inner
+    return text + ";" + lace + ";" + pack + ";" + inner
 def __flux__(code, seed):
    raw = marshal.dumps(compile(code, __gravel__(seed + b'flux'), 'exec', optimize=2, dont_inherit=True))
    key = __spark__(seed + b'fluxkey', 1000000, 2147483647)
    fog = __weld__(__gasket__(raw), key)
    shot = hashlib.sha256(fog).hexdigest()
    tag = __spark__(seed + b'fluxtag', 1, 7)
-   blob = base64.b85encode(fog).decode('ascii')
-   return f"import base64,bz2,hashlib,lzma,marshal,zlib\n__={blob!r};_={key};___={shot!r};____={tag}\ndef _____(b,k):\n r=bytearray();g=k&255;d=((k>>8)&255) or 73;t=((k>>16)&255) or 19\n for i,x in enumerate(b):g=(g+d+i+t)&255;r.append(x^g^((t+i)&255))\n return bytes(r)\nb=base64.b85decode(__.encode());hashlib.sha256(b).hexdigest()!=___ and (_ for _ in ()).throw(SystemExit);b=_____.__call__(b,_);m=b[0];m not in (0,1,2) and (_ for _ in ()).throw(SystemExit);b=(zlib.decompress,bz2.decompress,lzma.decompress)[m](b[1:]);____ not in range(1,8) and (_ for _ in ()).throw(SystemExit);exec(marshal.loads(b),globals())"
+   blob = base64.b64encode(fog).decode('ascii')
+   text, book = __script__(seed + b'fluxword', ('base64', 'bz2', 'hashlib', 'lzma', 'marshal', 'zlib', 'b64decode', 'sha256', 'decompress', 'loads', 'exec', 'range'))
+   names = __sigil__(seed + b'fluxname', 14)
+   body, code = names[0], names[1]
+   liba, libb, libc, libd, libe, libf = names[2], names[3], names[4], names[5], names[6], names[7]
+   mode, func, rows, glow, drift, tint = names[8], names[9], names[10], names[11], names[12], names[13]
+   rawname = __rune__(set(names), seed + b'fluxraw', b'raw')
+   if len(blob) < 1536:
+        rawsrc = __orchid__(rawname); blobsrc = __prism__(rawname, __opal__(seed + b'fluxblob', blob.encode('ascii'))) + ".decode('ascii')"
+   else:
+        rawsrc = ''; blobsrc = repr(blob)
+   return f"{text};{rawsrc + ';' if rawsrc else ''}{body}={blobsrc};{code}={key};{libc}={shot!r};{libd}={tag};{liba}=__import__({__lotus__(book,'base64')});{libb}=__import__({__lotus__(book,'bz2')});{libe}=__import__({__lotus__(book,'hashlib')});{libf}=__import__({__lotus__(book,'marshal')});{rows}=__import__({__lotus__(book,'zlib')});{glow}=__import__({__lotus__(book,'lzma')});exec('def {func}(b,k):\\n g=k&255;d=((k>>8)&255) or 73;t=((k>>16)&255) or 19;n=len(b)\\n base=bytes((((g+((i+1)*(d+t))+(i*(i+1)//2))&255)^((t+i)&255)) for i in range(512));m=(base*((n>>9)+1))[:n]\\n return (int.from_bytes(b,\\'little\\')^int.from_bytes(m,\\'little\\')).to_bytes(n,\\'little\\')');{body}=getattr({liba},{__lotus__(book,'b64decode')})({body}.encode());getattr({libe},{__lotus__(book,'sha256')})({body}).hexdigest()!={libc} and (_ for _ in ()).throw(SystemExit);{body}={func}({body},{code});{mode}={body}[0];{mode} not in (0,1,2) and (_ for _ in ()).throw(SystemExit);{body}=(getattr({rows},{__lotus__(book,'decompress')}),getattr({libb},{__lotus__(book,'decompress')}),getattr({glow},{__lotus__(book,'decompress')}))[{mode}]({body}[1:]);{libd} not in getattr(__import__('builtins'),{__lotus__(book,'range')})(1,8) and (_ for _ in ()).throw(SystemExit);getattr(__import__('builtins'),{__lotus__(book,'exec')})(getattr({libf},{__lotus__(book,'loads')})({body}),globals())"
+def __cowl__(code, seed):
+   raw = marshal.dumps(compile(code, __gravel__(seed + b'mask'), 'exec', optimize=2, dont_inherit=True))
+   pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.b64encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
+   words = ('base64', 'b64decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec')
+   words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
+   name = __sigil__(seed + b'maskname', 5)
+   name[:3] = ['__yepppppp__', '__meoooo__', '__deptrai__']
+   return f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6]))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob!r},{shot!r})"
 def __crystal__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
@@ -3508,7 +3697,7 @@ def __crystal__(tree, path, used):
    peek != stem and (_ for _ in ()).throw(ValueError('pack'))
    stamp = hashlib.sha256(raw).hexdigest()
    mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
-   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
+   return __onyx__(base64.b64encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
 def __forge__(path):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
