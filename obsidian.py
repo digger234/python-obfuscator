@@ -4416,6 +4416,10 @@ __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__d
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={base64.b64encode(core).decode('ascii')!r};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 def __concac__():raise SystemExit
+def __lmao__(f,*a):
+ k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __concac__())(k[0],k[1],k[2],f,a)
+def __lmaoo__(v):
+ k=(729184633,461928377,729184633^461928377);return (lambda p,q,r,x:x if (p^q)==r else __concac__())(k[0],k[1],k[2],v)
 def __ditmemay__():
  global __iloveyou__;__iloveyou__=True;return True
 def __uwu__():
@@ -4608,15 +4612,14 @@ def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  return hold(code,globals(),globals())
 def __tooldepphet__():
-  shell=base64.b64decode(__ngauvcl__.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
-  __cak__(shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=__skibiditoilet__(shell,__yeppro__);shell=__pnhamaidinh__(shell,__yepvip__);shell=__luvpnha__(shell,__yepngau__);shell=__yeupnha__(shell,__meocute__,__yepyep__);shell={heart}(shell,__meowmeow__);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,__manhvcl__)
+  shell=__lmao__(base64.b64decode,__ngauvcl__.encode());__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+  __lmao__(__cak__,shell)!=grain and (_ for _ in ()).throw(SystemExit)
+  shell=__lmao__(__skibiditoilet__,shell,__yeppro__);shell=__lmao__(__pnhamaidinh__,shell,__yepvip__);shell=__lmao__(__luvpnha__,shell,__yepngau__);shell=__lmao__(__yeupnha__,shell,__meocute__,__yepyep__);shell=__lmao__({heart},shell,__meowmeow__);mode=__lmaoo__(shell[0]);shell=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[mode],shell[1:]);shell=__lmao__({heart},shell,__manhvcl__)
   mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
-  return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
+  return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[mode],shell[1:])
 def __depvcl__():
- __uwu__();__thichvarko__();__varconcac__();__checkvar__();__owo__()
- __OwO__();__haha__();__hihi__();__hoho__();__hahaha__();__hihihi__();__anhdomixi__();__mixifood__()
- __iloveyou__ and __concac__();core=__tooldepphet__();__iloveyou__ and __concac__();code=__alovu__(core);__iloveyou__ and __concac__();__nhinconcac__(code)
+ __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__))
+ __iloveyou__ and __concac__();core=__lmao__(__tooldepphet__);__iloveyou__ and __concac__();code=__lmao__(__alovu__,core);__iloveyou__ and __concac__();__lmao__(__nhinconcac__,code)
 __depvcl__()
 """
     ore = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
