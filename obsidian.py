@@ -3343,46 +3343,46 @@ def {runf}():
     api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump')
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
     outer = f"""import base64,bz2,ctypes,gc,hashlib,lzma,marshal,os,platform,socket,sys,uuid,zlib
-tag=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
+__iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
 base=id(globals().get('__builtins__'));trid=id(sys.settrace);prid=id(sys.setprofile);meta=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;path=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=base^trid^prid;__meoooo__=(meta<<8)^path;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 blob={base64.b64encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};veil={cloakk};span={lanek};spur={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
-def bad():raise SystemExit
-def boom():
- global tag;tag=True;return True
-def wake():
+def __concac__():raise SystemExit
+def __ditmemay__():
+ global __iloveyou__;__iloveyou__=True;return True
+def __uwu__():
   sys.tracebacklimit=0
   try:gc.collect()
   except:pass
   return 0
-def cloak(blob,salt):
+def __luvpnha__(blob,salt):
   tilt=((salt>>3)&15)+1;tab=bytes((((one>>4)|((one<<4)&255))&255) for one in range(256));row=blob.translate(tab);need=len(row)
   base=bytes(((salt+slot*tilt+(slot>>1))&255) for slot in range(512));mask=(base*((need>>9)+1))[:need]
   return (int.from_bytes(row,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')
-def peel(blob,add,step):
+def __yeupnha__(blob,add,step):
  row=bytearray(blob)
  for at in range(256):
   key=(-add-((at+1)*step))&255;tab=bytes(((one+key)&255) for one in range(256));row[at::256]=row[at::256].translate(tab)
  return bytes(row)
-def unlace(blob,span):
+def __pnhamaidinh__(blob,span):
   rows=[];slot=0;span=max(2,span)
   while slot < len(blob):
    part=blob[slot:slot+span];left=part[:len(part)//2];right=part[len(part)//2:];out=bytearray(len(part));out[::2]=right;out[1::2]=left
    rows.append(bytes(out));slot += span
   return b''.join(rows)
-def scree(blob,span):
+def __skibiditoilet__(blob,span):
   rows=[];slot=0;span=max(2,span);flip=0
   while slot < len(blob):
    part=blob[slot:slot+span];rows.append(part[::-1] if flip&1 else part);slot += span;flip += 1
   return b''.join(rows)
-def sift(blob):
+def __cak__(blob):
   rows=[];slot=0;glow=0
   while slot < len(blob):
    part=blob[slot:slot+32];row=(len(part),sum(part)&0xffff,part[:1],part[-1:]);rows.append(row);glow=(glow+((slot+1)*((row[1] or 1)&0xffff)))&0xffffffff;slot += 32
   if not rows:
    return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
   return (len(blob),len(rows),rows[0],rows[-1],glow)
-def wash():
+def __thichvarko__():
  for one in mods:
   try:sys.modules.pop(one,None)
   except:pass
@@ -3396,7 +3396,7 @@ def wash():
     except:pass
     break
  return 0
-def leash():
+def __varconcac__():
  if hasattr(sys,'meta_path'):
   try:
    for one in list(sys.meta_path):
@@ -3415,71 +3415,71 @@ def leash():
      if word in low:
       try:sys.path_hooks.remove(one)
       except:pass
-      break
+     break
   except:pass
  return 0
-def gate(name,home,need):
+def __varrrrr__(name,home,need):
  hold=getattr(home,name,None)
- if hold is None or not callable(hold):return boom()
- if getattr(hold,'__name__',name)!=name:return boom()
+ if hold is None or not callable(hold):return __ditmemay__()
+ if getattr(hold,'__name__',name)!=name:return __ditmemay__()
  rows=need if isinstance(need,tuple) else (need,)
- if getattr(hold,'__module__',None) not in rows:return boom()
- if hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return boom()
+ if getattr(hold,'__module__',None) not in rows:return __ditmemay__()
+ if hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return __ditmemay__()
  return hold
-def mesh():
+def __checkvar__():
  built=__import__('builtins')
- gate('exec',built,('builtins',));gate('eval',built,('builtins',));gate('compile',built,('builtins',));gate('open',built,('builtins','io','_io'));gate('__import__',built,('builtins',));gate('loads',marshal,('marshal',));gate('decompress',zlib,('zlib',));gate('decompress',bz2,('bz2','_bz2'));gate('decompress',lzma,('lzma','_lzma'))
+ __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('__import__',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
  for one in (eval,exec,compile,__import__,open,type,getattr,setattr):
-  if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return boom()
+  if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return __ditmemay__()
  return 0
-def hush():
+def __owo__():
  for one in (lambda:sys.gettrace() is None,lambda:sys.getprofile() is None,lambda:id(eval)==id(eval),lambda:id(exec)==id(exec),lambda:id(compile)==id(compile),lambda:type(open).__name__=='builtin_function_or_method',lambda:type(print).__name__=='builtin_function_or_method',lambda:__import__.__module__ in ('builtins',None)):
   try:
-   if not one():return boom()
-  except:return boom()
+   if not one():return __ditmemay__()
+  except:return __ditmemay__()
  return 0
-def comb():
+def __OwO__():
  built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print')
  if isinstance(built,dict):
   for one in rows:
-   if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return boom()
+   if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return __ditmemay__()
  else:
   for one in rows:
    hold=getattr(built,one,None)
-   if hold is None or hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return boom()
+   if hold is None or hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return __ditmemay__()
  return 0
-def pine():
- if id(sys.settrace)!=trid or id(sys.setprofile)!=prid:return boom()
+def __haha__():
+ if id(sys.settrace)!=trid or id(sys.setprofile)!=prid:return __ditmemay__()
  hold=id(globals().get('__builtins__'))
- if base and hold!=base:return boom()
- if hasattr(sys,'meta_path') and len(sys.meta_path)>meta+2:return boom()
- if hasattr(sys,'path_hooks') and len(sys.path_hooks)>path+2:return boom()
- if ((hold^id(sys.settrace)^id(sys.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return boom()
+ if base and hold!=base:return __ditmemay__()
+ if hasattr(sys,'meta_path') and len(sys.meta_path)>meta+2:return __ditmemay__()
+ if hasattr(sys,'path_hooks') and len(sys.path_hooks)>path+2:return __ditmemay__()
+ if ((hold^id(sys.settrace)^id(sys.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return __ditmemay__()
  return 0
-def nail():
+def __hihi__():
  for one in (exec,eval,compile):
-  try:one.__code__;return boom()
+  try:one.__code__;return __ditmemay__()
   except AttributeError:pass
-  except:return boom()
+  except:return __ditmemay__()
  return 0
-def iron():
+def __hoho__():
  if os.name!='nt':return 0
  try:
-  if ctypes.windll.kernel32.IsDebuggerPresent():return boom()
+  if ctypes.windll.kernel32.IsDebuggerPresent():return __ditmemay__()
  except:pass
  try:
   slot=ctypes.c_int(0);ctypes.windll.kernel32.CheckRemoteDebuggerPresent(ctypes.windll.kernel32.GetCurrentProcess(),ctypes.byref(slot))
-  if slot.value:return boom()
+  if slot.value:return __ditmemay__()
  except:pass
  return 0
-def coal():
+def __hahaha__():
  if os.name!='nt':return 0
  try:
   hold=ctypes.windll.ntdll.NtQueryInformationProcess;flag=ctypes.c_ulong(0);side=hold(ctypes.windll.kernel32.GetCurrentProcess(),0x1F,ctypes.byref(flag),ctypes.sizeof(flag),None)
-  if not side and not flag.value:return boom()
+  if not side and not flag.value:return __ditmemay__()
  except:pass
  return 0
-def frost():
+def __hihihi__():
  if os.name!='nt':return 0
  try:
   getm=ctypes.windll.kernel32.GetModuleHandleA;geta=ctypes.windll.kernel32.GetProcAddress
@@ -3491,18 +3491,18 @@ def frost():
     except:ptr=0
     if not ptr:continue
     row=ctypes.cast(ptr,ctypes.POINTER(ctypes.c_ubyte))
-    if row[0] in (0xE9,0xEB) or (row[0]==0xFF and row[1]==0x25):return boom()
+    if row[0] in (0xE9,0xEB) or (row[0]==0xFF and row[1]==0x25):return __ditmemay__()
  except:pass
  return 0
-class Box(ctypes.Structure):_fields_=[('ContextFlags',ctypes.c_ulong),('Dr0',ctypes.c_ulonglong),('Dr1',ctypes.c_ulonglong),('Dr2',ctypes.c_ulonglong),('Dr3',ctypes.c_ulonglong),('Dr6',ctypes.c_ulonglong),('Dr7',ctypes.c_ulonglong)]
-def shard():
+class __hohoho__(ctypes.Structure):_fields_=[('ContextFlags',ctypes.c_ulong),('Dr0',ctypes.c_ulonglong),('Dr1',ctypes.c_ulonglong),('Dr2',ctypes.c_ulonglong),('Dr3',ctypes.c_ulonglong),('Dr6',ctypes.c_ulonglong),('Dr7',ctypes.c_ulonglong)]
+def __anhdomixi__():
  if os.name!='nt':return 0
  try:
-  box=Box();box.ContextFlags=0x10;ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
-  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):return boom()
+  box=__hohoho__();box.ContextFlags=0x10;ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
+  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):return __ditmemay__()
  except:pass
  return 0
-def ember():
+def __mixifood__():
  rows=[]
  try:rows.extend(str(one).lower() for one in sys.modules)
  except:pass
@@ -3512,44 +3512,44 @@ def ember():
  except:pass
  text=' '.join(str(one).lower() for one in sys.argv);rows.append(text)
  for word in hint+debug+anlz+vm+decomp+sbx:
-  if any(word in one for one in rows):return boom()
+  if any(word in one for one in rows):return __ditmemay__()
  for word in cmd+host:
-  if word in text:return boom()
+  if word in text:return __ditmemay__()
  bits=[]
  for one in sys.argv:bits.extend(part.lower() for part in str(one).replace('/',' ').replace('\\\\',' ').replace(':',' ').replace('-',' ').split())
  for word in key:
-  if word in bits:return boom()
+  if word in bits:return __ditmemay__()
  try:
   low=' '.join((socket.gethostname(),platform.node(),str(os.environ.get('USERNAME','')),str(os.environ.get('COMPUTERNAME','')))).lower()
   for word in vm+sbx:
-   if word in low:return boom()
+   if word in low:return __ditmemay__()
  except:pass
  try:
   low=':'.join(['{{:02x}}'.format((uuid.getnode()>>(slot*8))&255) for slot in range(6)][::-1][:3]).lower()
-  if any(low.startswith(one) for one in mac):return boom()
+  if any(low.startswith(one) for one in mac):return __ditmemay__()
  except:pass
  return 0
-def read(blob):
+def __alovu__(blob):
  left=marshal.loads(blob)
- if getattr(left,'co_filename','')!=mark:return boom()
+ if getattr(left,'co_filename','')!=mark:return __ditmemay__()
  name=''.join(('PyMarshal_','ReadObjectFromString'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
  box=ctypes.create_string_buffer(blob);right=hold(ctypes.cast(box,ctypes.c_char_p),len(blob))
- if getattr(right,'co_filename','')!=mark or type(left) is not type(right) or getattr(left,'co_name','')!=getattr(right,'co_name',''):return boom()
+ if getattr(right,'co_filename','')!=mark or type(left) is not type(right) or getattr(left,'co_name','')!=getattr(right,'co_name',''):return __ditmemay__()
  return right
-def fire(code):
+def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  return hold(code,globals(),globals())
-def fetch():
+def __tooldepphet__():
   shell=base64.b64decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
-  sift(shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=scree(shell,spur);shell=unlace(shell,span);shell=cloak(shell,veil);shell=peel(shell,add,step);shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
+  __cak__(shell)!=grain and (_ for _ in ()).throw(SystemExit)
+  shell=__skibiditoilet__(shell,spur);shell=__pnhamaidinh__(shell,span);shell=__luvpnha__(shell,veil);shell=__yeupnha__(shell,add,step);shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
   mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
-def rise():
- wake();wash();leash();mesh();hush()
- comb();pine();nail();iron();coal();frost();shard();ember()
- tag and bad();core=fetch();tag and bad();code=read(core);tag and bad();fire(code)
-rise()
+def __depvcl__():
+ __uwu__();__thichvarko__();__varconcac__();__checkvar__();__owo__()
+ __OwO__();__haha__();__hihi__();__hoho__();__hahaha__();__hihihi__();__anhdomixi__();__mixifood__()
+ __iloveyou__ and __concac__();core=__tooldepphet__();__iloveyou__ and __concac__();code=__alovu__(core);__iloveyou__ and __concac__();__nhinconcac__(code)
+__depvcl__()
 """
     ore = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
     pack = __gasket__(ore)
