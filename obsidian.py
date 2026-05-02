@@ -111,9 +111,13 @@ def __chant__(text, seed):
 def __prism__(name, data):
    row, key, fog, mark = data
    return f"{name}({row!r},{key},{fog!r},{mark!r})"
-def __plume__(name):
-   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw.decode('utf-8')"
+def __iris__(name, mode):
+   tail = ".decode('utf-8')" if mode else ""
+   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw{tail}"
    return f"exec({text!r})"
+def __plume__(name):
+   mode = 1
+   return __iris__(name, mode)
 def __ivory__(seed, used, words, func):
    rows = []
    book = {}
@@ -143,8 +147,7 @@ def __opal__(seed, raw):
    rows = tuple(byte ^ fog[slot] ^ key for slot, byte in enumerate(raw))
    return rows, key, fog.hex(), __crown__(raw)
 def __orchid__(name):
-   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw"
-   return f"exec({text!r})"
+   return __iris__(name, 0)
 def __tuff__(code): return (code.co_code, code.co_consts, code.co_names, code.co_varnames, code.co_freevars, code.co_cellvars)
 def __vine__(data):
    if isinstance(data, (list, tuple)): return b''.join(__vine__(one) for one in data)
@@ -301,11 +304,11 @@ def __key__(seed):
    slag, smoke = __spark__(seed + b'slag', 1000000, 2147483647), __spark__(seed + b'smoke', 1000000, 2147483647)
    ashk, gritk, lavak, crustk = __spark__(seed + b'ash', 17, 251), __spark__(seed + b'grit', 3, 29), __spark__(seed + b'lava', 1, 7), __spark__(seed + b'crust', 9, 33)
    emberk, cinderk, smeltk, veilk = __spark__(seed + b'ember', 17, 251), __spark__(seed + b'cinder', 3, 29), __spark__(seed + b'smelt', 17, 251), __spark__(seed + b'veil', 17, 251)
-   weftk, thornk = __spark__(seed + b'weft', 192, 767), __spark__(seed + b'thorn', 192, 767)
+   weftk, thornk = __spark__(seed + b'weft', 1024, 4095), __spark__(seed + b'thorn', 1024, 4095)
    return slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk
 def __corek__(seed):
    leftk, rightk = __spark__(seed + b'glass', 1000000, 2147483647), __spark__(seed + b'forge', 1000000, 2147483647)
-   mistk, dustk, cloakk, lanek, spurk = __spark__(seed + b'mist', 17, 251), __spark__(seed + b'dust', 3, 29), __spark__(seed + b'cloak', 17, 251), __spark__(seed + b'lane', 192, 767), __spark__(seed + b'spur', 192, 767)
+   mistk, dustk, cloakk, lanek, spurk = __spark__(seed + b'mist', 17, 251), __spark__(seed + b'dust', 3, 29), __spark__(seed + b'cloak', 17, 251), __spark__(seed + b'lane', 1024, 4095), __spark__(seed + b'spur', 1024, 4095)
    return leftk, rightk, mistk, dustk, cloakk, lanek, spurk
 def __wrapk__(seed):
    shellk, glassk = __spark__(seed + b'shell', 1000000, 2147483647), __spark__(seed + b'glasswrap', 1000000, 2147483647)
@@ -1700,8 +1703,8 @@ def __nam__(code, seed):
 def __var__(code, seed):
     rows = []
     for one in __drip__(code):
-        rows.extend((slot, name, len(name), zlib.adler32(name.encode('utf-8', 'replace')) & 0xffffffff) for slot, name in enumerate(one.co_varnames))
-    fog = __mix__(seed, (__hist__(rows), len(rows), len(set(row[1] for row in rows))))
+        rows.extend((one.co_name, slot, name, len(name), one.co_argcount, one.co_nlocals, zlib.adler32((one.co_name + ':' + name).encode('utf-8', 'replace')) & 0xffffffff) for slot, name in enumerate(one.co_varnames))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows), len(set(row[2] for row in rows))))
     return (len(rows), fog.hex())
 def __cell__(code, seed):
     rows = []
@@ -2302,6 +2305,710 @@ def __crestmar__(code, seed):
         rows.append((one.co_name, len(raw), len(pack), pack[0], hashlib.sha256(raw[:1024]).hexdigest(), hashlib.sha1(pack[:1024]).hexdigest()))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:128]), len(rows)))
     return (len(rows), fog.hex())
+def __vex__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            fun = node.func
+            chain = []
+            while isinstance(fun, ast.Attribute):
+                chain.append(fun.attr); fun = fun.value
+            if isinstance(fun, ast.Name): chain.append(fun.id)
+            else: chain.append(type(fun).__name__)
+            rows.append((tuple(reversed(chain)), len(node.args), tuple(kw.arg or '*' for kw in node.keywords), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __zod__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            cur = node
+            chain = []
+            while isinstance(cur, ast.Attribute):
+                chain.append(cur.attr); cur = cur.value
+            if isinstance(cur, ast.Name): chain.append(cur.id)
+            else: chain.append(type(cur).__name__)
+            rows.append((tuple(reversed(chain)), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __kiv__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for one in node.names: rows.append(('i', one.name, one.asname or '', one.name.count('.'), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ImportFrom):
+            rows.append(('f', node.module or '', node.level, tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __mav__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            val = node.value; raw = val.encode('utf-8', 'replace')
+            rows.append(('s', len(raw), raw[:16], raw[-16:], val.count('\n'), val.count('{'), zlib.crc32(raw) & 0xffffffff, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, bytes):
+            val = node.value
+            rows.append(('b', len(val), val[:16], val[-16:], len(set(val[:512])), zlib.adler32(val) & 0xffffffff, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __nox__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+            val = node.value
+            rows.append(('i', int(val < 0), abs(val).bit_length(), val & 0xffff, zlib.crc32(str(val).encode()) & 0xffffffff, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, float): rows.append(('f', repr(node.value), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, complex): rows.append(('c', repr(node.value.real), repr(node.value.imag), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __pyr__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If): rows.append(('if', type(node.test).__name__, len(node.body), len(node.orelse), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.While): rows.append(('while', type(node.test).__name__, len(node.body), len(node.orelse), getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.For, ast.AsyncFor)): rows.append(('for', type(node.target).__name__, type(node.iter).__name__, len(node.body), len(node.orelse), int(isinstance(node, ast.AsyncFor))))
+        elif isinstance(node, ast.IfExp): rows.append(('ifexp', type(node.test).__name__, type(node.body).__name__, type(node.orelse).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __qel__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Try): rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ExceptHandler): rows.append(('except', type(node.type).__name__ if node.type else '', node.name or '', len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Raise): rows.append(('raise', type(node.exc).__name__ if node.exc else '', type(node.cause).__name__ if node.cause else '', getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __rix__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            args = node.args; name = getattr(node, 'name', '<lambda>')
+            rows.append((type(node).__name__, name, len(args.posonlyargs), len(args.args), len(args.kwonlyargs), int(args.vararg is not None), int(args.kwarg is not None), len(args.defaults), len(args.kw_defaults), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Return): rows.append(('return', type(node.value).__name__ if node.value else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Yield): rows.append(('yield', type(node.value).__name__ if node.value else '', getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __sorn__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef): rows.append(('class', node.name, len(node.bases), len(node.keywords), len(node.decorator_list), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.With): rows.append(('with', len(node.items), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncWith): rows.append(('awith', len(node.items), len(node.body), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __tav__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)): rows.append((type(node).__name__, type(node.elt).__name__, len(node.generators), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.DictComp): rows.append(('DictComp', type(node.key).__name__, type(node.value).__name__, len(node.generators), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.comprehension): rows.append(('gen', type(node.target).__name__, type(node.iter).__name__, len(node.ifs), int(node.is_async)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __ulx__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.AsyncFunctionDef, ast.AsyncFor, ast.AsyncWith, ast.Await)): rows.append((type(node).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ('run','create_task','gather','wait_for','sleep','wait_closed'): rows.append(('call', node.func.attr, len(node.args), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __vor__(tree, code, seed):
+    keys = ('open','read','write','close','exists','isfile','isdir','join','remove','rename','replace','socket','connect','send','recv','request','get','post','AsyncClient','Client','Session')
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('a', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Name) and node.id in keys: rows.append(('n', node.id, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.keyword) and node.arg in keys: rows.append(('k', node.arg, type(node.value).__name__))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __wex__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)): rows.append((type(node).__name__, len(node.elts), type(getattr(node, 'ctx', None)).__name__, tuple(type(one).__name__ for one in node.elts[:64]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Dict): rows.append(('Dict', len(node.keys), tuple(type(one).__name__ if one else '' for one in node.keys[:64]), tuple(type(one).__name__ for one in node.values[:64]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Starred): rows.append(('Starred', type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __yul__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Subscript): rows.append(('sub', type(node.value).__name__, type(node.slice).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Slice): rows.append(('slice', int(node.lower is not None), int(node.upper is not None), int(node.step is not None)))
+        elif isinstance(node, ast.Delete): rows.append(('del', len(node.targets), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AugAssign): rows.append(('aug', type(node.target).__name__, type(node.op).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __ziv__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.BinOp): rows.append(('bin', type(node.op).__name__, type(node.left).__name__, type(node.right).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.BoolOp): rows.append(('bool', type(node.op).__name__, len(node.values), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.UnaryOp): rows.append(('unary', type(node.op).__name__, type(node.operand).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Compare): rows.append(('cmp', type(node.left).__name__, tuple(type(one).__name__ for one in node.ops), len(node.comparators), getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __kro__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Match): rows.append(('match', type(node.subject).__name__, len(node.cases), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.match_case): rows.append(('case', type(node.pattern).__name__, type(node.guard).__name__ if node.guard else '', len(node.body)))
+        elif type(node).__name__.startswith('Match'): rows.append((type(node).__name__, getattr(node, 'name', '') or '', getattr(node, 'rest', '') or ''))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __lum__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.JoinedStr): rows.append(('join', len(node.values), tuple(type(one).__name__ for one in node.values), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.FormattedValue): rows.append(('fmt', node.conversion, type(node.value).__name__, type(node.format_spec).__name__ if node.format_spec else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.NamedExpr): rows.append(('walrus', type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __orz__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Global): rows.append(('global', tuple(node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Nonlocal): rows.append(('nonlocal', tuple(node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.arg): rows.append(('arg', node.arg, type(node.annotation).__name__ if node.annotation else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.alias): rows.append(('alias', node.name, node.asname or ''))
+    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __nyx__(tree, code, seed):
+    rows = []
+    hold = [(tree, 0)]
+    while hold:
+        node, deep = hold.pop()
+        kids = list(ast.iter_child_nodes(node))
+        rows.append((type(node).__name__, deep, len(kids), getattr(node, 'lineno', 0)))
+        for one in reversed(kids): hold.append((one, deep + 1))
+    wide = max((row[1] for row in rows), default=0)
+    fog = __mix__(seed, (__hist__((row[0], row[1], row[2]) for row in rows), tuple(rows[:1024]), len(rows), wide))
+    return (len(rows), wide, fog.hex())
+def __pax__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = one.co_code
+        rows.append((one.co_name, len(raw), one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, one.co_stacksize, one.co_flags, zlib.crc32(raw[:128]) & 0xffffffff, zlib.adler32(raw[-128:]) & 0xffffffff))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __qyx__(tree, code, seed):
+    rows = []
+    kind = type(code)
+    for one in __drip__(code):
+        for slot, val in enumerate(one.co_consts[:256]):
+            if isinstance(val, kind): rows.append((one.co_name, slot, 'code', val.co_name, len(val.co_code), len(val.co_consts), len(val.co_names)))
+            elif isinstance(val, (str, bytes, int, float, complex, type(None))): rows.append((one.co_name, slot, type(val).__name__, len(repr(val))))
+            else: rows.append((one.co_name, slot, type(val).__name__, zlib.crc32(repr(val).encode('utf-8', 'replace')) & 0xffffffff))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __rux__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        line = getattr(one, 'co_linetable', getattr(one, 'co_lnotab', b'')); exc = getattr(one, 'co_exceptiontable', b'')
+        rows.append((one.co_name, one.co_firstlineno, len(line), len(exc), zlib.crc32(line) & 0xffffffff, zlib.adler32(exc) & 0xffffffff, line[:48], exc[:48]))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __siv__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = one.co_code
+        bag = []
+        for slot in range(0, min(len(raw), 768) - 2, 3): bag.append((raw[slot], raw[slot + 1], raw[slot + 2]))
+        rows.append((one.co_name, len(raw), __hist__(bag), tuple(bag[:96])))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __tix__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        names = tuple((slot, val, len(val), zlib.crc32(val.encode('utf-8', 'replace')) & 0xffffffff) for slot, val in enumerate(one.co_names[:256]))
+        vars = tuple((slot, val, len(val), zlib.adler32(val.encode('utf-8', 'replace')) & 0xffffffff) for slot, val in enumerate(one.co_varnames[:256]))
+        rows.append((one.co_name, names, vars, tuple(one.co_freevars), tuple(one.co_cellvars)))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __uvo__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = marshal.dumps(one)
+        pack = __gasket__(raw)
+        rows.append((one.co_name, len(raw), len(pack), pack[0], hashlib.sha256(raw[:1024]).hexdigest(), hashlib.sha1(pack[:1024]).hexdigest()))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __vyn__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)): rows.append((type(node).__name__, getattr(node, 'lineno', 0), len(list(ast.iter_child_nodes(node)))))
+        elif isinstance(node, (ast.Assert, ast.Pass, ast.Break, ast.Continue)): rows.append((type(node).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Expr): rows.append(('expr', type(node.value).__name__, getattr(node, 'lineno', 0)))
+    mark = tuple((one.co_name, one.co_flags, one.co_stacksize) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+
+def __wok__(tree, code, seed):
+    rows = []
+    hold = [(tree, None, 0)]
+    while hold:
+        node, parent, deep = hold.pop()
+        kids = list(ast.iter_child_nodes(node))
+        rows.append((type(node).__name__, parent or '', deep, len(kids), getattr(node, 'lineno', 0), getattr(node, 'col_offset', 0)))
+        for kid in reversed(kids):
+            hold.append((kid, type(node).__name__, deep + 1))
+    edge = tuple((rows[i][0], rows[i + 1][0], rows[i + 1][2] - rows[i][2]) for i in range(min(len(rows) - 1, 2048)))
+    mark = tuple((one.co_name, len(one.co_code), one.co_stacksize) for one in __drip__(code)[:96])
+    fog = __mix__(seed, (__hist__(rows), __hist__(edge), mark, len(rows)))
+    return (len(rows), fog.hex())
+def __xul__(tree, code, seed):
+    rows = []
+    stack = ['<module>']
+    def walk(node):
+        name = getattr(node, 'name', None)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            stack.append(name or type(node).__name__)
+            rows.append(('scope', type(node).__name__, tuple(stack[-4:]), len(getattr(node, 'body', [])), getattr(node, 'lineno', 0)))
+            for kid in ast.iter_child_nodes(node): walk(kid)
+            stack.pop(); return
+        if isinstance(node, ast.Name): rows.append(('name', tuple(stack[-3:]), node.id, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.arg): rows.append(('arg', tuple(stack[-3:]), node.arg, type(node.annotation).__name__ if node.annotation else ''))
+        elif isinstance(node, (ast.Global, ast.Nonlocal)): rows.append((type(node).__name__, tuple(stack[-3:]), tuple(node.names)))
+        for kid in ast.iter_child_nodes(node): walk(kid)
+    walk(tree)
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1536]), len(rows), len(set(row[0] for row in rows))))
+    return (len(rows), fog.hex())
+def __yex__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant):
+            val = node.value
+            raw = repr(val).encode('utf-8', 'replace')
+            bins = [0, 0, 0, 0]
+            for byte in raw[:4096]: bins[(byte >> 6) & 3] += 1
+            rows.append((type(val).__name__, len(raw), tuple(bins), zlib.crc32(raw[:512]) & 0xffffffff, getattr(node, 'lineno', 0)))
+    codebag = []
+    for one in __drip__(code): codebag.append((one.co_name, len(one.co_consts), __hist__(type(val).__name__ for val in one.co_consts)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(codebag[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __zok__(tree, code, seed):
+    keys = ('trace','debug','profile','inspect','frame','ctypes','pythonapi','marshal','exec','eval','compile','open','socket','httpx','aiohttp','requests','proxy','thread','asyncio')
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and any(key in node.id.lower() for key in keys): rows.append(('n', node.id, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Attribute) and any(key in node.attr.lower() for key in keys): rows.append(('a', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str) and any(key in node.value.lower() for key in keys): rows.append(('s', len(node.value), zlib.crc32(node.value.encode('utf-8', 'replace')) & 0xffffffff, getattr(node, 'lineno', 0)))
+    names = []
+    for one in __drip__(code): names.extend(str(name).lower() for name in one.co_names)
+    fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __kex__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Try):
+            rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), tuple(type(one).__name__ for one in node.body[:8]), getattr(node, 'lineno', 0)))
+            for at, handler in enumerate(node.handlers): rows.append(('handler', at, type(handler.type).__name__ if handler.type else '', handler.name or '', len(handler.body)))
+        elif isinstance(node, ast.Raise): rows.append(('raise', type(node.exc).__name__ if node.exc else '', type(node.cause).__name__ if node.cause else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Assert): rows.append(('assert', type(node.test).__name__, type(node.msg).__name__ if node.msg else '', getattr(node, 'lineno', 0)))
+    exc = []
+    for one in __drip__(code): exc.append((one.co_name, len(getattr(one, 'co_exceptiontable', b'')), zlib.crc32(getattr(one, 'co_exceptiontable', b'')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(exc[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __lix__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Await): rows.append(('await', type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.AsyncFunctionDef, ast.AsyncFor, ast.AsyncWith)): rows.append((type(node).__name__, getattr(node, 'name', ''), len(getattr(node, 'body', [])), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Call):
+            head = node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id if isinstance(node.func, ast.Name) else type(node.func).__name__
+            if head in ('run','gather','wait','wait_for','create_task','sleep','open_connection','start_server'): rows.append(('call', head, len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
+    flags = tuple((one.co_name, one.co_flags, one.co_stacksize) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), flags, len(rows)))
+    return (len(rows), fog.hex())
+def __mox__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = one.co_code
+        pairs = []
+        for at in range(0, min(len(raw), 1536) - 1, 2): pairs.append((raw[at], raw[at + 1]))
+        jumps = sum(1 for byte in raw if byte in (93, 110, 111, 112, 114, 115, 140, 176))
+        rows.append((one.co_name, len(raw), jumps, __hist__(pairs), tuple(pairs[:128])))
+    shape = __hist__(type(node).__name__ for node in ast.walk(tree))
+    fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __nuv__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        pool = []
+        for val in one.co_consts:
+            raw = marshal.dumps(val) if type(val) in (str, bytes, int, float, complex, tuple, frozenset, type(None), bool) else repr(type(val)).encode()
+            pool.append((type(val).__name__, len(raw), zlib.crc32(raw[:1024]) & 0xffffffff))
+        rows.append((one.co_name, len(pool), tuple(pool[:128]), __hist__(row[0] for row in pool)))
+    marks = tuple((type(node).__name__, getattr(node, 'lineno', 0)) for node in ast.walk(tree) if isinstance(node, (ast.Constant, ast.JoinedStr, ast.FormattedValue)))[:1024]
+    fog = __mix__(seed, (__hist__(rows), marks, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __oxa__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            head = node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id if isinstance(node.func, ast.Name) else type(node.func).__name__
+            vals = tuple(type(arg).__name__ for arg in node.args[:16])
+            kws = tuple((kw.arg or '*', type(kw.value).__name__) for kw in node.keywords[:16])
+            rows.append((head, vals, kws, getattr(node, 'lineno', 0)))
+    order = tuple(row[0] for row in rows[:2048])
+    fog = __mix__(seed, (__hist__(rows), __hist__(order), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __piv__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign): rows.append(('assign', len(node.targets), tuple(type(one).__name__ for one in node.targets), type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AnnAssign): rows.append(('ann', type(node.target).__name__, type(node.annotation).__name__, int(node.simple), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.NamedExpr): rows.append(('named', type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Delete): rows.append(('del', len(node.targets), tuple(type(one).__name__ for one in node.targets), getattr(node, 'lineno', 0)))
+    vars = tuple((one.co_name, one.co_nlocals, len(one.co_varnames), tuple(one.co_varnames[:64])) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), vars, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __qor__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import): rows.append(('import', tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ImportFrom): rows.append(('from', node.module or '', node.level, tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == '__import__': rows.append(('dyn', len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
+    names = []
+    for one in __drip__(code): names.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
+    fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __rax__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef): rows.append(('class', node.name, tuple(type(one).__name__ for one in node.bases), len(node.keywords), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.FunctionDef): rows.append(('func', node.name, len(node.decorator_list), len(node.args.args), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncFunctionDef): rows.append(('afunc', node.name, len(node.decorator_list), len(node.args.args), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Lambda): rows.append(('lambda', len(node.args.args), type(node.body).__name__, getattr(node, 'lineno', 0)))
+    quals = tuple((one.co_name, one.co_qualname, one.co_firstlineno) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), quals, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __sax__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.JoinedStr): rows.append(('join', len(node.values), tuple(type(one).__name__ for one in node.values), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.FormattedValue): rows.append(('fmt', node.conversion, type(node.value).__name__, type(node.format_spec).__name__ if node.format_spec else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str) and ('{' in node.value or '}' in node.value): rows.append(('brace', len(node.value), node.value.count('{'), node.value.count('}'), getattr(node, 'lineno', 0)))
+    consts = tuple((one.co_name, sum(1 for val in one.co_consts if isinstance(val, str))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), consts, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __tov__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Subscript): rows.append(('sub', type(node.value).__name__, type(node.slice).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Slice): rows.append(('slice', type(node.lower).__name__ if node.lower else '', type(node.upper).__name__ if node.upper else '', type(node.step).__name__ if node.step else ''))
+        elif isinstance(node, ast.Starred): rows.append(('star', type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    line = tuple((one.co_name, one.co_firstlineno, len(getattr(one, 'co_linetable', b''))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), line, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __uzn__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Match): rows.append(('match', type(node.subject).__name__, len(node.cases), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.match_case): rows.append(('case', type(node.pattern).__name__, type(node.guard).__name__ if node.guard else '', len(node.body)))
+        elif type(node).__name__.startswith('Match'): rows.append((type(node).__name__, getattr(node, 'name', '') or '', getattr(node, 'rest', '') or '', len(list(ast.iter_child_nodes(node)))))
+    raw = marshal.dumps(code)
+    fog = __mix__(seed, (__hist__(rows), len(raw), hashlib.sha256(raw[:2048]).hexdigest(), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __vok__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.With): rows.append(('with', len(node.items), len(node.body), tuple(type(one.context_expr).__name__ for one in node.items), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncWith): rows.append(('awith', len(node.items), len(node.body), tuple(type(one.context_expr).__name__ for one in node.items), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.withitem): rows.append(('item', type(node.context_expr).__name__, type(node.optional_vars).__name__ if node.optional_vars else ''))
+    ops = tuple((one.co_name, one.co_code.count(143), one.co_code.count(53), one.co_code.count(54)) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), ops, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __waz__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.BoolOp): rows.append(('bool', type(node.op).__name__, len(node.values), tuple(type(one).__name__ for one in node.values[:16]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Compare): rows.append(('cmp', tuple(type(one).__name__ for one in node.ops), len(node.comparators), type(node.left).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.UnaryOp): rows.append(('unary', type(node.op).__name__, type(node.operand).__name__, getattr(node, 'lineno', 0)))
+    nums = tuple((one.co_name, sum(1 for val in one.co_consts if isinstance(val, (int, float, complex)) and not isinstance(val, bool))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), nums, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __xir__(tree, code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = marshal.dumps(one)
+        a = zlib.crc32(raw) & 0xffffffff
+        b = zlib.adler32(raw) & 0xffffffff
+        c = hashlib.blake2s(raw[:4096], digest_size=16).hexdigest()
+        rows.append((one.co_name, len(raw), a, b, c, len(one.co_consts), len(one.co_names), len(one.co_varnames)))
+    depth = 0
+    hold = [(tree, 0)]
+    while hold:
+        node, deep = hold.pop(); depth = max(depth, deep)
+        for kid in ast.iter_child_nodes(node): hold.append((kid, deep + 1))
+    fog = __mix__(seed, (__hist__(rows), depth, tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __yok__(tree, code, seed):
+    rows = []
+    last = None
+    for node in ast.walk(tree):
+        now = getattr(node, 'lineno', 0)
+        col = getattr(node, 'col_offset', 0)
+        if now:
+            rows.append((type(node).__name__, now, col, 0 if last is None else now - last))
+            last = now
+    tables = tuple((one.co_name, one.co_firstlineno, len(getattr(one, 'co_linetable', b'')), zlib.crc32(getattr(one, 'co_linetable', b'')) & 0xffffffff) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), tables, tuple(rows[:1536]), len(rows)))
+    return (len(rows), fog.hex())
+def __zax__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        kids = list(ast.iter_child_nodes(node))
+        if len(kids) > 2: rows.append((type(node).__name__, len(kids), tuple(type(one).__name__ for one in kids[:12]), getattr(node, 'lineno', 0)))
+    raw = b''.join(one.co_code[:128] for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), hashlib.sha1(raw).hexdigest(), tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+
+def __kao__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If): rows.append(('if', type(node.test).__name__, tuple(type(one).__name__ for one in node.body[:6]), tuple(type(one).__name__ for one in node.orelse[:6]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.IfExp): rows.append(('ifexp', type(node.test).__name__, type(node.body).__name__, type(node.orelse).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Break, ast.Continue, ast.Pass)): rows.append((type(node).__name__, getattr(node, 'lineno', 0)))
+    jumps = tuple((one.co_name, sum(1 for byte in one.co_code if byte in (110,111,112,114,115,140,176))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), jumps, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __leo__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        dec = getattr(node, 'decorator_list', None)
+        if dec is not None: rows.append(('deco', type(node).__name__, getattr(node, 'name', ''), len(dec), tuple(type(one).__name__ for one in dec[:16]), getattr(node, 'lineno', 0)))
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ('property','staticmethod','classmethod'): rows.append(('builtin', node.func.id, getattr(node, 'lineno', 0)))
+    qual = tuple((one.co_name, one.co_qualname.count('.'), one.co_flags) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), qual, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __mio__(tree, code, seed):
+    rows = []
+    keys = ('argv','stdin','stdout','stderr','environ','path','platform','version','modules','meta_path','settrace','gettrace')
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('attr', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Name) and node.id in ('sys','os','platform','warnings'): rows.append(('name', node.id, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    pool = tuple((one.co_name, tuple(name for name in one.co_names if name in keys or name in ('sys','os','warnings'))[:32]) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), pool, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __neo__(tree, code, seed):
+    rows = []
+    keys = ('Structure','windll','kernel32','pythonapi','py_object','c_char_p','c_long','create_string_buffer','cast','byref')
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('attr', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str) and any(key in node.value for key in keys): rows.append(('str', len(node.value), zlib.crc32(node.value.encode()) & 0xffffffff, getattr(node, 'lineno', 0)))
+    raw = tuple((one.co_name, sum(1 for name in one.co_names if name in keys)) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), raw, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __pio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            gens = getattr(node, 'generators', [])
+            rows.append((type(node).__name__, len(gens), tuple((type(gen.target).__name__, type(gen.iter).__name__, len(gen.ifs), int(gen.is_async)) for gen in gens[:8]), getattr(node, 'lineno', 0)))
+    flags = tuple((one.co_name, one.co_flags, len(one.co_freevars), len(one.co_cellvars)) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), flags, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __qio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            raw = node.value.encode('utf-8', 'replace')
+            wide = sum(1 for ch in node.value if ord(ch) > 127)
+            rows.append((len(raw), wide, node.value.count('\u200d'), node.value.count('\u200c'), zlib.crc32(raw[:1024]) & 0xffffffff, getattr(node, 'lineno', 0)))
+    consts = tuple((one.co_name, sum(1 for val in one.co_consts if isinstance(val, str) and any(ord(ch) > 127 for ch in val))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), consts, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __rio__(tree, code, seed):
+    rows = []
+    keys = ('Thread','Event','Lock','Queue','Executor','Process','start','join','daemon','submit','result')
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('attr', node.attr, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Call):
+            head = node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id if isinstance(node.func, ast.Name) else ''
+            if head in keys: rows.append(('call', head, len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
+    pool = tuple((one.co_name, tuple(name for name in one.co_names if name in keys)[:32]) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), pool, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __sio__(tree, code, seed):
+    rows = []
+    keys = ('sha1','sha256','sha512','md5','blake2s','crc32','adler32','hexdigest','digest','compress','decompress','b64encode','b64decode')
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('attr', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Name) and node.id in keys: rows.append(('name', node.id, getattr(node, 'lineno', 0)))
+    raw = marshal.dumps(code)
+    fog = __mix__(seed, (__hist__(rows), hashlib.sha512(raw[:4096]).hexdigest(), zlib.crc32(raw) & 0xffffffff, tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __tio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.BinOp): rows.append(('bin', type(node.op).__name__, type(node.left).__name__, type(node.right).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AugAssign): rows.append(('aug', type(node.op).__name__, type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+    op = tuple((one.co_name, sum(one.co_code.count(byte) for byte in (45,46,47,48,49,50,51,52,122))) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), op, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __uio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.keyword): rows.append((node.arg or '*', type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Call) and node.keywords: rows.append(('callkw', len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
+    names = tuple((one.co_name, len(one.co_names), tuple(one.co_names[:32])) for one in __drip__(code)[:128])
+    fog = __mix__(seed, (__hist__(rows), names, tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __vio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Return): rows.append(('return', type(node.value).__name__ if node.value else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Yield, ast.YieldFrom)): rows.append((type(node).__name__, type(node.value).__name__ if node.value else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Expr): rows.append(('expr', type(node.value).__name__, getattr(node, 'lineno', 0)))
+    stack = tuple((one.co_name, one.co_stacksize, len(one.co_code)) for one in __drip__(code)[:256])
+    fog = __mix__(seed, (__hist__(rows), stack, tuple(rows[:1536]), len(rows)))
+    return (len(rows), fog.hex())
+def __wio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute): rows.append((node.attr, type(node.ctx).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+    chain = []
+    for one in __drip__(code):
+        chain.append((one.co_name, tuple(name for name in one.co_names[:64]), tuple(one.co_varnames[:32])))
+    fog = __mix__(seed, (__hist__(rows), tuple(chain[:256]), tuple(rows[:1536]), len(rows)))
+    return (len(rows), fog.hex())
+
+def __xio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict): rows.append(('dict', len(node.keys), tuple(type(one).__name__ if one else '' for one in node.keys[:32]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Set): rows.append(('set', len(node.elts), tuple(type(one).__name__ for one in node.elts[:32]), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_consts)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __yio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.List): rows.append(('list', len(node.elts), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Tuple): rows.append(('tuple', len(node.elts), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_code[:16]) for one in __drip__(code)[:128]), tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __zio__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AnnAssign): rows.append(('ann', type(node.target).__name__, type(node.annotation).__name__, type(node.value).__name__ if node.value else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.arg) and node.annotation: rows.append(('arg', node.arg, type(node.annotation).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_flags) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __kra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assert): rows.append(('assert', type(node.test).__name__, type(node.msg).__name__ if node.msg else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Raise): rows.append(('raise', type(node.exc).__name__ if node.exc else '', getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_exceptiontable)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __lra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.For): rows.append(('for', type(node.target).__name__, type(node.iter).__name__, len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.While): rows.append(('while', type(node.test).__name__, len(node.body), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_stacksize) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __mra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom): rows.append((node.module or '', node.level, len(node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.alias): rows.append((node.name, node.asname or '', len(node.name)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_names)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __nra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.TryStar): rows.append(('trystar', len(node.body), len(node.handlers), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ExceptHandler): rows.append(('except', type(node.type).__name__ if node.type else '', len(node.body), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, zlib.crc32(one.co_code) & 0xffffffff) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __pra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.NamedExpr): rows.append((type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Lambda): rows.append((len(node.args.args), type(node.body).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_freevars), len(one.co_cellvars)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __qra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef): rows.append((node.name, len(node.bases), len(node.keywords), tuple(type(one).__name__ for one in node.body[:16]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.keyword): rows.append((node.arg or '*', type(node.value).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_qualname) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __rra__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Module): rows.append(('module', len(node.body), tuple(type(one).__name__ for one in node.body[:32])))
+        elif isinstance(node, ast.Expr): rows.append(('expr', type(node.value).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), hashlib.blake2b(marshal.dumps(code)[:4096], digest_size=32).hexdigest(), tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __grave__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Delete): rows.append(('del', tuple(type(one).__name__ for one in node.targets[:16]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Global): rows.append(('global', tuple(node.names[:32]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Nonlocal): rows.append(('nonlocal', tuple(node.names[:32]), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, tuple(one.co_names[:24])) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __shiver__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Await): rows.append(('await', type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncFor): rows.append(('asyncfor', type(node.target).__name__, type(node.iter).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncWith): rows.append(('asyncwith', len(node.items), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_flags, one.co_stacksize) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __sable__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Slice): rows.append(('slice', type(node.lower).__name__ if node.lower else '', type(node.upper).__name__ if node.upper else '', type(node.step).__name__ if node.step else '', getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Starred): rows.append(('star', type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_consts), one.co_nlocals) for one in __drip__(code)[:128]), tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+def __mosaic__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.MatchClass): rows.append(('mclass', type(node.cls).__name__, len(node.patterns), len(node.kwd_patterns), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.MatchMapping): rows.append(('mmap', len(node.keys), len(node.patterns), bool(node.rest), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.MatchSequence): rows.append(('mseq', len(node.patterns), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, zlib.adler32(one.co_code) & 0xffffffff) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
+    return (len(rows), fog.hex())
+def __lamb__(tree, code, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Lambda):
+            args = node.args
+            rows.append((len(args.posonlyargs), len(args.args), len(args.kwonlyargs), int(args.vararg is not None), int(args.kwarg is not None), len(args.defaults), len(args.kw_defaults), type(node.body).__name__, getattr(node, 'lineno', 0)))
+            rows.extend(('name', one.arg, len(one.arg)) for one in args.posonlyargs + args.args + args.kwonlyargs)
+            args.vararg and rows.append(('var', args.vararg.arg, len(args.vararg.arg)))
+            args.kwarg and rows.append(('kw', args.kwarg.arg, len(args.kwarg.arg)))
+    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_freevars), len(one.co_cellvars), one.co_argcount) for one in __drip__(code)[:256]), tuple(rows[:1024]), len(rows)))
+    return (len(rows), fog.hex())
+
 def __chart__(tree, code, stem, path, seed):
     rows = [fn(tree, seed + tag) for tag, fn in ((b'shape', __shapeid__), (b'literal', __literal__), (b'label', __label__), (b'flow', __flow__), (b'call', __call__), (b'scope', __scope__), (b'module', __module__), (b'set', __set__), (b'sub', __sub__), (b'bin', __bin__), (b'cmp', __cmp__), (b'form', __form__), (b'trap', __trap__), (b'pat', __pat__), (b'ret', __ret__), (b'loop', __loop__), (b'comp', __comp__), (b'ann', __ann__), (b'ref', __ref__), (b'depth', __depth__), (b'tile', __tile__), (b'context', __context__), (b'discard', __discard__), (b'wth', __wth__), (b'body', __body__), (b'glyph', __glyph__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))]
     rows.extend(fn(tree, seed + tag) for tag, fn in ((b'tok', __tok__), (b'atom', __atom__), (b'num', __num__), (b'txt', __txt__), (b'bop', __bop__), (b'cmpr', __cmpr__), (b'dial', __dial__), (b'asgn', __asgn__), (b'river', __river__), (b'catch', __catch__), (b'mask', __mask__), (b'coil', __coil__), (b'fmt', __fmt__), (b'match', __match__), (b'imp', __imp__), (b'func', __func__), (b'arg', __arg__), (b'clan', __clan__), (b'deco', __deco__), (b'anno', __anno__)))
@@ -2311,6 +3018,11 @@ def __chart__(tree, code, stem, path, seed):
     rows.extend(fn(tree, seed + tag) for tag, fn in ((b'crestcall', __crestcall__), (b'crestattr', __crestattr__), (b'crestimp', __crestimp__), (b'creststr', __creststr__), (b'crestbytes', __crestbytes__), (b'crestnum', __crestnum__), (b'crestseq', __crestseq__), (b'crestbranch', __crestbranch__), (b'cresttry', __cresttry__), (b'crestfunc', __crestfunc__), (b'crestclass', __crestclass__), (b'crestcomp', __crestcomp__), (b'crestpat', __crestpat__), (b'crestfmt', __crestfmt__), (b'crestscope', __crestscope__), (b'crestname', __crestname__), (b'crestop', __crestop__), (b'crestline', __crestline__), (b'crestapi', __crestapi__)))
     rows.extend(fn(tree, seed + tag) for tag, fn in ((b'crestio', __crestio__), (b'crestnet', __crestnet__), (b'cresttime', __cresttime__), (b'cresterr', __cresterr__), (b'crestasync', __crestasync__), (b'crestui', __crestui__), (b'crestpack', __crestpack__)))
     rows.extend(fn(code, seed + tag) for tag, fn in ((b'crestcode', __crestcode__), (b'crestconst', __crestconst__), (b'crestpool', __crestpool__), (b'cresttable', __cresttable__), (b'crestmar', __crestmar__)))
+    rows.extend(fn(tree, code, seed + tag) for tag, fn in ((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'nox', __nox__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rix', __rix__), (b'sorn', __sorn__), (b'tav', __tav__), (b'ulx', __ulx__), (b'vor', __vor__), (b'wex', __wex__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'nyx', __nyx__), (b'pax', __pax__), (b'qyx', __qyx__), (b'rux', __rux__), (b'siv', __siv__), (b'tix', __tix__), (b'uvo', __uvo__), (b'vyn', __vyn__)))
+    rows.extend(fn(tree, code, seed + tag) for tag, fn in ((b'wok', __wok__), (b'xul', __xul__), (b'yex', __yex__), (b'zok', __zok__), (b'kex', __kex__), (b'lix', __lix__), (b'mox', __mox__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'rax', __rax__), (b'sax', __sax__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'zax', __zax__)))
+    rows.extend(fn(tree, code, seed + tag) for tag, fn in ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)))
+    rows.extend(fn(tree, code, seed + tag) for tag, fn in ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)))
+    rows.extend(fn(tree, code, seed + tag) for tag, fn in ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)))
     rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
     mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
     core = __vine__((tuple(rows), mark))
@@ -2323,6 +3035,7 @@ def __vein__(code):
     plain = []
     seen = {}
     dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip'}
+    dust.update({'BaseException','BaseExceptionGroup','Exception','ExceptionGroup','ArithmeticError','BufferError','LookupError','AssertionError','AttributeError','EOFError','FloatingPointError','GeneratorExit','ImportError','ModuleNotFoundError','IndexError','KeyError','KeyboardInterrupt','MemoryError','NameError','NotImplementedError','OSError','OverflowError','RecursionError','ReferenceError','RuntimeError','StopAsyncIteration','StopIteration','SyntaxError','IndentationError','TabError','SystemError','SystemExit','TypeError','UnboundLocalError','UnicodeError','UnicodeEncodeError','UnicodeDecodeError','UnicodeTranslateError','ValueError','ZeroDivisionError','BlockingIOError','ChildProcessError','ConnectionError','BrokenPipeError','ConnectionAbortedError','ConnectionRefusedError','ConnectionResetError','FileExistsError','FileNotFoundError','InterruptedError','IsADirectoryError','NotADirectoryError','PermissionError','ProcessLookupError','TimeoutError','Warning','UserWarning','DeprecationWarning','PendingDeprecationWarning','SyntaxWarning','RuntimeWarning','FutureWarning','ImportWarning','UnicodeWarning','BytesWarning','ResourceWarning'})
     ward = {'__name__','__file__','__package__','__spec__','__loader__','__builtins__','__doc__','__annotations__','__cached__','__path__','__slots__','__class__'}
     def __gather__(root):
         seen = set()
@@ -2959,7 +3672,7 @@ def {load}(i):
             return node
         if isinstance(node, ast.ExceptHandler):
             node = __cast__(node, 'shape', set())
-            if node.name and __token__(node.name) and not (wall[0] > 0 and room[0] == 0):
+            if node.name and __token__(node.name):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchStar):
@@ -3443,8 +4156,9 @@ def {guard}(blob,mark,seal):
 def {split}(blob):
  hold=[]
  slot=0
- while slot < len(blob):
-  hold.append(len(blob[slot:slot+16]))
+ top=min(len(blob),4096)
+ while slot < top:
+  hold.append(min(16,top-slot))
   slot += 16
  if not hold:
   raise SystemExit
@@ -3514,17 +4228,16 @@ def {drusef}(blob):
    return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
   return (len(blob),len(rows),rows[0],rows[-1],glow)
 def {gully}(blob):
- rows=[(byte^slot)&255 for slot,byte in enumerate(blob)]
- if not rows:
+ if not blob:
   raise SystemExit
- rows=(len(rows),sum(rows)&0xffffffff,min(rows),max(rows))
+ head=blob[:4096];rows=(len(blob),zlib.crc32(head)&0xffffffff,min(head),max(head))
  if rows[1]==0:
   raise SystemExit
  if rows[3]<rows[2]:
   raise SystemExit
  return rows
 def {beryl}(blob):
- rows=(len(blob),sum(blob)&0xffffffff)
+ rows=(len(blob),zlib.adler32(blob)&0xffffffff)
  if rows[0]<4:
   raise SystemExit
  if rows[1]==0:
@@ -3540,8 +4253,8 @@ def {scarp}(blob):
  rows[0] and rows[1]==0 and (_ for _ in ()).throw(SystemExit)
  return rows
 def {obsf}(blob):
- rows=blob[::2]
- rows=(len(rows),sum(rows)&0xffffffff)
+ rows=blob[:8192:2]
+ rows=(len(rows),zlib.crc32(rows)&0xffffffff)
  rows[0]==0 and (_ for _ in ()).throw(SystemExit)
  return rows
 def {shalex}(blob):
@@ -3904,7 +4617,7 @@ def __sear__(text, seed):
     chain = __chalk__(seed, 3)
     lace, knot = __lily__(seed + b'searlace', '|'.join(chain[:2]))
     text, book = __script__(seed + b'searword', ('zlib', 'crc32', 'builtins', 'exec', 'decompress', 'base64', 'b64decode', 'bz2', 'lzma'))
-    name = __sigil__(seed + b'searname', 4)
+    name = __sigil__(seed + b'searname', 8)
     bags = []
     bags.append(f"{ident}={utext!r}")
     bags.append(f"_={watermark!r}")
@@ -3920,8 +4633,8 @@ def __sear__(text, seed):
     void = __lotus__(book, 'b64decode')
     ice = __lotus__(book, 'bz2')
     rock = __lotus__(book, 'lzma')
-    coal = f"(lambda q,m:(int.from_bytes(q,'little')^int.from_bytes((m*((len(q)>>8)+1))[:len(q)],'little')).to_bytes(len(q),'little'))(getattr(__import__({wood}),{void})({name[2]}.encode()),bytes((({name[0]}*{lead})&255)^{iron}^(({name[0]}*{gold})&255)^{zinc} for {name[0]} in range(256)))"
-    ash = f"(lambda __p:(getattr(__import__({wind}),{metal}),getattr(__import__({ice}),{metal}),getattr(__import__({rock}),{metal}))[__p[0]](__p[1:]))({coal})"
+    coal = f"(lambda {name[4]}:(lambda {name[5]}:{name[5]})({name[4]}))((lambda q,m:(int.from_bytes(q,'little')^int.from_bytes((m*((len(q)>>8)+1))[:len(q)],'little')).to_bytes(len(q),'little'))(getattr(__import__({wood}),{void})({name[2]}.encode()),bytes((({name[0]}*{lead})&255)^{iron}^(({name[0]}*{gold})&255)^{zinc} for {name[0]} in range(256))))"
+    ash = f"(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))((lambda __p:(getattr(__import__({wind}),{metal}),getattr(__import__({ice}),{metal}),getattr(__import__({rock}),{metal}))[__p[0]](__p[1:]))({coal}))"
 
     inner = (
         f"(lambda {name[2]}:"
@@ -3957,9 +4670,9 @@ def __cowl__(code, seed):
    pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.b64encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
    words = ('base64', 'b64decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec')
    words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
-   name = __sigil__(seed + b'maskname', 5)
+   name = __sigil__(seed + b'maskname', 8)
    name[:3] = ['__yepppppp__', '__meoooo__', '__deptrai__']
-   return f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6]))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob!r},{shot!r})"
+   return f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob!r},{shot!r})"
 def __crystal__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
