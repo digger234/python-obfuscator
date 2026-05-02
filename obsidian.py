@@ -3344,9 +3344,9 @@ def {runf}():
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
     outer = f"""import base64,bz2,ctypes,gc,hashlib,lzma,marshal,os,platform,socket,sys,uuid,zlib
 __iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
-base=id(globals().get('__builtins__'));trid=id(sys.settrace);prid=id(sys.setprofile);meta=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;path=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
-__yepppppp__=base^trid^prid;__meoooo__=(meta<<8)^path;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
-blob={base64.b64encode(core).decode('ascii')!r};left={leftk};right={rightk};add={mistk};step={dustk};veil={cloakk};span={lanek};spur={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
+__dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
+__yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
+__ngauvcl__={base64.b64encode(core).decode('ascii')!r};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 def __concac__():raise SystemExit
 def __ditmemay__():
  global __iloveyou__;__iloveyou__=True;return True
@@ -3415,7 +3415,7 @@ def __varconcac__():
      if word in low:
       try:sys.path_hooks.remove(one)
       except:pass
-     break
+      break
   except:pass
  return 0
 def __varrrrr__(name,home,need):
@@ -3449,11 +3449,11 @@ def __OwO__():
    if hold is None or hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return __ditmemay__()
  return 0
 def __haha__():
- if id(sys.settrace)!=trid or id(sys.setprofile)!=prid:return __ditmemay__()
+ if id(sys.settrace)!=__deptraivailon__ or id(sys.setprofile)!=__deptraivcl__:return __ditmemay__()
  hold=id(globals().get('__builtins__'))
- if base and hold!=base:return __ditmemay__()
- if hasattr(sys,'meta_path') and len(sys.meta_path)>meta+2:return __ditmemay__()
- if hasattr(sys,'path_hooks') and len(sys.path_hooks)>path+2:return __ditmemay__()
+ if __dmm__ and hold!=__dmm__:return __ditmemay__()
+ if hasattr(sys,'meta_path') and len(sys.meta_path)>__toolvip__+2:return __ditmemay__()
+ if hasattr(sys,'path_hooks') and len(sys.path_hooks)>__chatvcl__+2:return __ditmemay__()
  if ((hold^id(sys.settrace)^id(sys.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return __ditmemay__()
  return 0
 def __hihi__():
@@ -3540,9 +3540,9 @@ def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  return hold(code,globals(),globals())
 def __tooldepphet__():
-  shell=base64.b64decode(blob.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+  shell=base64.b64decode(__ngauvcl__.encode());hashlib.sha256(shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   __cak__(shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=__skibiditoilet__(shell,spur);shell=__pnhamaidinh__(shell,span);shell=__luvpnha__(shell,veil);shell=__yeupnha__(shell,add,step);shell={heart}(shell,right);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,left)
+  shell=__skibiditoilet__(shell,__yeppro__);shell=__pnhamaidinh__(shell,__yepvip__);shell=__luvpnha__(shell,__yepngau__);shell=__yeupnha__(shell,__meocute__,__yepyep__);shell={heart}(shell,__meowmeow__);mode=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:]);shell={heart}(shell,__manhvcl__)
   mode=shell[0];mode not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return (zlib.decompress,bz2.decompress,lzma.decompress)[mode](shell[1:])
 def __depvcl__():
