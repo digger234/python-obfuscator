@@ -206,11 +206,11 @@ def __wisp__(code):
    blob = __vine__(tuple(rows)); return (len(rows), hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest())
 def __gasket__(blob):
    if len(blob) > 4096:
-        pick = (0, zlib.compress(blob, 6))
+        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9))), key=lambda row: len(row[1]))
    elif len(blob) < 512:
-        pick = min(((0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+        pick = min(((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
    else:
-        pick = min(((0, zlib.compress(blob, 6)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
    return bytes([pick[0]]) + pick[1]
 def __weld__(blob, key):
    rows = bytearray(); glow = key & 255; drift = ((key >> 8) & 255) or 73; tint = ((key >> 16) & 255) or 19
