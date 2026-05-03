@@ -299,21 +299,25 @@ def __corea__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): return _
 def __coreb__(blob, leftk, rightk, mistk, dustk, cloakk, lanek, spurk): peek=__weld__(__unsnare__(__unshroud__(__unravel__(__thorn__(blob, spurk), lanek), cloakk), mistk, dustk), rightk); mode=peek[0]; return __weld__((zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:]), leftk)
 def __wrapa__(blob, shellk, glassk, forgek, stampk): return __snare__(__weld__(__gasket__(__weld__(blob, shellk)), glassk), forgek, stampk)
 def __wrapb__(blob, shellk, glassk, forgek, stampk): peek=__weld__(__unsnare__(blob, forgek, stampk), glassk); mode=peek[0]; return __weld__((zlib.decompress, bz2.decompress, lzma.decompress)[mode](peek[1:]), shellk)
+def __nexus__(raw, seed, plan, face, loom):
+    src = raw if isinstance(raw, bytes) else raw.encode('utf-8', 'replace')
+    head = src[:4096]; tail = src[-4096:] if src else b''; size = len(src).to_bytes(8, 'little'); core = head + tail + size
+    bag = bytearray(); bag.extend(hashlib.sha512(seed + core[:256]).digest()); bag.extend(hashlib.blake2b(core[:512] + seed, digest_size=64).digest()); bag.extend(hashlib.blake2s(seed + core[-512:], digest_size=32).digest())
+    one = zlib.compress(core, 9); two = bz2.compress(core, 9); thr = lzma.compress(core, preset=6); best = min((one, two, thr, core), key=len); bag.extend(hashlib.sha512(best + seed).digest())
+    hist = bytearray(256)
+    for byte in core: hist[byte] = (hist[byte] + 1) & 255
+    bag.extend(hist); bag.extend(zlib.crc32(src).to_bytes(4, 'little')); bag.extend(zlib.adler32(src).to_bytes(4, 'little'))
+    view = repr((plan[:64] if isinstance(plan, tuple) else plan, face[:64] if isinstance(face, tuple) else face, loom[:64] if isinstance(loom, tuple) else loom)).encode('utf-8', 'replace')
+    bag.extend(hashlib.sha512(view + seed).digest()); cur = hashlib.sha512(seed + bytes(bag[-256:]) + size).digest()
+    funcs = (hashlib.sha512, hashlib.blake2b, hashlib.sha3_512, hashlib.sha256)
+    for num in range(1, 521):
+        fun = funcs[(num - 1) & 3]; win = 64 + ((num - 1) % 96); raw = cur + bag[-win:] + num.to_bytes(2, 'little')
+        bit = fun(raw, digest_size=64).digest() if fun is hashlib.blake2b else fun(raw).digest(); cur = hashlib.blake2s(bit + cur + size, digest_size=32).digest(); bag.extend(cur)
+    pack = zlib.compress(bytes(bag), 9); mark = marshal.dumps((len(src), len(best), zlib.crc32(pack) & 0xffffffff, hashlib.sha256(pack).digest()))
+    return hashlib.sha512(pack + mark + cur + seed).digest()
 def __mark__(code): return __glow__(code), __bloom__(code), __echo__(code), __magma__(code), __soul__(code), __wisp__(code)
-def __key__(seed):
-   slag, smoke = __spark__(seed + b'slag', 1000000, 2147483647), __spark__(seed + b'smoke', 1000000, 2147483647)
-   ashk, gritk, lavak, crustk = __spark__(seed + b'ash', 17, 251), __spark__(seed + b'grit', 3, 29), __spark__(seed + b'lava', 1, 7), __spark__(seed + b'crust', 9, 33)
-   emberk, cinderk, smeltk, veilk = __spark__(seed + b'ember', 17, 251), __spark__(seed + b'cinder', 3, 29), __spark__(seed + b'smelt', 17, 251), __spark__(seed + b'veil', 17, 251)
-   weftk, thornk = __spark__(seed + b'weft', 1024, 4095), __spark__(seed + b'thorn', 1024, 4095)
-   return slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk
-def __corek__(seed):
-   leftk, rightk = __spark__(seed + b'glass', 1000000, 2147483647), __spark__(seed + b'forge', 1000000, 2147483647)
-   mistk, dustk, cloakk, lanek, spurk = __spark__(seed + b'mist', 17, 251), __spark__(seed + b'dust', 3, 29), __spark__(seed + b'cloak', 17, 251), __spark__(seed + b'lane', 1024, 4095), __spark__(seed + b'spur', 1024, 4095)
-   return leftk, rightk, mistk, dustk, cloakk, lanek, spurk
-def __wrapk__(seed):
-   shellk, glassk = __spark__(seed + b'shell', 1000000, 2147483647), __spark__(seed + b'glasswrap', 1000000, 2147483647)
-   forgek, stampk = __spark__(seed + b'forgewrap', 17, 251), __spark__(seed + b'stampwrap', 3, 29)
-   return shellk, glassk, forgek, stampk
+def __keys__(seed, spec):
+   return tuple(__spark__(seed + tag, low, high) for tag, low, high in spec)
 def __brand__(blob):
     return hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest(), hashlib.md5(blob).hexdigest(), __flare__(blob), zlib.adler32(blob) ^ zlib.crc32(blob)
 def __carapace__(raw, seed, kind):
@@ -4382,19 +4386,10 @@ def {runf}():
 """
     ore = marshal.dumps(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True))
     pack = __gasket__(ore)
-    leftk, rightk, mistk, dustk, cloakk, lanek, spurk = __corek__(seed)
-    probe = __corea__(pack, leftk, rightk, mistk, dustk, cloakk, lanek, spurk)
-    core = pack
-    core = __weld__(core, leftk)
-    core = __gasket__(core)
-    core = __weld__(core, rightk)
-    core = __snare__(core, mistk, dustk)
-    core = __shroud__(core, cloakk)
-    core = __ravel__(core, lanek)
-    core = __thorn__(core, spurk)
+    leftk, rightk, mistk, dustk, cloakk, lanek, spurk = __keys__(seed, ((b'glass', 1000000, 2147483647), (b'forge', 1000000, 2147483647), (b'mist', 17, 251), (b'dust', 3, 29), (b'cloak', 17, 251), (b'lane', 1024, 4095), (b'spur', 1024, 4095)))
+    core = __corea__(pack, leftk, rightk, mistk, dustk, cloakk, lanek, spurk)
     graink = __chaff__(core)
-    probe != core and (_ for _ in ()).throw(ValueError('core'))
-    __coreb__(probe, leftk, rightk, mistk, dustk, cloakk, lanek, spurk) != pack and (_ for _ in ()).throw(ValueError('core'))
+    __coreb__(core, leftk, rightk, mistk, dustk, cloakk, lanek, spurk) != pack and (_ for _ in ()).throw(ValueError('core'))
     flag = hashlib.sha256(core).hexdigest()
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'wrap', mint) for slot in range(7)]
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
@@ -4624,15 +4619,9 @@ __depvcl__()
 """
     ore = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
     pack = __gasket__(ore)
-    shellk, glassk, forgek, stampk = __wrapk__(seed)
-    probe = __wrapa__(pack, shellk, glassk, forgek, stampk)
-    wrap = pack
-    wrap = __weld__(wrap, shellk)
-    wrap = __gasket__(wrap)
-    wrap = __weld__(wrap, glassk)
-    wrap = __snare__(wrap, forgek, stampk)
-    probe != wrap and (_ for _ in ()).throw(ValueError('wrap'))
-    __wrapb__(probe, shellk, glassk, forgek, stampk) != pack and (_ for _ in ()).throw(ValueError('wrap'))
+    shellk, glassk, forgek, stampk = __keys__(seed, ((b'shell', 1000000, 2147483647), (b'glasswrap', 1000000, 2147483647), (b'forgewrap', 17, 251), (b'stampwrap', 3, 29)))
+    wrap = __wrapa__(pack, shellk, glassk, forgek, stampk)
+    __wrapb__(wrap, shellk, glassk, forgek, stampk) != pack and (_ for _ in ()).throw(ValueError('wrap'))
     crest = hashlib.sha256(wrap).hexdigest()
     mark = (len(wrap), zlib.crc32(wrap) & 0xffffffff, zlib.adler32(wrap) & 0xffffffff, hashlib.sha1(wrap).hexdigest(), crest, sys.version_info[:2])
     grain = __spark__(seed + b'outer', 1, 255)
@@ -4745,13 +4734,10 @@ def __crystal__(tree, path, used):
    anneal, perm = __anneal__(seed, list(brand)); seed = hashlib.sha256(seed + repr(anneal).encode('utf-8', 'replace') + repr(perm).encode('ascii')).digest()
    plan, face, loom = __loom__(tree, code, stem, seed, clay, desert, hills, mortar, trio, render, shade, temper, metal, anneal, perm, meta)
    ore = hashlib.sha512(__vine__((atlas, norm, mark, meta, scarp, sand, mire, loam, silt, clay, quarry, qkey, desert, shrine, hills, mortar, trio, render, shade, temper, metal, anneal, perm, face, loom))).digest()
-   seed = hashlib.sha256(seed + ore).digest()
-   slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk = __key__(seed)
-   probe = __packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk)
-   probe = __packb__(probe, smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
-   raw = __gasket__(stem); raw = __weld__(raw, slag); raw = __snare__(raw, ashk, gritk); raw = __whorl__(raw, lavak); raw = __scald__(raw, smeltk); raw = __shroud__(raw, veilk); raw = __ravel__(raw, weftk); raw = __thorn__(raw, thornk); raw = __pair__(raw)
-   raw = __gasket__(raw); raw = __weld__(raw, smoke); raw = __spine__(raw, crustk); raw = __snare__(raw, emberk, cinderk); raw = __shroud__(raw, veilk ^ 0x5A); raw = __ravel__(raw, weftk + 1); raw = __thorn__(raw, thornk + 1); raw = __pair__(raw)
-   probe != raw and (_ for _ in ()).throw(ValueError('pack'))
+   turn = __nexus__(stem + ore, seed, plan, face, loom)
+   seed = hashlib.sha256(seed + ore + turn).digest()
+   slag, smoke, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk = __keys__(seed, ((b'slag', 1000000, 2147483647), (b'smoke', 1000000, 2147483647), (b'ash', 17, 251), (b'grit', 3, 29), (b'lava', 1, 7), (b'crust', 9, 33), (b'ember', 17, 251), (b'cinder', 3, 29), (b'smelt', 17, 251), (b'veil', 17, 251), (b'weft', 1024, 4095), (b'thorn', 1024, 4095)))
+   raw = __packb__(__packa__(stem, slag, ashk, gritk, lavak, smeltk, veilk, weftk, thornk), smoke, crustk, emberk, cinderk, veilk, weftk, thornk)
    raw = __veil__(raw, plan)
    chaffk = __chaff__(raw)
    if len(raw) < 8:
