@@ -206,11 +206,11 @@ def __wisp__(code):
    blob = __vine__(tuple(rows)); return (len(rows), hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest())
 def __gasket__(blob):
    if len(blob) > 4096:
-        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9))), key=lambda row: len(row[1]))
+        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3))), key=lambda row: (len(row[1]), row[0]))
    elif len(blob) < 512:
-        pick = min(((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+        pick = min(((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: (len(row[1]), row[0]))
    else:
-        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: len(row[1]))
+        pick = min(((0, zlib.compress(blob, 4)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: (len(row[1]), row[0]))
    return bytes([pick[0]]) + pick[1]
 def __weld__(blob, key):
    rows = bytearray(); glow = key & 255; drift = ((key >> 8) & 255) or 73; tint = ((key >> 16) & 255) or 19
@@ -2359,7 +2359,7 @@ def __mav__(tree, code, seed):
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
-def __nox__(tree, code, seed):
+def __night__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
@@ -2389,7 +2389,7 @@ def __qel__(tree, code, seed):
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
-def __rix__(tree, code, seed):
+def __rice__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
@@ -2418,7 +2418,7 @@ def __tav__(tree, code, seed):
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __ulx__(tree, code, seed):
+def __umber__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.AsyncFunctionDef, ast.AsyncFor, ast.AsyncWith, ast.Await)): rows.append((type(node).__name__, getattr(node, 'lineno', 0)))
@@ -2436,7 +2436,7 @@ def __vor__(tree, code, seed):
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __wex__(tree, code, seed):
+def __wool__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.List, ast.Tuple, ast.Set)): rows.append((type(node).__name__, len(node.elts), type(getattr(node, 'ctx', None)).__name__, tuple(type(one).__name__ for one in node.elts[:64]), getattr(node, 'lineno', 0)))
@@ -2493,7 +2493,7 @@ def __orz__(tree, code, seed):
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
-def __nyx__(tree, code, seed):
+def __dusk__(tree, code, seed):
     rows = []
     hold = [(tree, 0)]
     while hold:
@@ -2504,7 +2504,7 @@ def __nyx__(tree, code, seed):
     wide = max((row[1] for row in rows), default=0)
     fog = __mix__(seed, (__hist__((row[0], row[1], row[2]) for row in rows), tuple(rows[:1024]), len(rows), wide))
     return (len(rows), wide, fog.hex())
-def __pax__(tree, code, seed):
+def __peace__(tree, code, seed):
     rows = []
     for one in __drip__(code):
         raw = one.co_code
@@ -2512,7 +2512,7 @@ def __pax__(tree, code, seed):
     shape = __hist__(type(node).__name__ for node in ast.walk(tree))
     fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
-def __qyx__(tree, code, seed):
+def __quill__(tree, code, seed):
     rows = []
     kind = type(code)
     for one in __drip__(code):
@@ -2523,7 +2523,7 @@ def __qyx__(tree, code, seed):
     shape = __hist__(type(node).__name__ for node in ast.walk(tree))
     fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
-def __rux__(tree, code, seed):
+def __rust__(tree, code, seed):
     rows = []
     for one in __drip__(code):
         line = getattr(one, 'co_linetable', getattr(one, 'co_lnotab', b'')); exc = getattr(one, 'co_exceptiontable', b'')
@@ -2541,7 +2541,7 @@ def __siv__(tree, code, seed):
     shape = __hist__(type(node).__name__ for node in ast.walk(tree))
     fog = __mix__(seed, (__hist__(rows), shape, tuple(rows[:256]), len(rows)))
     return (len(rows), fog.hex())
-def __tix__(tree, code, seed):
+def __tick__(tree, code, seed):
     rows = []
     for one in __drip__(code):
         names = tuple((slot, val, len(val), zlib.crc32(val.encode('utf-8', 'replace')) & 0xffffffff) for slot, val in enumerate(one.co_names[:256]))
@@ -2599,7 +2599,7 @@ def __xul__(tree, code, seed):
     walk(tree)
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1536]), len(rows), len(set(row[0] for row in rows))))
     return (len(rows), fog.hex())
-def __yex__(tree, code, seed):
+def __yarn__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant):
@@ -2623,7 +2623,7 @@ def __zok__(tree, code, seed):
     for one in __drip__(code): names.extend(str(name).lower() for name in one.co_names)
     fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __kex__(tree, code, seed):
+def __pearl__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Try):
@@ -2635,7 +2635,7 @@ def __kex__(tree, code, seed):
     for one in __drip__(code): exc.append((one.co_name, len(getattr(one, 'co_exceptiontable', b'')), zlib.crc32(getattr(one, 'co_exceptiontable', b'')) & 0xffffffff))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(exc[:256]), len(rows)))
     return (len(rows), fog.hex())
-def __lix__(tree, code, seed):
+def __lime__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Await): rows.append(('await', type(node.value).__name__, getattr(node, 'lineno', 0)))
@@ -2646,7 +2646,7 @@ def __lix__(tree, code, seed):
     flags = tuple((one.co_name, one.co_flags, one.co_stacksize) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), flags, len(rows)))
     return (len(rows), fog.hex())
-def __mox__(tree, code, seed):
+def __cedar__(tree, code, seed):
     rows = []
     for one in __drip__(code):
         raw = one.co_code
@@ -2699,7 +2699,7 @@ def __qor__(tree, code, seed):
     for one in __drip__(code): names.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
     fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
-def __rax__(tree, code, seed):
+def __zinc__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef): rows.append(('class', node.name, tuple(type(one).__name__ for one in node.bases), len(node.keywords), len(node.body), getattr(node, 'lineno', 0)))
@@ -2709,7 +2709,7 @@ def __rax__(tree, code, seed):
     quals = tuple((one.co_name, one.co_qualname, one.co_firstlineno) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), quals, tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
-def __sax__(tree, code, seed):
+def __topaz__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.JoinedStr): rows.append(('join', len(node.values), tuple(type(one).__name__ for one in node.values), getattr(node, 'lineno', 0)))
@@ -2781,7 +2781,7 @@ def __yok__(tree, code, seed):
     tables = tuple((one.co_name, one.co_firstlineno, len(getattr(one, 'co_linetable', b'')), zlib.crc32(getattr(one, 'co_linetable', b'')) & 0xffffffff) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), tables, tuple(rows[:1536]), len(rows)))
     return (len(rows), fog.hex())
-def __zax__(tree, code, seed):
+def __ruby__(tree, code, seed):
     rows = []
     for node in ast.walk(tree):
         kids = list(ast.iter_child_nodes(node))
@@ -3364,7 +3364,7 @@ def __squid__(tree, code, seed):
         rows.append((one.co_name, len(data), zlib.crc32(bytes(part)) & 0xffffffff, sum(part) & 0xffffffff))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows), __glow__(code), __bloom__(code)))
     return (len(rows), fog.hex())
-def __vexx__(tree, code, seed):
+def __wraith__(tree, code, seed):
     rows = []
     names = set()
     attrs = set()
@@ -3599,7 +3599,7 @@ def __kelp__(bag, seed):
             rows.append(('cmp', tuple(type(one).__name__ for one in node.ops), len(node.comparators), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('kelp', len(rows), fog.hex())
-def __coralx__(bag, seed):
+def __shell__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, ast.If):
@@ -3651,7 +3651,7 @@ def __dripstone__(bag, seed):
             rows.append(('item', type(node.context_expr).__name__, type(node.optional_vars).__name__ if node.optional_vars else ''))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('dripstone', len(rows), fog.hex())
-def __sculkx__(bag, seed):
+def __sculk__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -3659,7 +3659,7 @@ def __sculkx__(bag, seed):
             rows.append((type(node).__name__, node.name, len(node.body), len(args.args), len(args.kwonlyargs), int(args.vararg is not None), int(args.kwarg is not None), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('sculkx', len(rows), fog.hex())
-def __tuffx__(bag, seed):
+def __tufa__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, ast.arg):
@@ -3708,7 +3708,7 @@ def __andesite__(bag, seed):
             rows.append((type(node).__name__, tuple(node.names), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
     return ('andesite', len(rows), fog.hex())
-def __basaltx__(bag, seed):
+def __crag__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, ast.Return):
@@ -3801,24 +3801,24 @@ def __lantern__(bag, seed):
             rows.append(('pass', getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
     return ('lantern', len(rows), fog.hex())
-def __torchx__(bag, seed):
+def __lamp__(bag, seed):
     rows = []
     for one in bag['codes']:
         rows.append((one.co_name, one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
-    return ('torchx', len(rows), fog.hex())
+    return ('lamp', len(rows), fog.hex())
 def __campfire__(bag, seed):
     rows = []
     for one in bag['codes']:
         rows.append((one.co_name, one.co_stacksize, one.co_flags, one.co_firstlineno, len(one.co_code)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('campfire', len(rows), fog.hex())
-def __anvilx__(bag, seed):
+def __hammer__(bag, seed):
     rows = []
     for one in bag['codes']:
         rows.append((one.co_name, tuple(one.co_names[:64]), len(one.co_names)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
-    return ('anvilx', len(rows), fog.hex())
+    return ('hammer', len(rows), fog.hex())
 def __furnace__(bag, seed):
     rows = []
     for one in bag['codes']:
@@ -4122,13 +4122,13 @@ def __drowned2__(bag, seed):
         rows.append((one.co_name, getattr(one, 'co_positions', lambda: ())().__class__.__name__, len(one.co_linetable)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('drowned2', len(rows), fog.hex())
-def __wardenx__(bag, seed):
+def __watch__(bag, seed):
     rows = []
     for one in bag['codes']:
         rows.append((one.co_name, one.co_flags & 0xff, (one.co_flags >> 8) & 0xff, one.co_stacksize))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('wardenx', len(rows), fog.hex())
-def __allayx__(bag, seed):
+def __sprite__(bag, seed):
     rows = []
     for node in bag['nodes'][:4096]:
         rows.append((type(node).__name__, int(hasattr(node, 'body')), int(hasattr(node, 'value')), int(hasattr(node, 'target')), int(hasattr(node, 'name'))))
@@ -4184,7 +4184,7 @@ def __breezez__(bag, seed):
                 rows.append((type(node).__name__, type(comp.target).__name__, type(comp.iter).__name__, len(comp.ifs), comp.is_async, getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('breezez', len(rows), fog.hex())
-def __catx__(bag, seed):
+def __cat__(bag, seed):
     rows = []
     side = getattr(ast, 'ExtSlice', None)
     for node in bag['nodes']:
@@ -4219,13 +4219,13 @@ def __horse__(bag, seed):
             rows.append((type(node.target).__name__, type(node.iter).__name__, tuple(type(one).__name__ for one in node.body[:16]), tuple(type(one).__name__ for one in node.orelse[:16]), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
     return ('horse', len(rows), fog.hex())
-def __iron__(bag, seed):
+def __metal__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, ast.Try):
             rows.append((tuple(type(one).__name__ for one in node.body[:16]), tuple(type(one.type).__name__ if one.type else '' for one in node.handlers[:16]), tuple(type(one).__name__ for one in node.finalbody[:16]), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
-    return ('iron', len(rows), fog.hex())
+    return ('metal', len(rows), fog.hex())
 def __mooshroom__(bag, seed):
     rows = []
     for one in bag['codes']:
@@ -4258,7 +4258,7 @@ def __snow__(bag, seed):
         rows.append((type(node).__name__, line, end, end - line if end and line else 0))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('snow', len(rows), fog.hex())
-def __wolfx__(bag, seed):
+def __wolf__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, ast.ClassDef):
@@ -4274,7 +4274,7 @@ def __zoglin__(bag, seed):
             rows.append((node.name, 'async', tuple(type(one).__name__ for one in node.body[:32]), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
     return ('zoglin', len(rows), fog.hex())
-def __piglinx__(bag, seed):
+def __brute__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, (ast.If, ast.While)):
@@ -4433,9 +4433,620 @@ def __mica__(bag, seed):
             rows.append((type(node).__name__, type(elt).__name__ if elt is not None else '', type(key).__name__ if key is not None else '', type(val).__name__ if val is not None else '', tuple(gens), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('mica', len(rows), fog.hex())
+def __lexi__(text):
+    rows = []
+    tok = __import__('tokenize')
+    io = __import__('io')
+    try:
+        for one in tok.generate_tokens(io.StringIO(text).readline):
+            rows.append((one.type, one.string, one.start, one.end, one.line))
+    except tok.TokenError as err:
+        rows.append((-1, repr(err), (0, 0), (0, 0), ''))
+    return tuple(rows)
+def __linen__(text, lex, path, seed):
+    rows = []
+    lines = text.splitlines(True)
+    vals = []
+    for slot, line in enumerate(lines):
+        vals.append(len(line))
+        rows.append((slot & 255, len(line), int(line.endswith('\n')), int(line.endswith('\r\n')), zlib.crc32(line.encode('utf-8', 'replace')) & 0xffffffff))
+    wide = (min(vals) if vals else 0, max(vals) if vals else 0, sum(vals) if vals else 0, len(vals))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), tuple(rows[-128:]), wide))
+    return ('linen', len(rows), fog.hex())
+def __gap__(text, lex, path, seed):
+    rows = []
+    space = tab = cr = lf = form = vert = 0
+    for ch in text:
+        if ch == ' ': space += 1
+        elif ch == '\t': tab += 1
+        elif ch == '\r': cr += 1
+        elif ch == '\n': lf += 1
+        elif ch == '\f': form += 1
+        elif ch == '\v': vert += 1
+    for line in text.splitlines():
+        lead = len(line) - len(line.lstrip(' \t'))
+        rows.append((lead, line[:lead], len(line), len(line.rstrip(' \t'))))
+    fog = __mix__(seed, ((space, tab, cr, lf, form, vert), __hist__(rows), tuple(rows[:512])))
+    return ('gap', len(rows), fog.hex())
+def __dent__(text, lex, path, seed):
+    rows = []
+    stack = [0]
+    turns = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        lead = len(line) - len(line.lstrip(' '))
+        hard = len(line) - len(line.lstrip('\t'))
+        mix = lead + hard * 8
+        if mix > stack[-1]:
+            stack.append(mix); turns.append(('in', mix, len(stack)))
+        while mix < stack[-1] and len(stack) > 1:
+            turns.append(('out', stack.pop(), len(stack)))
+        rows.append((mix, hard, len(line), line.lstrip()[:12]))
+    fog = __mix__(seed, (__hist__(rows), tuple(turns[:512]), tuple(rows[:512]), len(stack)))
+    return ('dent', len(rows), fog.hex())
+def __track__(text, lex, path, seed):
+    rows = []
+    hits = []
+    for slot, line in enumerate(text.splitlines(True)):
+        tail = len(line.rstrip('\r\n')) - len(line.rstrip(' \t\r\n'))
+        semi = line.rstrip().endswith(';')
+        if tail or semi:
+            hits.append((slot, tail, int(semi), len(line)))
+        rows.append((tail, int(semi), len(line), line.count(';')))
+    fog = __mix__(seed, (__hist__(rows), tuple(hits[:512]), len(hits)))
+    return ('track', len(hits), fog.hex())
+def __letter__(text, lex, path, seed):
+    rows = []
+    uni = __import__('unicodedata')
+    cats = {}
+    wide = [0, 0, 0, 0, 0]
+    for ch in text:
+        cat = uni.category(ch)
+        cats[cat] = cats.get(cat, 0) + 1
+        code = ord(ch)
+        if code < 128: wide[0] += 1
+        elif code < 2048: wide[1] += 1
+        elif code < 65536: wide[2] += 1
+        elif code < 1114112: wide[3] += 1
+        if ch.isidentifier(): wide[4] += 1
+    for key in sorted(cats):
+        rows.append((key, cats[key]))
+    fog = __mix__(seed, (tuple(rows), tuple(wide), len(text)))
+    return ('glyphs', len(rows), fog.hex())
+def __word__(text, lex, path, seed):
+    rows = []
+    words = []
+    name = getattr(__import__('token'), 'NAME')
+    for typ, val, start, end, line in lex:
+        if typ == name:
+            words.append(val)
+    bits = [0] * 64
+    ngram = {}
+    for word in words[:4096]:
+        low = word.lower()
+        raw = word.encode('utf-8', 'replace')
+        mark = int.from_bytes(hashlib.blake2s(raw, digest_size=8).digest(), 'little')
+        for bit in range(64):
+            bits[bit] += 1 if (mark >> bit) & 1 else -1
+        for slot in range(max(0, len(low) - 2)):
+            tri = low[slot:slot + 3]
+            ngram[tri] = ngram.get(tri, 0) + 1
+        rows.append((len(word), int(word == low), int(word.isupper()), int(any(ord(ch) > 127 for ch in word)), word.count('_'), zlib.crc32(raw) & 0xffffffff))
+    face = sum((1 << bit) for bit, val in enumerate(bits) if val >= 0)
+    gram = tuple(sorted(ngram.items(), key=lambda row: (-row[1], row[0]))[:256])
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(set(words)), len(words), face, gram))
+    return ('word', len(words), fog.hex())
+def __key__(text, lex, path, seed):
+    rows = []
+    key = set(__import__('keyword').kwlist)
+    name = getattr(__import__('token'), 'NAME')
+    flow = []
+    for typ, val, start, end, line in lex:
+        if typ == name and val in key:
+            flow.append((val, start[0], start[1]))
+    for val, row, col in flow[:2048]:
+        rows.append((val, row & 255, col, len(val)))
+    fog = __mix__(seed, (__hist__(val for val, _, _ in flow), tuple(rows), len(flow)))
+    return ('key', len(flow), fog.hex())
+def __digit__(text, lex, path, seed):
+    rows = []
+    num = getattr(__import__('token'), 'NUMBER')
+    for typ, val, start, end, line in lex:
+        if typ != num:
+            continue
+        low = val.lower()
+        rows.append((len(val), int('x' in low), int('b' in low), int('o' in low), int('e' in low), int('_' in low), int('j' in low), start[0] & 255, zlib.crc32(val.encode()) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('numx', len(rows), fog.hex())
+def __string__(text, lex, path, seed):
+    rows = []
+    st = getattr(__import__('token'), 'STRING')
+    for typ, val, start, end, line in lex:
+        if typ != st:
+            continue
+        low = val[:8].lower()
+        raw = val.encode('utf-8', 'replace')
+        hist = [0] * 8
+        for byte in raw[:4096]:
+            hist[byte >> 5] += 1
+        ent = 0
+        if raw:
+            tab = {}
+            for byte in raw[:4096]:
+                tab[byte] = tab.get(byte, 0) + 1
+            for valx in tab.values():
+                ent += valx * valx
+        rows.append((len(val), int("'''" in val[:6] or '"""' in val[:6]), int('r' in low), int('b' in low), int('f' in low), val[:3], val[-3:], tuple(hist), ent, zlib.crc32(raw) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows), __hist__(row[7] for row in rows)))
+    return ('string', len(rows), fog.hex())
+def __head__(text, lex, path, seed):
+    rows = []
+    st = getattr(__import__('token'), 'STRING')
+    for typ, val, start, end, line in lex:
+        if typ != st:
+            continue
+        pre = []
+        for ch in val[:8]:
+            if ch in 'rRuUbBfF':
+                pre.append(ch.lower())
+            elif ch in '"\'':
+                break
+        rows.append((''.join(pre), len(val), start[0] & 255))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('head', len(rows), fog.hex())
+def __slash__(text, lex, path, seed):
+    rows = []
+    st = getattr(__import__('token'), 'STRING')
+    for typ, val, start, end, line in lex:
+        if typ != st:
+            continue
+        esc = val.count('\\')
+        rows.append((esc, val.count('\\n'), val.count('\\x'), val.count('\\u'), val.count('\\U'), val.count('\\N'), len(val)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('slash', len(rows), fog.hex())
+def __mold__(text, lex, path, seed):
+    rows = []
+    st = getattr(__import__('token'), 'STRING')
+    for typ, val, start, end, line in lex:
+        low = val[:8].lower()
+        if typ == st and 'f' in low:
+            dep = top = 0
+            for ch in val:
+                if ch == '{':
+                    dep += 1
+                    top = max(top, dep)
+                elif ch == '}' and dep:
+                    dep -= 1
+            rows.append((len(val), val.count('{'), val.count('}'), val.count('!'), val.count(':'), top, dep, start[0] & 255))
+    scan = []
+    for slot, line in enumerate(text.splitlines()):
+        if 'f"' in line or "f'" in line or 'F"' in line or "F'" in line:
+            scan.append((slot, line.count('{'), line.count('}'), line.count('='), line.count('!'), len(line)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), tuple(scan[:256]), len(scan), __hist__(row[5] for row in rows)))
+    return ('mold', len(rows) + len(scan), fog.hex())
+def __brace__(text, lex, path, seed):
+    rows = []
+    open = {'(': 0, '[': 0, '{': 0}
+    close = {')': 0, ']': 0, '}': 0}
+    for ch in text:
+        if ch in open: open[ch] += 1
+        elif ch in close: close[ch] += 1
+    rows.extend((key, open[key]) for key in sorted(open))
+    rows.extend((key, close[key]) for key in sorted(close))
+    fog = __mix__(seed, (tuple(rows), len(text), zlib.crc32(text.encode('utf-8', 'replace')) & 0xffffffff))
+    return ('bracez', len(rows), fog.hex())
+def __paren__(text, lex, path, seed):
+    rows = []
+    dep = 0
+    top = 0
+    hist = {}
+    for ch in text:
+        if ch in '([{':
+            dep += 1
+            top = max(top, dep)
+        elif ch in ')]}' and dep:
+            dep -= 1
+        hist[dep] = hist.get(dep, 0) + 1
+    for key in sorted(hist)[:256]:
+        rows.append((key, hist[key]))
+    fog = __mix__(seed, (tuple(rows), top, dep, len(text)))
+    return ('paren', len(rows), fog.hex())
+def __sign__(text, lex, path, seed):
+    rows = []
+    op = getattr(__import__('token'), 'OP')
+    vals = {}
+    for typ, val, start, end, line in lex:
+        if typ == op:
+            vals[val] = vals.get(val, 0) + 1
+    for key in sorted(vals):
+        rows.append((key, vals[key]))
+    fog = __mix__(seed, (tuple(rows), len(rows)))
+    return ('sign', len(rows), fog.hex())
+def __point__(text, lex, path, seed):
+    rows = []
+    vals = [one[1] for one in lex]
+    for slot in range(1, len(vals) - 1):
+        if vals[slot] == '.' and vals[slot - 1].isidentifier() and vals[slot + 1].isidentifier():
+            rows.append((vals[slot - 1][-16:], vals[slot + 1][:16], slot & 1023))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('point', len(rows), fog.hex())
+def __summon__(text, lex, path, seed):
+    rows = []
+    vals = [(one[0], one[1], one[2]) for one in lex if one[1].strip()]
+    name = getattr(__import__('token'), 'NAME')
+    for slot in range(len(vals) - 1):
+        if vals[slot][0] == name and vals[slot + 1][1] == '(':
+            rows.append((vals[slot][1], vals[slot][2][0] & 255, vals[slot][2][1]))
+    fog = __mix__(seed, (__hist__(row[0] for row in rows), tuple(rows[:1024]), len(rows)))
+    return ('summon', len(rows), fog.hex())
+def __bring__(text, lex, path, seed):
+    rows = []
+    lines = text.splitlines()
+    for slot, line in enumerate(lines):
+        cut = line.strip()
+        if cut.startswith('import ') or cut.startswith('from '):
+            rows.append((slot & 255, len(cut), cut.count(','), cut.count('.'), zlib.crc32(cut.encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('bring', len(rows), fog.hex())
+def __path__(text, lex, path, seed):
+    rows = []
+    base = os.path.basename(path)
+    root = os.path.dirname(path)
+    parts = [part for part in root.replace('\\', '/').split('/') if part]
+    for slot, part in enumerate(parts[-16:]):
+        rows.append((slot, len(part), zlib.crc32(part.encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, (base, len(base), tuple(rows), len(text)))
+    return ('path', len(rows), fog.hex())
+def __shebang__(text, lex, path, seed):
+    first = text.splitlines()[0] if text.splitlines() else ''
+    hit = first.startswith('#!')
+    row = (int(hit), len(first), first[:64], zlib.crc32(first.encode('utf-8', 'replace')) & 0xffffffff)
+    fog = __mix__(seed, row)
+    return ('shebang', int(hit), fog.hex())
+def __coding__(text, lex, path, seed):
+    rows = []
+    for slot, line in enumerate(text.splitlines()[:2]):
+        low = line.lower()
+        hit = 'coding' in low or 'encoding' in low
+        rows.append((slot, int(hit), len(line), zlib.crc32(line.encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, tuple(rows))
+    return ('coding', len(rows), fog.hex())
+def __blank__(text, lex, path, seed):
+    rows = []
+    run = 0
+    for line in text.splitlines():
+        if line.strip():
+            if run:
+                rows.append(run)
+                run = 0
+        else:
+            run += 1
+    if run:
+        rows.append(run)
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('blank', len(rows), fog.hex())
+def __chunk__(text, lex, path, seed):
+    rows = []
+    lines = text.splitlines()
+    at = 0
+    while at < len(lines):
+        part = lines[at:at + 16]
+        vals = [len(line) for line in part]
+        rows.append((at // 16, sum(vals), max(vals) if vals else 0, min(vals) if vals else 0, zlib.adler32('\n'.join(part).encode('utf-8', 'replace')) & 0xffffffff))
+        at += 16
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('chunk', len(rows), fog.hex())
+def __cover__(text, lex, path, seed):
+    rows = []
+    for slot, line in enumerate(text.splitlines()):
+        cut = line.rstrip()
+        rows.append((int(cut.endswith('\\')), int(line.startswith((' ', '\t'))), cut.count(','), cut.count('(') + cut.count('[') + cut.count('{'), len(cut)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('cover', len(rows), fog.hex())
+def __style__(text, lex, path, seed):
+    rows = []
+    name = getattr(__import__('token'), 'NAME')
+    for typ, val, start, end, line in lex:
+        if typ != name:
+            continue
+        low = val.lower()
+        snake = '_' in val
+        camel = any(ch.isupper() for ch in val[1:])
+        rows.append((len(val), int(snake), int(camel), int(val == low), int(val[:1].isupper())))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('style', len(rows), fog.hex())
+def __noise__(text, lex, path, seed):
+    rows = []
+    chars = '{}[]();:,.+-*/%@&|^~=<>'
+    for ch in chars:
+        rows.append((ch, text.count(ch)))
+    fog = __mix__(seed, (tuple(rows), len(text)))
+    return ('noise', len(rows), fog.hex())
+def __ratio__(text, lex, path, seed):
+    total = len(text) or 1
+    line = len(text.splitlines()) or 1
+    alpha = sum(1 for ch in text if ch.isalpha())
+    digit = sum(1 for ch in text if ch.isdigit())
+    space = sum(1 for ch in text if ch.isspace())
+    punct = total - alpha - digit - space
+    row = (total, line, alpha * 1000 // total, digit * 1000 // total, space * 1000 // total, punct * 1000 // total)
+    fog = __mix__(seed, row)
+    return ('ratio', total, fog.hex())
+def __duet__(text, lex, path, seed):
+    rows = []
+    seen = {}
+    for slot in range(max(0, len(text) - 1)):
+        pair = text[slot:slot + 2]
+        seen[pair] = seen.get(pair, 0) + 1
+    tri = {}
+    for slot in range(max(0, len(text) - 2)):
+        one = text[slot:slot + 3]
+        tri[one] = tri.get(one, 0) + 1
+    for key, val in sorted(seen.items(), key=lambda row: (-row[1], row[0]))[:512]:
+        rows.append((key, val))
+    top = tuple(sorted(tri.items(), key=lambda row: (-row[1], row[0]))[:256])
+    fog = __mix__(seed, (tuple(rows), top, len(seen), len(tri), len(text)))
+    return ('duet', len(rows) + len(top), fog.hex())
+def __current__(text, lex, path, seed):
+    rows = []
+    keys = {'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'match', 'case', 'return', 'yield', 'raise', 'assert'}
+    name = getattr(__import__('token'), 'NAME')
+    for typ, val, start, end, line in lex:
+        if typ == name and val in keys:
+            rows.append((val, start[0] & 255, start[1]))
+    fog = __mix__(seed, (__hist__(row[0] for row in rows), tuple(rows[:1024]), len(rows)))
+    return ('flowtxt', len(rows), fog.hex())
+def __brine__(text, lex, path, seed):
+    raw = text.encode('utf-8', 'replace')
+    cuts = []
+    for step in (1, 3, 5, 7, 11):
+        bag = bytearray()
+        for slot, byte in enumerate(raw[:65536]):
+            bag.append((byte + step + slot) & 255)
+        cuts.append((step, len(bag), zlib.crc32(bytes(bag)) & 0xffffffff, hashlib.sha1(bytes(bag[:4096])).hexdigest()))
+    fog = __mix__(seed, tuple(cuts))
+    return ('saltxt', len(raw), fog.hex())
+def __scan__(text, lex, path, seed):
+    rows = []
+    keys = ('exec', 'eval', 'compile', 'open', '__import__', 'getattr', 'setattr', 'globals', 'locals', 'vars', 'input', 'socket', 'subprocess', 'requests', 'httpx', 'aiohttp', 'pickle', 'marshal', 'base64', 'zlib', 'bz2', 'lzma', 'ctypes', 'threading', 'asyncio', 'password', 'token', 'secret', 'cookie', 'session', 'apikey', 'webhook', 'bearer', 'credential', 'license')
+    low = text.lower()
+    for key in keys:
+        count = low.count(key)
+        if count:
+            rows.append((key, count, low.find(key), low.rfind(key)))
+    fog = __mix__(seed, (tuple(rows), __hist__(row[0] for row in rows), len(low)))
+    return ('scan', len(rows), fog.hex())
+def __moss__(text, lex, path, seed):
+    rows = []
+    last = ''
+    for slot, line in enumerate(text.splitlines()):
+        cut = line.strip()
+        if cut:
+            rows.append((slot & 255, len(cut), zlib.crc32((last + cut).encode('utf-8', 'replace')) & 0xffffffff))
+            last = cut[-32:]
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(rows[-256:])))
+    return ('mossy', len(rows), fog.hex())
+def __reed__(text, lex, path, seed):
+    rows = []
+    vals = text.splitlines()
+    for slot in range(0, len(vals), 8):
+        part = vals[slot:slot + 8]
+        tall = ''.join(line[:1] for line in part)
+        deep = ''.join(line[-1:] for line in part if line)
+        rows.append((slot // 8, len(part), zlib.crc32(tall.encode('utf-8', 'replace')) & 0xffffffff, zlib.adler32(deep.encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('reedx', len(rows), fog.hex())
+def __weave__(text, lex, path, seed):
+    rows = []
+    name = getattr(__import__('token'), 'NAME')
+    op = getattr(__import__('token'), 'OP')
+    last = None
+    for typ, val, start, end, line in lex:
+        if typ in (name, op):
+            if last is not None:
+                rows.append((last[0], val, start[0] - last[1][0], start[1]))
+            last = (val, start)
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('loomx', len(rows), fog.hex())
+def __flax__(text, lex, path, seed):
+    rows = []
+    vals = []
+    for typ, val, start, end, line in lex:
+        vals.append((typ, len(val), start[0], start[1], end[0], end[1]))
+    for slot in range(0, len(vals), 32):
+        part = vals[slot:slot + 32]
+        rows.append((slot // 32, len(part), __hist__(one[0] for one in part), sum(one[1] for one in part)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(vals)))
+    return ('flax', len(rows), fog.hex())
+def __fiber__(text, lex, path, seed):
+    rows = []
+    for line in text.splitlines():
+        if not line:
+            continue
+        rows.append((len(line), line[:1], line[-1:], line.count(' '), line.count('\t'), zlib.crc32(line[:80].encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('grainx', len(rows), fog.hex())
+def __badge__(text, lex, path, seed):
+    rows = []
+    cur = hashlib.sha256(seed).digest()
+    for line in text.splitlines()[:4096]:
+        raw = line.encode('utf-8', 'replace')
+        cur = hashlib.sha256(cur + len(raw).to_bytes(4, 'little') + raw[:256]).digest()
+        rows.append((cur[:4], len(raw), raw[:1], raw[-1:]))
+    fog = __mix__(seed, (cur, tuple(rows[:256]), len(rows)))
+    return ('stampx', len(rows), fog.hex())
+def __crease__(text, lex, path, seed):
+    rows = []
+    lines = text.splitlines()
+    for slot, line in enumerate(lines):
+        left = line[:len(line) // 2]
+        right = line[len(line) // 2:]
+        rows.append((slot & 255, zlib.crc32(left.encode('utf-8', 'replace')) & 0xffffffff, zlib.adler32(right.encode('utf-8', 'replace')) & 0xffffffff, len(left), len(right)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('foldx', len(rows), fog.hex())
+def __quote__(text, lex, path, seed):
+    rows = []
+    for line in text.splitlines():
+        rows.append((line.count("'"), line.count('"'), line.count("'''"), line.count('"""'), line.count('`'), len(line)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('quotex', len(rows), fog.hex())
+def __stripe__(text, lex, path, seed):
+    rows = []
+    roll = hashlib.sha256(seed + b'stripe').digest()
+    for slot, line in enumerate(text.splitlines()):
+        raw = line.encode('utf-8', 'replace')
+        roll = hashlib.sha256(roll + raw[:256] + len(raw).to_bytes(4, 'little')).digest()
+        rows.append((slot & 1023, hashlib.blake2s(raw, digest_size=8).hexdigest(), roll[:6], len(raw)))
+    fog = __mix__(seed, (__hist__(row[1] for row in rows), tuple(rows[:512]), tuple(rows[-128:]), roll))
+    return ('linehash', len(rows), fog.hex())
+def __space__(text, lex, path, seed):
+    rows = []
+    for line in text.splitlines():
+        runs = []
+        cur = 0
+        for ch in line:
+            if ch == ' ':
+                cur += 1
+            elif cur:
+                runs.append(cur); cur = 0
+        if cur:
+            runs.append(cur)
+        rows.append((len(runs), max(runs) if runs else 0, sum(runs), len(line)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('space', len(rows), fog.hex())
+def __meter__(text, lex, path, seed):
+    rows = []
+    jump = []
+    last = (0, 0)
+    for typ, val, start, end, line in lex:
+        jump.append((start[0] - last[0], start[1] - last[1]))
+        rows.append((typ, end[0] - start[0], end[1] - start[1], len(val), start[0] & 255))
+        last = end
+    fog = __mix__(seed, (__hist__(rows), __hist__(jump), tuple(rows[:2048]), len(rows)))
+    return ('meter', len(rows), fog.hex())
+def __route__(text, lex, path, seed):
+    rows = []
+    vals = [one[1] for one in lex if one[1].strip()]
+    for slot in range(max(0, len(vals) - 2)):
+        tri = vals[slot:slot + 3]
+        raw = ''.join(tri).encode('utf-8', 'replace')
+        rows.append((slot & 1023, len(raw), zlib.crc32(raw) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('route', len(rows), fog.hex())
+def __matter__(text, lex, path, seed):
+    rows = []
+    take = {getattr(__import__('token'), 'STRING'), getattr(__import__('token'), 'NUMBER')}
+    for typ, val, start, end, line in lex:
+        if typ in take:
+            raw = val.encode('utf-8', 'replace')
+            rows.append((typ, len(raw), raw[:8], raw[-8:], zlib.crc32(raw) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('matter', len(rows), fog.hex())
+def __bare__(text, lex, path, seed):
+    rows = []
+    bag = []
+    for line in text.splitlines():
+        cut = line.strip()
+        if cut and not cut.startswith('#'):
+            bag.append(cut)
+    for slot, cut in enumerate(bag[:4096]):
+        rows.append((slot & 255, len(cut), cut[:16], cut[-16:], zlib.adler32(cut.encode('utf-8', 'replace')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(bag)))
+    return ('bare', len(bag), fog.hex())
+def __rind__(text, lex, path, seed):
+    rows = []
+    vals = text.splitlines()
+    for slot, line in enumerate(vals):
+        raw = line[::-1].encode('utf-8', 'replace')
+        rows.append((slot & 255, len(raw), zlib.crc32(raw[:128]) & 0xffffffff, zlib.adler32(raw[-128:]) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('rind', len(rows), fog.hex())
+def __stamp__(text, lex, path, seed):
+    rows = []
+    last = 0
+    for slot, ch in enumerate(text[:131072]):
+        cur = (last + ord(ch) + slot) & 0xffffffff
+        if slot % 64 == 0:
+            rows.append((slot // 64, cur, ord(ch), last))
+        last = ((cur << 3) | (cur >> 29)) & 0xffffffff
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), last, len(text)))
+    return ('stamp', len(rows), fog.hex())
+def __wave__(text, lex, path, seed):
+    rows = []
+    vals = [len(line) for line in text.splitlines()]
+    for slot in range(1, len(vals)):
+        rows.append((slot & 255, vals[slot - 1], vals[slot], vals[slot] - vals[slot - 1]))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(vals)))
+    return ('wave', len(rows), fog.hex())
+def __cord__(text, lex, path, seed):
+    rows = []
+    name = getattr(__import__('token'), 'NAME')
+    vals = [one for one in lex if one[1].strip()]
+    at = 0
+    while at < len(vals):
+        typ, val, start, end, line = vals[at]
+        if typ != name:
+            at += 1; continue
+        deep = call = dot = 0; raw = [val]; cur = at + 1
+        while cur + 1 < len(vals) and vals[cur][1] in ('.', '('):
+            if vals[cur][1] == '.' and vals[cur + 1][0] == name:
+                dot += 1; raw.append(vals[cur + 1][1]); cur += 2; continue
+            if vals[cur][1] == '(':
+                call += 1; deep += 1; cur += 1; break
+        if dot or call:
+            buf = '.'.join(raw).encode('utf-8', 'replace')
+            rows.append((len(raw), dot, call, deep, start[0] & 255, zlib.crc32(buf) & 0xffffffff))
+        at = max(cur, at + 1)
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
+    return ('cord', len(rows), fog.hex())
+def __shade__(text, lex, path, seed):
+    rows = []
+    com = getattr(__import__('tokenize'), 'COMMENT')
+    for typ, val, start, end, line in lex:
+        if typ != com:
+            continue
+        low = val.lower()
+        raw = val.encode('utf-8', 'replace')
+        rows.append((len(val), int('type:' in low), int('noqa' in low), int('todo' in low or 'fixme' in low), start[0] & 255, zlib.adler32(raw) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return ('shade', len(rows), fog.hex())
+def __frost__(text, lex, path, seed):
+    rows = []
+    name = getattr(__import__('token'), 'NAME')
+    bag = {}
+    for typ, val, start, end, line in lex:
+        if typ == name:
+            dat = bag.setdefault(val, [0, start[0], start[0], start[1], 0])
+            dat[0] += 1; dat[2] = start[0]; dat[3] = min(dat[3], start[1]); dat[4] = max(dat[4], end[1])
+    for val, dat in sorted(bag.items(), key=lambda row: (-row[1][0], row[0]))[:2048]:
+        raw = val.encode('utf-8', 'replace')
+        rows.append((dat[0], dat[2] - dat[1], dat[3], dat[4], len(val), zlib.crc32(raw) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(bag)))
+    return ('frost', len(rows), fog.hex())
+def __lens__(text, lex, path, seed):
+    rows = []
+    stack = []
+    pair = {')': '(', ']': '[', '}': '{'}
+    for typ, val, start, end, line in lex:
+        if val in '([{':
+            stack.append((val, start))
+        elif val in pair:
+            ok = int(bool(stack) and stack[-1][0] == pair[val])
+            old = stack.pop()[1] if ok else start
+            rows.append((ok, val, start[0] - old[0], start[1] - old[1], len(stack)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(stack), len(rows)))
+    return ('lens', len(rows), fog.hex())
+def __scroll__(raw, path, seed):
+    text = raw.decode('utf-8', 'replace') if isinstance(raw, (bytes, bytearray)) else str(raw)
+    lex = __lexi__(text)
+    seq = ((b'linen', __linen__), (b'gap', __gap__), (b'dent', __dent__), (b'track', __track__), (b'letter', __letter__), (b'word', __word__), (b'key', __key__), (b'digit', __digit__), (b'string', __string__), (b'head', __head__), (b'slash', __slash__), (b'mold', __mold__), (b'brace', __brace__), (b'paren', __paren__), (b'sign', __sign__), (b'point', __point__), (b'summon', __summon__), (b'bring', __bring__), (b'path', __path__), (b'shebang', __shebang__), (b'coding', __coding__), (b'blank', __blank__), (b'chunk', __chunk__), (b'cover', __cover__), (b'style', __style__), (b'noise', __noise__), (b'ratio', __ratio__), (b'duet', __duet__), (b'current', __current__), (b'brine', __brine__), (b'scan', __scan__), (b'moss', __moss__), (b'reed', __reed__), (b'weave', __weave__), (b'flax', __flax__), (b'fiber', __fiber__), (b'badge', __badge__), (b'crease', __crease__), (b'quote', __quote__), (b'stripe', __stripe__), (b'space', __space__), (b'meter', __meter__), (b'route', __route__), (b'matter', __matter__), (b'bare', __bare__), (b'rind', __rind__), (b'stamp', __stamp__), (b'wave', __wave__), (b'cord', __cord__), (b'shade', __shade__), (b'frost', __frost__), (b'lens', __lens__))
+    rows = [fn(text, lex, path, seed + tag) for tag, fn in seq]
+    fog = __mix__(seed, (tuple(rows), len(text), len(lex), os.path.basename(path)))
+    return (len(rows), fog.hex())
 def __ore__(tree, code, seed):
     nodes = tuple(ast.walk(tree)); codes = __drip__(code); bag = {'nodes': nodes, 'codes': codes, 'wide': (len(nodes), len(codes))}
-    seq = ((b'oak', __oak__), (b'spruce', __spruce__), (b'birch', __birch__), (b'jungle', __jungle__), (b'acacia', __acacia__), (b'mangrove', __mangrove__), (b'cherry', __cherry__), (b'bamboo', __bamboo__), (b'cactus', __cactus__), (b'kelp', __kelp__), (b'coralx', __coralx__), (b'seagrass', __seagrass__), (b'mycelium', __mycelium__), (b'shroom', __shroom__), (b'azalea', __azalea__), (b'dripstone', __dripstone__), (b'sculkx', __sculkx__), (b'tuffx', __tuffx__), (b'calcite', __calcite__), (b'amethyst', __amethyst__), (b'granite', __granite__), (b'diorite', __diorite__), (b'andesite', __andesite__), (b'basaltx', __basaltx__), (b'blackstone', __blackstone__), (b'netherrack', __netherrack__), (b'glowstone', __glowstone__), (b'endstone', __endstone__), (b'purpur', __purpur__), (b'prismarine', __prismarine__), (b'terracotta', __terracotta__), (b'concrete', __concrete__), (b'lantern', __lantern__), (b'torchx', __torchx__), (b'campfire', __campfire__), (b'anvilx', __anvilx__), (b'furnace', __furnace__), (b'hopper', __hopper__), (b'dropper', __dropper__), (b'observer', __observer__), (b'piston', __piston__), (b'rail', __rail__), (b'minecart', __minecart__), (b'bee2', __bee2__), (b'camel2', __camel2__), (b'warden2', __warden2__), (b'allay2', __allay2__), (b'breeze2', __breeze2__), (b'sniffer2', __sniffer2__), (b'strider2', __strider2__), (b'hoglin2', __hoglin2__), (b'panda2', __panda2__), (b'llama2', __llama2__), (b'ocelot2', __ocelot2__), (b'ravager2', __ravager2__), (b'turtle2', __turtle2__), (b'phantom2', __phantom2__), (b'dolphin2', __dolphin2__), (b'fox2', __fox2__), (b'goat2', __goat2__), (b'parrot2', __parrot2__), (b'rabbit2', __rabbit2__), (b'salmon2', __salmon2__), (b'spider2', __spider2__), (b'squid2', __squid2__), (b'vex2', __vex2__), (b'zombie2', __zombie2__), (b'creeper2', __creeper2__), (b'piglin2', __piglin2__), (b'ghast2', __ghast2__), (b'shulker2', __shulker2__), (b'ender2', __ender2__), (b'slime2', __slime2__), (b'magma2', __magma2__), (b'blaze2', __blaze2__), (b'stray2', __stray2__), (b'husk2', __husk2__), (b'drowned2', __drowned2__), (b'wardenx', __wardenx__), (b'allayx', __allayx__), (b'axolotl', __axolotl__), (b'armadillo', __armadillo__), (b'badger', __badger__), (b'bogged', __bogged__), (b'breezez', __breezez__), (b'catx', __catx__), (b'donkey', __donkey__), (b'frog', __frog__), (b'horse', __horse__), (b'iron', __iron__), (b'mooshroom', __mooshroom__), (b'mule', __mule__), (b'polar', __polar__), (b'snow', __snow__), (b'wolfx', __wolfx__), (b'zoglin', __zoglin__), (b'piglinx', __piglinx__), (b'silver', __silver__), (b'copper', __copper__), (b'wax', __wax__), (b'glint', __glint__), (b'echoes', __echoes__), (b'golem', __golem__), (b'ravine', __ravine__), (b'geode', __geode__), (b'spire', __spire__), (b'agate', __agate__), (b'jade', __jade__), (b'quartz', __quartz__), (b'mica', __mica__))
+    seq = ((b'oak', __oak__), (b'spruce', __spruce__), (b'birch', __birch__), (b'jungle', __jungle__), (b'acacia', __acacia__), (b'mangrove', __mangrove__), (b'cherry', __cherry__), (b'bamboo', __bamboo__), (b'cactus', __cactus__), (b'kelp', __kelp__), (b'shell', __shell__), (b'seagrass', __seagrass__), (b'mycelium', __mycelium__), (b'shroom', __shroom__), (b'azalea', __azalea__), (b'dripstone', __dripstone__), (b'sculk', __sculk__), (b'tufa', __tufa__), (b'calcite', __calcite__), (b'amethyst', __amethyst__), (b'granite', __granite__), (b'diorite', __diorite__), (b'andesite', __andesite__), (b'crag', __crag__), (b'blackstone', __blackstone__), (b'netherrack', __netherrack__), (b'glowstone', __glowstone__), (b'endstone', __endstone__), (b'purpur', __purpur__), (b'prismarine', __prismarine__), (b'terracotta', __terracotta__), (b'concrete', __concrete__), (b'lantern', __lantern__), (b'lamp', __lamp__), (b'campfire', __campfire__), (b'hammer', __hammer__), (b'furnace', __furnace__), (b'hopper', __hopper__), (b'dropper', __dropper__), (b'observer', __observer__), (b'piston', __piston__), (b'rail', __rail__), (b'minecart', __minecart__), (b'bee2', __bee2__), (b'camel2', __camel2__), (b'warden2', __warden2__), (b'allay2', __allay2__), (b'breeze2', __breeze2__), (b'sniffer2', __sniffer2__), (b'strider2', __strider2__), (b'hoglin2', __hoglin2__), (b'panda2', __panda2__), (b'llama2', __llama2__), (b'ocelot2', __ocelot2__), (b'ravager2', __ravager2__), (b'turtle2', __turtle2__), (b'phantom2', __phantom2__), (b'dolphin2', __dolphin2__), (b'fox2', __fox2__), (b'goat2', __goat2__), (b'parrot2', __parrot2__), (b'rabbit2', __rabbit2__), (b'salmon2', __salmon2__), (b'spider2', __spider2__), (b'squid2', __squid2__), (b'vex2', __vex2__), (b'zombie2', __zombie2__), (b'creeper2', __creeper2__), (b'piglin2', __piglin2__), (b'ghast2', __ghast2__), (b'shulker2', __shulker2__), (b'ender2', __ender2__), (b'slime2', __slime2__), (b'magma2', __magma2__), (b'blaze2', __blaze2__), (b'stray2', __stray2__), (b'husk2', __husk2__), (b'drowned2', __drowned2__), (b'watch', __watch__), (b'sprite', __sprite__), (b'axolotl', __axolotl__), (b'armadillo', __armadillo__), (b'badger', __badger__), (b'bogged', __bogged__), (b'breezez', __breezez__), (b'cat', __cat__), (b'donkey', __donkey__), (b'frog', __frog__), (b'horse', __horse__), (b'metal', __metal__), (b'mooshroom', __mooshroom__), (b'mule', __mule__), (b'polar', __polar__), (b'snow', __snow__), (b'wolf', __wolf__), (b'zoglin', __zoglin__), (b'brute', __brute__), (b'silver', __silver__), (b'copper', __copper__), (b'wax', __wax__), (b'glint', __glint__), (b'echoes', __echoes__), (b'golem', __golem__), (b'ravine', __ravine__), (b'geode', __geode__), (b'spire', __spire__), (b'agate', __agate__), (b'jade', __jade__), (b'quartz', __quartz__), (b'mica', __mica__))
     rows = [fn(bag, seed + tag) for tag, fn in seq]
     fog = __mix__(seed, (tuple(rows), len(nodes), len(codes), __hist__(rows)))
     return (len(rows), fog.hex())
@@ -4444,10 +5055,10 @@ def __chart__(tree, code, stem, path, seed):
     rows = []
     for arg, seq in flow:
         rows.extend(fn(arg, seed + tag) for tag, fn in seq)
-    dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'nox', __nox__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rix', __rix__), (b'sorn', __sorn__), (b'tav', __tav__), (b'ulx', __ulx__), (b'vor', __vor__), (b'wex', __wex__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'nyx', __nyx__), (b'pax', __pax__), (b'qyx', __qyx__), (b'rux', __rux__), (b'siv', __siv__), (b'tix', __tix__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yex', __yex__), (b'zok', __zok__), (b'kex', __kex__), (b'lix', __lix__), (b'mox', __mox__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'rax', __rax__), (b'sax', __sax__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'zax', __zax__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'sniffer', __sniffer__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'goat', __goat__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'vexx', __vexx__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),))
+    dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'night', __night__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rice', __rice__), (b'sorn', __sorn__), (b'tav', __tav__), (b'umber', __umber__), (b'vor', __vor__), (b'wool', __wool__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'dusk', __dusk__), (b'peace', __peace__), (b'quill', __quill__), (b'rust', __rust__), (b'siv', __siv__), (b'tick', __tick__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yarn', __yarn__), (b'zok', __zok__), (b'pearl', __pearl__), (b'lime', __lime__), (b'cedar', __cedar__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'zinc', __zinc__), (b'topaz', __topaz__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'ruby', __ruby__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'sniffer', __sniffer__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'goat', __goat__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'wraith', __wraith__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),))
     for seq in dual:
         rows.extend(fn(tree, code, seed + tag) for tag, fn in seq)
-    rows.append(__ore__(tree, code, seed + b'ore')); rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
+    rows.append(__ore__(tree, code, seed + b'ore')); rows.append(__scroll__(stem, path, seed + b'scroll')); rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
     mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
     core = __vine__((tuple(rows), mark)); fog = hashlib.sha512(core).digest(); salt = __mist__(seed + b'atlas' + fog, 64)
     return hashlib.blake2b(fog + salt + core[:4096], digest_size=64).digest()
@@ -5809,7 +6420,7 @@ def {runf}():
     graink = __chaff__(core)
     __coreb__(core, leftk, rightk, mistk, dustk, cloakk, lanek, spurk) != pack and (_ for _ in ()).throw(ValueError('core'))
     flag = hashlib.sha256(core).hexdigest()
-    shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'wrap', mint) for slot in range(7)]
+    shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
     anlz=('procmon','procmon64','procexp','procexp64','wireshark','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
