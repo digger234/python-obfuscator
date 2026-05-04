@@ -39,6 +39,16 @@ def __spark__(seed, low, high):
         return low
    fog = __mist__(seed, 8)
    return low + (int.from_bytes(fog, 'little') % (high - low + 1))
+def __hide__(text, seed):
+   rot = __spark__(seed + b'rot', 7, 87)
+   span = __spark__(seed + b'span', 233, 997)
+   rows = tuple(''.join(chr(32 + ((ord(ch) - 32 + rot) % 95)) for ch in text[at:at + span][::-1]) for at in range(0, len(text), span))
+   return rows, rot
+def __show__(rows, rot, name=None):
+   var = name or '__'
+   src = ''.join(chr(32 + i) for i in range(95))
+   dst = ''.join(chr(32 + ((i - rot) % 95)) for i in range(95))
+   return f"(lambda {var}:''.join(map(lambda v:v.translate({var})[::-1],{rows!r})))(str.maketrans({src!r},{dst!r}))"
 def __flare__(blob):
    glow = 0
    at = 0
@@ -110,7 +120,8 @@ def __chant__(text, seed):
    return (rows, key, fog.hex(), __crown__(raw))
 def __prism__(name, data):
    row, key, fog, mark = data
-   return f"{name}({row!r},{key},{fog!r},{mark!r})"
+   fog = repr(fog) if len(fog) < 80 else "''.join((" + ','.join(repr(fog[at:at + 48]) for at in range(0, len(fog), 48)) + "))"
+   return f"{name}({row!r},{key},{fog},{mark!r})"
 def __iris__(name, mode):
    tail = ".decode('utf-8')" if mode else ""
    text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw{tail}"
@@ -6147,8 +6158,11 @@ def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
     blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, cache, scan, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef, codonf, evalf = [__mint__(used, seed, mint) for slot in range(64)]
+    mask = __mint__(used, seed + b'rackmask', mint)
+    rackraw = rack.decode('ascii') if isinstance(rack, (bytes, bytearray)) else str(rack)
+    racksrc = __show__(*__hide__(rackraw, seed + b'onyxrack'), mask)
     inner = f"""import base64,bz2,hashlib,lzma,marshal,sys,zlib
-{blob}={rack!r}
+{blob}={racksrc}
 {left}={slag}
 {right}={smoke}
 {skin}={stamp!r}
@@ -6549,6 +6563,7 @@ def {runf}():
  {evalf}({coref})
 {runf}()
 """
+    inner = __flux__(__flux__(inner, seed + b'guts'), seed + b'marrow')
     ore = marshal.dumps(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True))
     pack = __gasket__(ore)
     leftk, rightk, mistk, dustk, cloakk, lanek, spurk = __keys__(seed, ((b'glass', 1000000, 2147483647), (b'forge', 1000000, 2147483647), (b'mist', 17, 251), (b'dust', 3, 29), (b'cloak', 17, 251), (b'lane', 1024, 4095), (b'spur', 1024, 4095)))
@@ -6557,6 +6572,8 @@ def {runf}():
     __coreb__(core, leftk, rightk, mistk, dustk, cloakk, lanek, spurk) != pack and (_ for _ in ()).throw(ValueError('core'))
     flag = hashlib.sha256(core).hexdigest()
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
+    mask = __mint__(used, seed + b'coremask', mint)
+    coresrc = __show__(*__hide__(base64.b64encode(core).decode('ascii'), seed + b'outercore'), mask)
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
     anlz=('procmon','procmon64','procexp','procexp64','wireshark','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
@@ -6574,7 +6591,7 @@ def {runf}():
 __iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r}
 __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
-__ngauvcl__={base64.b64encode(core).decode('ascii')!r};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
+__ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 def __concac__():raise SystemExit
 def __lmao__(f,*a):
  k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __concac__())(k[0],k[1],k[2],f,a)
@@ -6792,7 +6809,9 @@ __depvcl__()
     grain = __spark__(seed + b'outer', 1, 255)
     word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','b64decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','exec','eval','compile','__import__','open')
     word = tuple(tuple(ord(char) ^ grain for char in item) for item in word)
-    crust = f"{shell}={base64.b64encode(wrap)!r};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
+    mask = __mint__(used, seed + b'wrapmask', mint)
+    wrapsrc = __show__(*__hide__(base64.b64encode(wrap).decode('ascii'), seed + b'wrapblob'), mask)
+    crust = f"{shell}={wrapsrc};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
     cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')"
     ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=getattr(b,{bone}({storm}[9]))({shell});({guard}(blob,z,h,sys)!={seal} or getattr(built[{bone}({storm}[30])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[31])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[32])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[33])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[34])],'__module__','_io') not in ('_io','io','builtins') or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[mode](blob[1:]);blob={heart}(blob,{glass});mode=blob[0];(mode not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[mode](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];box=getattr(ct,{bone}({storm}[26]))(blob);code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),len(blob));run=getattr(getattr(ct,{bone}({storm}[15])),runn);run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
     return "\n\n" + __cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed)
@@ -6816,6 +6835,7 @@ def __sear__(text, seed):
     lace, knot = __lily__(seed + b'searlace', '|'.join(chain[:2]))
     text, book = __script__(seed + b'searword', ('zlib', 'crc32', 'builtins', 'exec', 'decompress', 'base64', 'b64decode', 'bz2', 'lzma'))
     name = __sigil__(seed + b'searname', 8)
+    melt = __show__(*__hide__(melt, seed + b'searmelt'), name[1])
     bags = []
     bags.append(f"{ident}={utext!r}")
     bags.append(f"_={watermark!r}")
@@ -6844,7 +6864,7 @@ def __sear__(text, seed):
         f"getattr(__import__({earth}),{air})({name[3]},globals())"
         f")[-1])"
         f"({ash})"
-        f")({melt!r})"
+        f")({melt})"
     )
     return text + ";" + lace + ";" + pack + ";" + spray + inner
 def __flux__(code, seed):
@@ -6854,29 +6874,33 @@ def __flux__(code, seed):
    shot = hashlib.sha256(fog).hexdigest()
    tag = __spark__(seed + b'fluxtag', 1, 7)
    blob = base64.b64encode(fog).decode('ascii')
-   text, book = __script__(seed + b'fluxword', ('base64', 'bz2', 'hashlib', 'lzma', 'marshal', 'zlib', 'b64decode', 'sha256', 'decompress', 'loads', 'exec', 'range'))
-   names = __sigil__(seed + b'fluxname', 14)
+   wkey = __spark__(seed + b'fluxword', 1, 255)
+   words = ('base64', 'bz2', 'hashlib', 'lzma', 'marshal', 'zlib', 'b64decode', 'sha256', 'decompress', 'loads', 'exec', 'range', 'builtins', 'bytes', 'enumerate', 'type', 'hexdigest', 'ascii', 'len', 'int', 'from_bytes', 'to_bytes', 'little')
+   words = tuple(tuple(ord(char) ^ wkey for char in word) for word in words)
+   names = __sigil__(seed + b'fluxname', 18)
    spray = __spray__(seed + b'fluxspray', 0)
    spray = f"{spray};" if spray else ''
    body, code = names[0], names[1]
    liba, libb, libc, libd, libe, libf = names[2], names[3], names[4], names[5], names[6], names[7]
-   mode, func, rows, glow, drift, tint = names[8], names[9], names[10], names[11], names[12], names[13]
+   mode, func, rows, glow, drift, tint, bone, hand, coal, ash = names[8], names[9], names[10], names[11], names[12], names[13], names[14], names[15], names[16], names[17]
    rawname = __rune__(set(names), seed + b'fluxraw', b'raw')
    if len(blob) < 1536:
         rawsrc = __orchid__(rawname); blobsrc = __prism__(rawname, __opal__(seed + b'fluxblob', blob.encode('ascii'))) + ".decode('ascii')"
    else:
-        rawsrc = ''; blobsrc = repr(blob)
-   return f"{text};{spray}{rawsrc + ';' if rawsrc else ''}{body}={blobsrc};{code}={key};{libc}={shot!r};{libd}={tag};{liba}=__import__({__lotus__(book,'base64')});{libb}=__import__({__lotus__(book,'bz2')});{libe}=__import__({__lotus__(book,'hashlib')});{libf}=__import__({__lotus__(book,'marshal')});{rows}=__import__({__lotus__(book,'zlib')});{glow}=__import__({__lotus__(book,'lzma')});exec('def {func}(b,k):\\n g=k&255;d=((k>>8)&255) or 73;t=((k>>16)&255) or 19;n=len(b)\\n base=bytes((((g+((i+1)*(d+t))+(i*(i+1)//2))&255)^((t+i)&255)) for i in range(512));m=(base*((n>>9)+1))[:n]\\n return (int.from_bytes(b,\\'little\\')^int.from_bytes(m,\\'little\\')).to_bytes(n,\\'little\\')');{body}=getattr({liba},{__lotus__(book,'b64decode')})({body}.encode());getattr({libe},{__lotus__(book,'sha256')})({body}).hexdigest()!={libc} and (_ for _ in ()).throw(SystemExit);{body}={func}({body},{code});{mode}={body}[0];{mode} not in (0,1,2) and (_ for _ in ()).throw(SystemExit);{body}=(getattr({rows},{__lotus__(book,'decompress')}),getattr({libb},{__lotus__(book,'decompress')}),getattr({glow},{__lotus__(book,'decompress')}))[{mode}]({body}[1:]);{libd} not in getattr(__import__('builtins'),{__lotus__(book,'range')})(1,8) and (_ for _ in ()).throw(SystemExit);getattr(__import__('builtins'),{__lotus__(book,'exec')})(getattr({libf},{__lotus__(book,'loads')})({body}),globals())"
+        rawsrc = ''; blobsrc = __show__(*__hide__(blob, seed + b'fluxmask'), rawname)
+   return f"{spray}{rawsrc + ';' if rawsrc else ''}{bone}=lambda r:''.join(map(chr,(x^{wkey} for x in r)));{hand}=__import__;{ash}={words!r};{body}={blobsrc};{code}={key};{libc}={shot!r};{libd}={tag};{liba}={hand}({bone}({ash}[0]));{libb}={hand}({bone}({ash}[1]));{libe}={hand}({bone}({ash}[2]));{libf}={hand}({bone}({ash}[4]));{rows}={hand}({bone}({ash}[5]));{glow}={hand}({bone}({ash}[3]));{coal}=vars({hand}({bone}({ash}[12])));{body}=vars({liba})[{bone}({ash}[6])]({coal}[{bone}({ash}[13])]({body},{bone}({ash}[17])));{func}=vars({libe})[{bone}({ash}[7])]({body});{func}=vars({coal}[{bone}({ash}[15])]({func}))[{bone}({ash}[16])]({func});{func}!={libc} and 1/0;{drift}={coal}[{bone}({ash}[18])]({body});{tint}={coal}[{bone}({ash}[13])]((((({code}&255)+((i+1)*(((({code}>>8)&255) or 73)+((({code}>>16)&255) or 19)))+(i*(i+1)//2))&255)^(((({code}>>16)&255) or 19)+i&255)) for i in {coal}[{bone}({ash}[11])](512));{tint}=({tint}*(({drift}>>9)+1))[:{drift}];{body}=vars({coal}[{bone}({ash}[19])])[{bone}({ash}[21])]((vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{body},{bone}({ash}[22]))^vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{tint},{bone}({ash}[22]))),{drift},{bone}({ash}[22]));{mode}={body}[0];{mode} not in (0,1,2) and 1/0;{body}=(vars({rows})[{bone}({ash}[8])],vars({libb})[{bone}({ash}[8])],vars({glow})[{bone}({ash}[8])])[{mode}]({body}[1:]);{libd} not in {coal}[{bone}({ash}[11])](1,8) and 1/0;{coal}[{bone}({ash}[10])](vars({libf})[{bone}({ash}[9])]({body}),vars())"
 def __cowl__(code, seed):
    raw = marshal.dumps(compile(code, __gravel__(seed + b'mask'), 'exec', optimize=2, dont_inherit=True))
    pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.b64encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
    words = ('base64', 'b64decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec')
    words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
-   name = __sigil__(seed + b'maskname', 8)
+   name = __sigil__(seed + b'maskname', 9)
    name[:3] = ['__yepppppp__', '__meoooo__', '__deptrai__']
+   blob = __show__(*__hide__(blob, seed + b'cowlblob'), name[3])
    spray = __spray__(seed + b'maskspray', 0)
    spray = f"{spray};" if spray else ''
-   return f"{spray}(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob!r},{shot!r})"
+   body = f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob},{shot!r})"
+   return f"{spray}{name[8]}=getattr;" + body.replace('getattr', name[8])
 def __crystal__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
