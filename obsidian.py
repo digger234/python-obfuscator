@@ -48,7 +48,22 @@ def __show__(rows, rot, name=None):
    var = name or '__'
    src = ''.join(chr(32 + i) for i in range(95))
    dst = ''.join(chr(32 + ((i - rot) % 95)) for i in range(95))
-   return f"(lambda {var}:''.join(map(lambda v:v.translate({var})[::-1],{rows!r})))(str.maketrans({src!r},{dst!r}))"
+   salt = repr((rows, rot, var)).encode('utf-8', 'replace')
+   cls = __spell__('str', salt + b'showstr')
+   make = __spell__('maketrans', salt + b'showmake')
+   return f"(lambda {var}:''.join(map(lambda v:v.translate({var})[::-1],{rows!r})))(__import__({__spell__('builtins', salt + b'showbuilt')}).__dict__[{cls}].__dict__[{make}]({src!r},{dst!r}))"
+def __spell__(text, seed):
+   rows = []
+   fog = __mist__(seed + text.encode('utf-8', 'replace'), max(16, len(text) * 8))
+   for slot, char in enumerate(text):
+      left = 1 + (fog[(slot * 3) % len(fog)] & 1); right = 1 + (fog[(slot * 3 + 1) % len(fog)] & 1); bag = []
+      for at in range(left):
+         base = (0x3041, 0x4e00, 0x0370, 0x1200)[(fog[(slot + at) % len(fog)] + at) & 3]; bag.append(chr(base + (fog[(slot * 5 + at) % len(fog)] & 127)))
+      pos = len(bag); bag.append(char)
+      for at in range(right):
+         base = (0x30a1, 0xac00, 0x0400, 0x10a0)[(fog[(slot + at + 7) % len(fog)] + at) & 3]; bag.append(chr(base + (fog[(slot * 7 + at) % len(fog)] & 127)))
+      rows.append(f"{bag!r}[{pos}]")
+   return "(" + repr('%s' * len(rows)) + " % (" + ",".join(rows) + ("," if len(rows) == 1 else "") + "))"
 def __flare__(blob):
    glow = 0
    at = 0
@@ -1711,12 +1726,38 @@ def __trace__(tree, seed):
 def __sig__(code, seed):
     rows = []
     for one in __drip__(code):
-        tab = getattr(one, 'co_linetable', getattr(one, 'co_lnotab', b'')); exc = getattr(one, 'co_exceptiontable', b'')
+        tab = one.co_linetable if hasattr(one, 'co_linetable') else getattr(one, 'co_lnotab', b''); exc = getattr(one, 'co_exceptiontable', b'')
         arg = (one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, one.co_stacksize, one.co_flags)
         raw = (hashlib.sha256(one.co_code).hexdigest(), hashlib.sha1(tab).hexdigest(), hashlib.sha1(exc).hexdigest())
         con = tuple((slot, type(val).__name__, len(val.co_code) if isinstance(val, type(one)) else len(val) if isinstance(val, (str, bytes, tuple)) else val.bit_length() if isinstance(val, int) else 0) for slot, val in enumerate(one.co_consts[:128]))
         rows.append((getattr(one, 'co_qualname', one.co_name), one.co_name, one.co_filename, one.co_firstlineno, arg, raw, con, tuple(one.co_freevars), tuple(one.co_cellvars)))
     fog = __mix__(seed, tuple(rows))
+    return (len(rows), fog.hex())
+def __ctor__(code, seed):
+    rows = []
+    kind = type(code)
+    for one in __drip__(code):
+        tab = one.co_linetable if hasattr(one, 'co_linetable') else getattr(one, 'co_lnotab', b'')
+        exc = getattr(one, 'co_exceptiontable', b'')
+        args = (one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, one.co_stacksize, one.co_flags)
+        cols = (len(one.co_code), len(one.co_consts), len(one.co_names), len(one.co_varnames), len(one.co_freevars), len(one.co_cellvars), len(tab), len(exc))
+        refs = tuple((slot, len(val.co_code), len(val.co_consts), len(val.co_names)) for slot, val in enumerate(one.co_consts[:96]) if isinstance(val, kind))
+        vals = tuple((slot, type(val).__name__, len(val) if isinstance(val, (str, bytes, tuple)) else val.bit_length() if isinstance(val, int) else 0) for slot, val in enumerate(one.co_consts[:96]) if not isinstance(val, kind))
+        rows.append((one.co_name, getattr(one, 'co_qualname', one.co_name), args, cols, hashlib.sha256(one.co_code + tab + exc).hexdigest(), refs, vals))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows), sys.version_info[:2]))
+    return (len(rows), fog.hex())
+def __made__(code, seed):
+    rows = []
+    kind = type(code)
+    for one in __drip__(code):
+        ok = int(callable(getattr(one, 'replace', None)))
+        try:
+            new = one.replace(co_code=one.co_code) if ok else one
+            same = int(isinstance(new, kind) and new.co_code == one.co_code and new.co_consts == one.co_consts)
+        except Exception:
+            same = 0
+        rows.append((one.co_name, kind.__name__, ok, same, len(marshal.dumps(one)), zlib.crc32(marshal.dumps(one)[:4096]) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
     return (len(rows), fog.hex())
 def __byte__(code, seed):
     rows = []
@@ -1967,6 +2008,229 @@ def __layout__(code, seed):
     for one in __drip__(code):
         rows.append((one.co_name, len(one.co_consts), tuple(type(val).__name__ for val in one.co_consts[:32]), tuple(one.co_names[:32])))
     fog = __mix__(seed, tuple(rows))
+    return (len(rows), fog.hex())
+def __flat__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant):
+            val = node.value
+            if isinstance(val, str): rows.append(('s', len(val), zlib.crc32(val.encode('utf-8', 'replace')) & 0xffffffff, getattr(node, 'lineno', 0)))
+            elif isinstance(val, bytes): rows.append(('b', len(val), zlib.crc32(val) & 0xffffffff, getattr(node, 'lineno', 0)))
+            elif isinstance(val, bool): rows.append(('o', int(val), getattr(node, 'lineno', 0)))
+            elif val is None: rows.append(('n', getattr(node, 'lineno', 0)))
+            elif isinstance(val, int): rows.append(('i', val.bit_length(), val & 0xffffffff, getattr(node, 'lineno', 0)))
+            elif isinstance(val, float): rows.append(('f', repr(val), getattr(node, 'lineno', 0)))
+            elif isinstance(val, complex): rows.append(('c', repr(val.real), repr(val.imag), getattr(node, 'lineno', 0)))
+            elif isinstance(val, type(Ellipsis)): rows.append(('e', getattr(node, 'lineno', 0)))
+            else: rows.append((type(val).__name__, len(repr(val)), getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): rows.append(('d', type(node).__name__, len(node.name), zlib.crc32(node.name.encode('utf-8', 'replace')) & 0xffffffff, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Import): rows.append(('m', tuple((one.name, one.asname) for one in node.names), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ImportFrom): rows.append(('r', node.module or '', node.level, tuple((one.name, one.asname) for one in node.names), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __fvn__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        glow = 2166136261
+        for byte in __vine__(__tuff__(one)):
+            glow ^= byte
+            glow = (glow * 16777619) & 0xffffffff
+        rows.append((one.co_name, glow, len(one.co_code), len(one.co_consts), len(marshal.dumps(one))))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __rill__(tree, seed):
+    rows = []
+    last = 0
+    for slot, node in enumerate(ast.walk(tree)):
+        line = getattr(node, 'lineno', 0); col = getattr(node, 'col_offset', 0)
+        rows.append((slot & 255, type(node).__name__, line - last, col, len(list(ast.iter_child_nodes(node)))))
+        last = line
+        if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __tor__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        base = type(node).__name__
+        for one in ast.iter_child_nodes(node):
+            rows.append((base, type(one).__name__, getattr(one, 'lineno', 0), getattr(one, 'col_offset', 0)))
+            if len(rows) >= 4096: break
+        if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __dell__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        line = getattr(node, 'lineno', 0); end = getattr(node, 'end_lineno', line); col = getattr(node, 'col_offset', 0); fin = getattr(node, 'end_col_offset', col)
+        if line or end or col or fin: rows.append((type(node).__name__, line, end, col, fin, max(0, end - line), max(0, fin - col)))
+        if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __fell__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            gens = tuple((len(one.ifs), int(one.is_async), type(one.target).__name__, type(one.iter).__name__) for one in node.generators)
+            rows.append((type(node).__name__, gens, getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.comprehension,)):
+            rows.append(('comp', len(node.ifs), int(node.is_async), type(node.target).__name__, type(node.iter).__name__))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __crux__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.With, ast.AsyncWith, ast.Match)):
+            rows.append((type(node).__name__, len(getattr(node, 'body', ())), len(getattr(node, 'orelse', ())), len(getattr(node, 'finalbody', ())), len(getattr(node, 'handlers', ())), getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise, ast.Yield, ast.YieldFrom, ast.Await)):
+            rows.append((type(node).__name__, getattr(node, 'lineno', 0), getattr(node, 'col_offset', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __vane__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            fun = type(node.func).__name__
+            if isinstance(node.func, ast.Name): fun = ('n', len(node.func.id), zlib.crc32(node.func.id.encode('utf-8', 'replace')) & 0xffffffff)
+            elif isinstance(node.func, ast.Attribute): fun = ('a', len(node.func.attr), zlib.crc32(node.func.attr.encode('utf-8', 'replace')) & 0xffffffff, type(node.func.value).__name__)
+            rows.append((fun, len(node.args), len(node.keywords), sum(1 for one in node.keywords if one.arg is None), getattr(node, 'lineno', 0)))
+            if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __pinion__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            arg = node.args
+            name = getattr(node, 'name', '<lambda>')
+            rows.append((type(node).__name__, len(name), len(arg.posonlyargs), len(arg.args), len(arg.kwonlyargs), int(arg.vararg is not None), int(arg.kwarg is not None), len(arg.defaults), len(arg.kw_defaults), len(getattr(node, 'decorator_list', ())), type(getattr(node, 'returns', None)).__name__))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __ochre__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            raw = node.value.encode('utf-8', 'replace')
+            rows.append((len(node.value), len(raw), sum(raw) & 0xffffffff, len(set(raw)), raw[:3], raw[-3:], getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Constant) and isinstance(node.value, bytes):
+            raw = node.value
+            rows.append((len(raw), zlib.crc32(raw) & 0xffffffff, len(set(raw)), raw[:3], raw[-3:], getattr(node, 'lineno', 0)))
+        if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __prong__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name):
+            rows.append(('n', type(node.ctx).__name__, len(node.id), zlib.crc32(node.id.encode('utf-8', 'replace')) & 0xffffffff, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Attribute):
+            rows.append(('a', type(node.ctx).__name__, len(node.attr), zlib.crc32(node.attr.encode('utf-8', 'replace')) & 0xffffffff, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            rows.append(('i', type(node).__name__, len(getattr(node, 'names', ())), getattr(node, 'module', '') or '', getattr(node, 'level', 0), getattr(node, 'lineno', 0)))
+        if len(rows) >= 4096: break
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __gauze__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.JoinedStr):
+            rows.append(('j', len(node.values), sum(isinstance(one, ast.FormattedValue) for one in node.values), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.FormattedValue):
+            rows.append(('f', node.conversion, type(node.value).__name__, type(node.format_spec).__name__ if node.format_spec else '', getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __pylon__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef):
+            rows.append((len(node.name), len(node.bases), len(node.keywords), len(node.decorator_list), len(node.body), tuple(type(one).__name__ for one in node.body[:32]), getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __keel__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.NamedExpr)):
+            vals = getattr(node, 'targets', None)
+            if vals is None: vals = [getattr(node, 'target', None)]
+            rows.append((type(node).__name__, tuple(type(one).__name__ for one in vals if one is not None), type(getattr(node, 'value', None)).__name__, type(getattr(node, 'op', None)).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __mast__(tree, seed):
+    rows = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Try):
+            rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.ExceptHandler):
+            rows.append(('ex', type(node.type).__name__ if node.type else '', len(node.name or ''), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Assert, ast.Raise)):
+            rows.append((type(node).__name__, type(getattr(node, 'exc', None)).__name__, type(getattr(node, 'msg', None)).__name__, getattr(node, 'lineno', 0)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
+    return (len(rows), fog.hex())
+def __rivet__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        data = one.co_code; bag = []
+        for at in range(0, min(len(data) - 1, 2048), 2): bag.append((data[at], data[at + 1]))
+        rows.append((one.co_name, len(data), __hist__(bag), tuple(bag[:64])))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __hinge__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        data = one.co_code; bag = []; at = 0
+        while at < len(data) and len(bag) < 256:
+            byte = data[at]; run = 1; at += 1
+            while at < len(data) and data[at] == byte and run < 255: run += 1; at += 1
+            bag.append((byte, run))
+        rows.append((one.co_name, len(data), tuple(bag), zlib.crc32(bytes(sum(([a, b] for a, b in bag), []))) & 0xffffffff if bag else 0))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __nickel__(code, seed):
+    rows = []
+    kind = type(code)
+    for one in __drip__(code):
+        bag = []
+        for slot, val in enumerate(one.co_consts[:128]):
+            if isinstance(val, kind): bag.append((slot, 'code', len(val.co_code), len(val.co_consts), len(val.co_names)))
+            elif isinstance(val, (str, bytes, tuple)): bag.append((slot, type(val).__name__, len(val), zlib.crc32(repr(val[:16] if isinstance(val, tuple) else val[:16]).encode('utf-8', 'replace')) & 0xffffffff))
+            elif isinstance(val, int): bag.append((slot, 'int', val.bit_length(), val & 0xffffffff))
+            else: bag.append((slot, type(val).__name__, len(repr(val))))
+        rows.append((one.co_name, __hist__(bag), tuple(bag[:64])))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __tin__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        bag = []
+        for vals in (one.co_names, one.co_varnames, one.co_freevars, one.co_cellvars):
+            raw = '|'.join(vals).encode('utf-8', 'replace')
+            bag.append((len(vals), len(raw), zlib.crc32(raw) & 0xffffffff, sum(raw) & 0xffffffff))
+        rows.append((one.co_name, tuple(bag), len(one.co_names), len(one.co_varnames)))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __rope__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        rows.append((one.co_name, tuple((slot, name, name in one.co_names, name in one.co_varnames) for slot, name in enumerate(one.co_freevars[:64])), tuple((slot, name, name in one.co_names, name in one.co_varnames) for slot, name in enumerate(one.co_cellvars[:64]))))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __sail__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        tab = one.co_linetable if hasattr(one, 'co_linetable') else getattr(one, 'co_lnotab', b'')
+        bag = []
+        for at in range(0, min(len(tab), 2048), 8):
+            row = tab[at:at + 8]; bag.append((len(row), sum(row) & 0xffff, zlib.crc32(row) & 0xffffffff))
+        rows.append((one.co_name, len(tab), tuple(bag[:256])))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
+    return (len(rows), fog.hex())
+def __anchor__(code, seed):
+    rows = []
+    for one in __drip__(code):
+        raw = marshal.dumps(one); bag = []
+        for at in range(0, min(len(raw), 4096), 32):
+            row = raw[at:at + 32]; bag.append((len(row), row[:2], row[-2:], zlib.adler32(row) & 0xffffffff))
+        rows.append((one.co_name, len(raw), zlib.crc32(raw) & 0xffffffff, tuple(bag[:128])))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
     return (len(rows), fog.hex())
 def __wheel__(tree, seed):
     rows = [type(one).__name__ for one in ast.walk(tree)]
@@ -3875,13 +4139,15 @@ def __campfire__(bag, seed):
 def __hammer__(bag, seed):
     rows = []
     for one in bag['codes']:
-        rows.append((one.co_name, tuple(one.co_names[:64]), len(one.co_names)))
+        raw = '|'.join(one.co_names).encode('utf-8', 'replace')
+        rows.append((one.co_name, tuple((slot, len(name), zlib.crc32(name.encode('utf-8', 'replace')) & 0xffffffff) for slot, name in enumerate(one.co_names[:64])), len(one.co_names), zlib.adler32(raw) & 0xffffffff))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('hammer', len(rows), fog.hex())
 def __furnace__(bag, seed):
     rows = []
     for one in bag['codes']:
-        rows.append((one.co_name, tuple(one.co_varnames[:64]), len(one.co_varnames)))
+        vals = tuple((slot, name in one.co_names, len(name), sum(name.encode('utf-8', 'replace')) & 0xffff) for slot, name in enumerate(one.co_varnames[:64]))
+        rows.append((one.co_name, vals, len(one.co_varnames), one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('furnace', len(rows), fog.hex())
 def __hopper__(bag, seed):
@@ -4115,19 +4381,19 @@ def __zombie2__(bag, seed):
 def __creeper2__(bag, seed):
     rows = []
     for one in bag['codes']:
-        rows.append((one.co_name, __glow__(one), __bloom__(one)))
+        rows.append((one.co_name, __glow__(one), __bloom__(one), len(one.co_code), zlib.crc32(one.co_code[:2048]) & 0xffffffff))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return ('creeper2', len(rows), fog.hex())
 def __piglin2__(bag, seed):
-    rows = []
-    for one in bag['codes']:
-        rows.append((one.co_name, __echo__(one), __magma__(one)))
+    rows = [(one.co_name, __echo__(one), __magma__(one), tuple(type(val).__name__ for val in one.co_consts[:32])) for one in bag['codes']]
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
     return ('piglin2', len(rows), fog.hex())
 def __ghast2__(bag, seed):
     rows = []
-    for one in bag['codes']:
-        rows.append((one.co_name, __soul__(one), __wisp__(one)))
+    at = 0
+    while at < len(bag['codes']):
+        one = bag['codes'][at]; rows.append((one.co_name, __soul__(one), __wisp__(one), at, len(marshal.dumps(one))))
+        at += 1
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:256]), len(rows)))
     return ('ghast2', len(rows), fog.hex())
 def __shulker2__(bag, seed):
@@ -5198,7 +5464,7 @@ def __ore__(tree, code, seed):
     fog = __mix__(seed, (tuple(rows), len(nodes), len(codes), __hist__(rows)))
     return (len(rows), fog.hex())
 def __chart__(tree, code, stem, path, seed):
-    flow = ((tree, ((b'shape', __shapeid__), (b'literal', __literal__), (b'label', __label__), (b'flow', __flow__), (b'call', __call__), (b'scope', __scope__), (b'module', __module__), (b'set', __set__), (b'sub', __sub__), (b'bin', __bin__), (b'cmp', __cmp__), (b'form', __form__), (b'trap', __trap__), (b'pat', __pat__), (b'ret', __ret__), (b'loop', __loop__), (b'comp', __comp__), (b'ann', __ann__), (b'ref', __ref__), (b'depth', __depth__), (b'tile', __tile__), (b'context', __context__), (b'discard', __discard__), (b'wth', __wth__), (b'body', __body__), (b'glyph', __glyph__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))), (tree, ((b'tok', __tok__), (b'atom', __atom__), (b'num', __num__), (b'txt', __txt__), (b'bop', __bop__), (b'cmpr', __cmpr__), (b'dial', __dial__), (b'asgn', __asgn__), (b'river', __river__), (b'catch', __catch__), (b'mask', __mask__), (b'coil', __coil__), (b'fmt', __fmt__), (b'match', __match__), (b'imp', __imp__), (b'func', __func__), (b'arg', __arg__), (b'clan', __clan__), (b'deco', __deco__), (b'anno', __anno__))), (tree, ((b'out', __out__), (b'slice', __slice__), (b'seq', __seq__), (b'paper', __paper__), (b'lineage', __lineage__), (b'tree', __tree__), (b'leaf', __leaf__), (b'edge', __edge__), (b'order', __order__), (b'nom', __nom__), (b'attr', __attr__), (b'kwd', __kwd__), (b'place', __place__), (b'sym', __sym__), (b'api', __api__), (b'lit', __lit__), (b'blend', __blend__), (b'block', __block__), (b'expr', __expr__), (b'stmt', __stmt__), (b'hash', __hash__), (b'trace', __trace__), (b'wheel', __wheel__), (b'level', __level__), (b'wrap', __wrap__), (b'source', __source__), (b'middle', __middle__), (b'tail', __tail__), (b'field', __field__), (b'wide', __wide__), (b'den', __den__))), (code, ((b'op', __op__), (b'constant', __constant__), (b'line', __line__), (b'free', __free__), (b'window', __window__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ord', __ord__), (b'sig', __sig__), (b'byte', __byte__), (b'blob', __blob__), (b'opcode', __opcode__), (b'quad', __quad__), (b'const', __const__), (b'nam', __nam__), (b'var', __var__), (b'cell', __cell__), (b'tab', __tab__), (b'except', __except__), (b'coord', __coord__), (b'fname', __fname__), (b'argv', __argv__), (b'flag', __flag__), (b'mar', __mar__), (b'slot', __slot__), (b'ordr', __ordr__), (b'pack', __pack__), (b'dig', __dig__), (b'pond', __pond__), (b'stk', __stk__))), (code, ((b'qual', __qual__), (b'size', __size__), (b'rng', __rng__), (b'duo', __duo__), (b'tri', __tri__), (b'oct', __oct__), (b'cnt', __cnt__), (b'dep', __dep__), (b'kind', __kind__), (b'pak', __pak__), (b'trail', __trail__), (b'split', __split__), (b'xor', __xor__), (b'sum', __sum__), (b'layout', __layout__), (b'mesh', __mesh__), (b'gate', __gate__), (b'fold', __fold__))), (tree, ((b'crestcall', __crestcall__), (b'crestattr', __crestattr__), (b'crestimp', __crestimp__), (b'creststr', __creststr__), (b'crestbytes', __crestbytes__), (b'crestnum', __crestnum__), (b'crestseq', __crestseq__), (b'crestbranch', __crestbranch__), (b'cresttry', __cresttry__), (b'crestfunc', __crestfunc__), (b'crestclass', __crestclass__), (b'crestcomp', __crestcomp__), (b'crestpat', __crestpat__), (b'crestfmt', __crestfmt__), (b'crestscope', __crestscope__), (b'crestname', __crestname__), (b'crestop', __crestop__), (b'crestline', __crestline__), (b'crestapi', __crestapi__))), (tree, ((b'crestio', __crestio__), (b'crestnet', __crestnet__), (b'cresttime', __cresttime__), (b'cresterr', __cresterr__), (b'crestasync', __crestasync__), (b'crestui', __crestui__), (b'crestpack', __crestpack__))), (code, ((b'crestcode', __crestcode__), (b'crestconst', __crestconst__), (b'crestpool', __crestpool__), (b'cresttable', __cresttable__), (b'crestmar', __crestmar__))))
+    flow = ((tree, ((b'shape', __shapeid__), (b'literal', __literal__), (b'label', __label__), (b'flow', __flow__), (b'call', __call__), (b'scope', __scope__), (b'module', __module__), (b'set', __set__), (b'sub', __sub__), (b'bin', __bin__), (b'cmp', __cmp__), (b'form', __form__), (b'trap', __trap__), (b'pat', __pat__), (b'ret', __ret__), (b'loop', __loop__), (b'comp', __comp__), (b'ann', __ann__), (b'ref', __ref__), (b'depth', __depth__), (b'tile', __tile__), (b'context', __context__), (b'discard', __discard__), (b'wth', __wth__), (b'body', __body__), (b'glyph', __glyph__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))), (tree, ((b'tok', __tok__), (b'atom', __atom__), (b'num', __num__), (b'txt', __txt__), (b'bop', __bop__), (b'cmpr', __cmpr__), (b'dial', __dial__), (b'asgn', __asgn__), (b'river', __river__), (b'catch', __catch__), (b'mask', __mask__), (b'coil', __coil__), (b'fmt', __fmt__), (b'match', __match__), (b'imp', __imp__), (b'func', __func__), (b'arg', __arg__), (b'clan', __clan__), (b'deco', __deco__), (b'anno', __anno__))), (tree, ((b'out', __out__), (b'slice', __slice__), (b'seq', __seq__), (b'paper', __paper__), (b'lineage', __lineage__), (b'tree', __tree__), (b'leaf', __leaf__), (b'edge', __edge__), (b'order', __order__), (b'nom', __nom__), (b'attr', __attr__), (b'kwd', __kwd__), (b'place', __place__), (b'sym', __sym__), (b'api', __api__), (b'lit', __lit__), (b'blend', __blend__), (b'block', __block__), (b'expr', __expr__), (b'stmt', __stmt__), (b'hash', __hash__), (b'trace', __trace__), (b'flat', __flat__), (b'rill', __rill__), (b'tor', __tor__), (b'dell', __dell__), (b'fell', __fell__), (b'crux', __crux__), (b'vane', __vane__), (b'pinion', __pinion__), (b'ochre', __ochre__), (b'prong', __prong__), (b'gauze', __gauze__), (b'pylon', __pylon__), (b'keel', __keel__), (b'mast', __mast__), (b'wheel', __wheel__), (b'level', __level__), (b'wrap', __wrap__), (b'source', __source__), (b'middle', __middle__), (b'tail', __tail__), (b'field', __field__), (b'wide', __wide__), (b'den', __den__))), (code, ((b'op', __op__), (b'constant', __constant__), (b'line', __line__), (b'free', __free__), (b'window', __window__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ord', __ord__), (b'sig', __sig__), (b'fvn', __fvn__), (b'rivet', __rivet__), (b'hinge', __hinge__), (b'nickel', __nickel__), (b'tin', __tin__), (b'rope', __rope__), (b'sail', __sail__), (b'anchor', __anchor__), (b'ctor', __ctor__), (b'made', __made__), (b'byte', __byte__), (b'blob', __blob__), (b'opcode', __opcode__), (b'quad', __quad__), (b'const', __const__), (b'nam', __nam__), (b'var', __var__), (b'cell', __cell__), (b'tab', __tab__), (b'except', __except__), (b'coord', __coord__), (b'fname', __fname__), (b'argv', __argv__), (b'flag', __flag__), (b'mar', __mar__), (b'slot', __slot__), (b'ordr', __ordr__), (b'pack', __pack__), (b'dig', __dig__), (b'pond', __pond__), (b'stk', __stk__))), (code, ((b'qual', __qual__), (b'size', __size__), (b'rng', __rng__), (b'duo', __duo__), (b'tri', __tri__), (b'oct', __oct__), (b'cnt', __cnt__), (b'dep', __dep__), (b'kind', __kind__), (b'pak', __pak__), (b'trail', __trail__), (b'split', __split__), (b'xor', __xor__), (b'sum', __sum__), (b'layout', __layout__), (b'mesh', __mesh__), (b'gate', __gate__), (b'fold', __fold__))), (tree, ((b'crestcall', __crestcall__), (b'crestattr', __crestattr__), (b'crestimp', __crestimp__), (b'creststr', __creststr__), (b'crestbytes', __crestbytes__), (b'crestnum', __crestnum__), (b'crestseq', __crestseq__), (b'crestbranch', __crestbranch__), (b'cresttry', __cresttry__), (b'crestfunc', __crestfunc__), (b'crestclass', __crestclass__), (b'crestcomp', __crestcomp__), (b'crestpat', __crestpat__), (b'crestfmt', __crestfmt__), (b'crestscope', __crestscope__), (b'crestname', __crestname__), (b'crestop', __crestop__), (b'crestline', __crestline__), (b'crestapi', __crestapi__))), (tree, ((b'crestio', __crestio__), (b'crestnet', __crestnet__), (b'cresttime', __cresttime__), (b'cresterr', __cresterr__), (b'crestasync', __crestasync__), (b'crestui', __crestui__), (b'crestpack', __crestpack__))), (code, ((b'crestcode', __crestcode__), (b'crestconst', __crestconst__), (b'crestpool', __crestpool__), (b'cresttable', __cresttable__), (b'crestmar', __crestmar__))))
     rows = []
     for arg, seq in flow:
         rows.extend(fn(arg, seed + tag) for tag, fn in seq)
@@ -5283,7 +5549,9 @@ def __vein__(code):
     tick = [0]
     gate = [0]
     lam = [0]
-    pac = [0]
+    bend = 257 + int.from_bytes(seed[8:12], 'little')
+    mask = int.from_bytes(seed[12:16], 'little') | 1
+    crisp = 1009 + int.from_bytes(seed[16:20], 'little')
     def __cast__(node, kind, skip):
         for field, value in ast.iter_fields(node):
             if field in skip:
@@ -5372,13 +5640,6 @@ def __vein__(code):
     def __carry__(node, tag):
         name = __mint__(used, seed, mint)
         return __lambda__(ast.Name(id=name, ctx=ast.Load()), [name], [node], tag)
-    def __pace__(mod):
-        pac[0] += 1
-        return pac[0] % mod == 0
-    def __bind__(body, left, right, tag):
-        a = __mint__(used, seed, mint)
-        b = __mint__(used, seed, mint)
-        return __lambda__(body(a, b), [a, b], [left, right], tag)
     def __gorge__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -5628,7 +5889,7 @@ def __vein__(code):
         if key not in seen:
             seen[key] = len(plain)
             plain.append(val)
-        return ast.Call(func=ast.Name(id=load, ctx=ast.Load()), args=[ast.Constant(seen[key])], keywords=[])
+        return ast.Call(func=ast.Name(id=load, ctx=ast.Load()), args=[ast.Constant(((seen[key] + bend) ^ mask) + crisp)], keywords=[])
     def __rift__(val):
         size = len(val)
         if size < 128:
@@ -5654,13 +5915,11 @@ def __vein__(code):
             out = ast.BinOp(left=out, op=ast.Add(), right=one)
         return out
     def __stray__(val):
-        if len(val) <= 80 and __pace__(3):
-            return __twine__(val)
-        return __fuse__(__rift__(val), 's')
+        out = __fuse__(__rift__(val), 's')
+        return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
     def __haze__(val):
-        if len(val) <= 32 and __pace__(3):
-            return __byte__(val)
-        return __fuse__(__rift__(val), 'b')
+        out = __fuse__(__rift__(val), 'b'); view = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('memoryview')], keywords=[]), args=[out], keywords=[])
+        return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[view], keywords=[])
     def __count__(val):
         off = 97 + ((abs(val) * 1315423911 + seed[0] + tick[0]) % 999903); key = 17 + ((abs(val) * 2654435761 + seed[1] + tick[0]) % 65519); ash = 33 + ((abs(val) * 2246822519 + seed[2] + tick[0]) % 65503); mul = 3 + ((abs(val) + seed[4] + tick[0]) % 97); bit = 1 + ((abs(val) + seed[5] + tick[0]) % 5); xor = 257 + ((abs(val) + seed[6] + tick[0]) % 65521)
         core = ((((((val + off) ^ key) + ash) * mul) << bit) ^ xor)
@@ -5669,29 +5928,24 @@ def __vein__(code):
         expr = ast.BinOp(left=expr, op=ast.FloorDiv(), right=ast.Constant(mul))
         expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key))
         return ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(off))
-    def __twine__(val):
-        raw = []
-        base = (0x3041, 0x30fa, 0x4e00, 0x9fff, 0x0370, 0x03ff, 0x1200, 0x137f)
-        for slot, char in enumerate(val):
-            left = base[(slot * 2) % len(base)]
-            right = base[(slot * 2 + 1) % len(base)]
-            raw.append(chr(__spark__(seed + b'twine' + slot.to_bytes(4, 'little') + len(val).to_bytes(4, 'little'), left, right)))
-            raw.append(char)
-        return ast.Subscript(value=__ember__(''.join(raw)), slice=ast.Slice(lower=ast.Constant(1), upper=None, step=ast.Constant(2)), ctx=ast.Load())
-    def __byte__(val):
-        idx = __mint__(used, seed, mint)
-        expr = ast.Constant(0)
-        for slot, byte in reversed(tuple(enumerate(val))):
-            expr = ast.IfExp(test=ast.Compare(left=ast.Name(id=idx, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(slot)]), body=__count__(byte), orelse=expr)
-        comp = ast.ListComp(elt=expr, generators=[ast.comprehension(target=ast.Name(id=idx, ctx=ast.Store()), iter=ast.Call(func=ast.Name(id='range', ctx=ast.Load()), args=[__count__(len(val))], keywords=[]), ifs=[], is_async=0)])
-        return ast.Call(func=ast.Name(id='bytes', ctx=ast.Load()), args=[comp], keywords=[])
+    def __calc__(val):
+        tick[0] += 1
+        off = 193 + ((abs(val) * 1315423911 + seed[0] + tick[0]) % 1048573); key = 257 + ((abs(val) * 2654435761 + seed[1] + tick[0]) % 65521); ash = 89 + ((abs(val) * 2246822519 + seed[2] + tick[0]) % 65519); mul = 3 + ((abs(val) + seed[3] + tick[0]) % 193); bit = 1 + ((abs(val) + seed[4] + tick[0]) % 5); xor = 521 + ((abs(val) + seed[5] + tick[0]) % 131071); salt = 1009 + ((abs(val) + seed[6] + tick[0]) % 104729); ring = 3 + ((abs(val) + seed[7] + tick[0]) % 251)
+        core = ((((((((val + off) ^ key) + ash) * mul) << bit) ^ xor) + salt) * ring)
+        expr = ast.BinOp(left=ast.Constant(core), op=ast.FloorDiv(), right=ast.Constant(ring))
+        expr = ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(salt))
+        expr = ast.BinOp(left=expr, op=ast.BitXor(), right=ast.Constant(xor))
+        expr = ast.BinOp(left=expr, op=ast.RShift(), right=ast.Constant(bit))
+        expr = ast.BinOp(left=expr, op=ast.FloorDiv(), right=ast.Constant(mul))
+        expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(ash)), op=ast.BitXor(), right=ast.Constant(key))
+        return ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(off))
     def __float__(val):
         return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
     def __plex__(val):
         return ast.Call(func=ast.Name(id='complex', ctx=ast.Load()), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
     def __truth__(val):
         left = (seed[4] & 1) + 1
-        return ast.Compare(left=ast.Constant(left), ops=[ast.Eq()], comparators=[ast.Constant(left if val else left + 1)])
+        return ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
     def __void__():
         return __carry__(ast.Constant(None), b'none')
     def __dot__():
@@ -5926,6 +6180,8 @@ def {load}(i):
  if {keep} is None:
    row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
    {keep}=tuple({barkf}(__import__('zlib').decompress({rune}(*{blob}))))
+ i=((i-{crisp})^{mask})-{bend}
+ (i<0 or i>=len({keep})) and (_ for _ in ()).throw(RuntimeError('bad'))
  return {keep}[i]
 """
         return ast.parse(text).body
@@ -6079,8 +6335,6 @@ def {load}(i):
         if isinstance(node, ast.Attribute) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__(node.attr)], keywords=[])
         if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load):
-            if __pace__(8):
-                return __bind__(lambda a, b: ast.Subscript(value=ast.Name(id=a, ctx=ast.Load()), slice=ast.Name(id=b, ctx=ast.Load()), ctx=ast.Load()), node.value, node.slice, b'item')
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__('__getitem__')], keywords=[]), args=[node.slice], keywords=[])
         if isinstance(node, ast.List) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('list')], keywords=[]), args=[ast.Tuple(elts=node.elts, ctx=ast.Load())], keywords=[])
@@ -6162,21 +6416,14 @@ def {load}(i):
                     keys.append(ast.keyword(arg=None, value=ast.Dict(keys=[__ember__(one.arg)], values=[one.value])))
             node.keywords = keys
             if not (isinstance(node.func, ast.Name) and node.func.id in gate):
-                if __pace__(16):
-                    name = __mint__(used, seed, mint)
-                    return __lambda__(ast.Call(func=ast.Name(id=name, ctx=ast.Load()), args=node.args, keywords=node.keywords), [name], [node.func], b'call')
                 node.func = __gloom__(node.func)
             return node
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and len(node.comparators) == 1:
             look = {ast.Eq: '__eq__', ast.NotEq: '__ne__', ast.Lt: '__lt__', ast.LtE: '__le__', ast.Gt: '__gt__', ast.GtE: '__ge__'}
             op = look.get(type(node.ops[0]))
             if op:
-                if __pace__(8):
-                    return __bind__(lambda a, b: ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=a, ctx=ast.Load()), __ember__(op)], keywords=[]), args=[ast.Name(id=b, ctx=ast.Load())], keywords=[]), node.left, node.comparators[0], b'cmp')
                 return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.left, __ember__(op)], keywords=[]), args=[node.comparators[0]], keywords=[])
         if isinstance(node, ast.BinOp) and (op := {ast.Add: 'add', ast.Sub: 'sub', ast.Mult: 'mul', ast.Div: 'truediv', ast.FloorDiv: 'floordiv', ast.Mod: 'mod', ast.Pow: 'pow', ast.LShift: 'lshift', ast.RShift: 'rshift', ast.BitOr: 'or_', ast.BitXor: 'xor', ast.BitAnd: 'and_'}.get(type(node.op))):
-            if __pace__(8):
-                return __bind__(lambda a, b: ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[ast.Name(id=a, ctx=ast.Load()), ast.Name(id=b, ctx=ast.Load())], keywords=[]), node.left, node.right, b'bin')
             return ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[node.left, node.right], keywords=[])
         if isinstance(node, ast.UnaryOp) and (name := __mint__(used, seed, mint)): return __lambda__(ast.UnaryOp(op=node.op, operand=ast.Name(id=name, ctx=ast.Load())), [name], [node.operand], b'unary')
         if isinstance(node, ast.BoolOp):
@@ -6277,7 +6524,7 @@ def {load}(i):
         if isinstance(node, ast.Constant) and isinstance(node.value, type(Ellipsis)):
             return ast.copy_location(__dot__(), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, int):
-            return ast.copy_location(__count__(node.value), node)
+            return ast.copy_location(__calc__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, float) and math.isfinite(node.value):
             return ast.copy_location(__float__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, complex):
@@ -6943,12 +7190,27 @@ def __mixifood__():
   if any(low.startswith(one) for one in mac):return __ditmemay__()
  except:pass
  return 0
+def __codev__(code):
+ tab=code.co_linetable if hasattr(code,'co_linetable') else getattr(code,'co_lnotab',b'');exc=getattr(code,'co_exceptiontable',b'')
+ rows=(code.co_argcount,getattr(code,'co_posonlyargcount',0),code.co_kwonlyargcount,code.co_nlocals,code.co_stacksize,code.co_flags,len(code.co_consts),len(code.co_names),len(code.co_varnames),len(code.co_freevars),len(code.co_cellvars),code.co_firstlineno)
+ fog=hashlib.sha256(code.co_code+tab+exc).hexdigest()
+ return (rows,fog,code.co_name,getattr(code,'co_qualname',code.co_name),code.co_filename)
+def __meme__():
+ try:
+  code=(lambda x=1:x).__code__;kind=type(code)
+  if not isinstance(code,kind):return __ditmemay__()
+  if callable(getattr(code,'replace',None)):
+   new=code.replace(co_consts=code.co_consts)
+   if not isinstance(new,kind) or __codev__(new)!=__codev__(code):return __ditmemay__()
+ except:return __ditmemay__()
+ return 0
 def __alovu__(blob):
  left=marshal.loads(blob)
  if getattr(left,'co_filename','')!=mark:return __ditmemay__()
  name=''.join(('PyMarshal_','ReadObjectFromString'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
  box=ctypes.create_string_buffer(blob);right=hold(ctypes.cast(box,ctypes.c_char_p),len(blob))
  if getattr(right,'co_filename','')!=mark or type(left) is not type(right) or getattr(left,'co_name','')!=getattr(right,'co_name',''):return __ditmemay__()
+ if __codev__(left)!=__codev__(right):return __ditmemay__()
  return right
 def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
@@ -6960,7 +7222,7 @@ def __tooldepphet__():
   way=shell[0];way not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:])
 def __depvcl__():
- __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__))
+ __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__))
  __iloveyou__ and __concac__();core=__lmao__(__tooldepphet__);__iloveyou__ and __concac__();code=__lmao__(__alovu__,core);__iloveyou__ and __concac__();__lmao__(__nhinconcac__,code)
 __depvcl__()
 """
@@ -7065,7 +7327,8 @@ def __cowl__(code, seed):
    spray = __spray__(seed + b'maskspray', 0)
    spray = f"{spray};" if spray else ''
    body = f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob},{shot!r})"
-   return f"{spray}{name[8]}=getattr;" + body.replace('getattr', name[8])
+   get = __spell__('getattr', seed + b'cowlget')
+   return f"{spray}{name[8]}=__import__({__spell__('builtins', seed + b'cowlbuilt')}).__dict__[{get}];" + body.replace('getattr', name[8])
 def __crystal__(tree, path, used):
    code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
