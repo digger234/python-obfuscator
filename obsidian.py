@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import secrets
+import unicodedata
 import warnings
 import zlib
 warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -21,6 +22,8 @@ except:
 if sys.version_info < (3, 10):
     print("Python 3.10+ required")
     sys.exit(1)
+try: sys.setrecursionlimit(max(sys.getrecursionlimit(), 500000))
+except: pass
 def __slate__():
    if Colorate is None:
         print(); print("OBSIDIAN"); print("dense fused shell // deobf thu di"); print(); return
@@ -80,15 +83,16 @@ def __mint__(used, seed, mint):
    while True:
         fog = hashlib.sha256(seed + mint[0].to_bytes(4, 'little')).digest(); wide = 2 + (fog[0] & 3); rows = ['__']; slot = 0; at = 1
         while slot < wide:
-             if at + 2 >= len(fog):
+            if at + 2 >= len(fog):
                   fog += hashlib.sha256(fog + seed + mint[0].to_bytes(4, 'little')).digest()
-             left, right = ring[fog[at] % len(ring)]; one = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1))); at += 3
-             if not one.isidentifier(): continue
-             rows.append(one); slot += 1
+            left, right = ring[fog[at] % len(ring)]; one = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1))); at += 3
+            if not one.isidentifier(): continue
+            rows.append(one); slot += 1
         tail = chr(0x3041 + (fog[29 % len(fog)] % (0x3096 - 0x3041 + 1)))
         tail.isidentifier() and rows.append(tail)
         rows.append('__'); name = ''.join(rows); mint[0] += 1
-        if name in used: continue
+        norm = unicodedata.normalize('NFKC', name)
+        if norm != name or name in used or norm in used: continue
         if name.isidentifier(): used.add(name); return name
 def __rune__(used, seed, mark):
    ring = ((0x4e00, 0x9faf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x16a0, 0x16ff), (0x1780, 0x17ff), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df))
@@ -108,8 +112,9 @@ def __rune__(used, seed, mark):
         rows.append('__')
         name = ''.join(rows)
         turn += 1
-        if name in used:
-             continue
+        norm = unicodedata.normalize('NFKC', name)
+        if norm != name or name in used or norm in used:
+              continue
         if name.isidentifier() and not __import__('keyword').iskeyword(name):
              used.add(name)
              return name
@@ -3899,7 +3904,7 @@ def __bamboo__(bag, seed):
     rows = []
     for node in bag['nodes']:
         if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
-            rows.append((type(node).__name__, len(node.elts), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+            rows.append((type(node).__name__, len(node.elts), type(getattr(node,'ctx',None)).__name__, getattr(node, 'lineno', 0)))
         if isinstance(node, ast.Dict):
             rows.append(('Dict', len(node.keys), len(node.values), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
@@ -5464,17 +5469,27 @@ def __ore__(tree, code, seed):
     fog = __mix__(seed, (tuple(rows), len(nodes), len(codes), __hist__(rows)))
     return (len(rows), fog.hex())
 def __chart__(tree, code, stem, path, seed):
-    flow = ((tree, ((b'shape', __shapeid__), (b'literal', __literal__), (b'label', __label__), (b'flow', __flow__), (b'call', __call__), (b'scope', __scope__), (b'module', __module__), (b'set', __set__), (b'sub', __sub__), (b'bin', __bin__), (b'cmp', __cmp__), (b'form', __form__), (b'trap', __trap__), (b'pat', __pat__), (b'ret', __ret__), (b'loop', __loop__), (b'comp', __comp__), (b'ann', __ann__), (b'ref', __ref__), (b'depth', __depth__), (b'tile', __tile__), (b'context', __context__), (b'discard', __discard__), (b'wth', __wth__), (b'body', __body__), (b'glyph', __glyph__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))), (tree, ((b'tok', __tok__), (b'atom', __atom__), (b'num', __num__), (b'txt', __txt__), (b'bop', __bop__), (b'cmpr', __cmpr__), (b'dial', __dial__), (b'asgn', __asgn__), (b'river', __river__), (b'catch', __catch__), (b'mask', __mask__), (b'coil', __coil__), (b'fmt', __fmt__), (b'match', __match__), (b'imp', __imp__), (b'func', __func__), (b'arg', __arg__), (b'clan', __clan__), (b'deco', __deco__), (b'anno', __anno__))), (tree, ((b'out', __out__), (b'slice', __slice__), (b'seq', __seq__), (b'paper', __paper__), (b'lineage', __lineage__), (b'tree', __tree__), (b'leaf', __leaf__), (b'edge', __edge__), (b'order', __order__), (b'nom', __nom__), (b'attr', __attr__), (b'kwd', __kwd__), (b'place', __place__), (b'sym', __sym__), (b'api', __api__), (b'lit', __lit__), (b'blend', __blend__), (b'block', __block__), (b'expr', __expr__), (b'stmt', __stmt__), (b'hash', __hash__), (b'trace', __trace__), (b'flat', __flat__), (b'rill', __rill__), (b'tor', __tor__), (b'dell', __dell__), (b'fell', __fell__), (b'crux', __crux__), (b'vane', __vane__), (b'pinion', __pinion__), (b'ochre', __ochre__), (b'prong', __prong__), (b'gauze', __gauze__), (b'pylon', __pylon__), (b'keel', __keel__), (b'mast', __mast__), (b'wheel', __wheel__), (b'level', __level__), (b'wrap', __wrap__), (b'source', __source__), (b'middle', __middle__), (b'tail', __tail__), (b'field', __field__), (b'wide', __wide__), (b'den', __den__))), (code, ((b'op', __op__), (b'constant', __constant__), (b'line', __line__), (b'free', __free__), (b'window', __window__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ord', __ord__), (b'sig', __sig__), (b'fvn', __fvn__), (b'rivet', __rivet__), (b'hinge', __hinge__), (b'nickel', __nickel__), (b'tin', __tin__), (b'rope', __rope__), (b'sail', __sail__), (b'anchor', __anchor__), (b'ctor', __ctor__), (b'made', __made__), (b'byte', __byte__), (b'blob', __blob__), (b'opcode', __opcode__), (b'quad', __quad__), (b'const', __const__), (b'nam', __nam__), (b'var', __var__), (b'cell', __cell__), (b'tab', __tab__), (b'except', __except__), (b'coord', __coord__), (b'fname', __fname__), (b'argv', __argv__), (b'flag', __flag__), (b'mar', __mar__), (b'slot', __slot__), (b'ordr', __ordr__), (b'pack', __pack__), (b'dig', __dig__), (b'pond', __pond__), (b'stk', __stk__))), (code, ((b'qual', __qual__), (b'size', __size__), (b'rng', __rng__), (b'duo', __duo__), (b'tri', __tri__), (b'oct', __oct__), (b'cnt', __cnt__), (b'dep', __dep__), (b'kind', __kind__), (b'pak', __pak__), (b'trail', __trail__), (b'split', __split__), (b'xor', __xor__), (b'sum', __sum__), (b'layout', __layout__), (b'mesh', __mesh__), (b'gate', __gate__), (b'fold', __fold__))), (tree, ((b'crestcall', __crestcall__), (b'crestattr', __crestattr__), (b'crestimp', __crestimp__), (b'creststr', __creststr__), (b'crestbytes', __crestbytes__), (b'crestnum', __crestnum__), (b'crestseq', __crestseq__), (b'crestbranch', __crestbranch__), (b'cresttry', __cresttry__), (b'crestfunc', __crestfunc__), (b'crestclass', __crestclass__), (b'crestcomp', __crestcomp__), (b'crestpat', __crestpat__), (b'crestfmt', __crestfmt__), (b'crestscope', __crestscope__), (b'crestname', __crestname__), (b'crestop', __crestop__), (b'crestline', __crestline__), (b'crestapi', __crestapi__))), (tree, ((b'crestio', __crestio__), (b'crestnet', __crestnet__), (b'cresttime', __cresttime__), (b'cresterr', __cresterr__), (b'crestasync', __crestasync__), (b'crestui', __crestui__), (b'crestpack', __crestpack__))), (code, ((b'crestcode', __crestcode__), (b'crestconst', __crestconst__), (b'crestpool', __crestpool__), (b'cresttable', __cresttable__), (b'crestmar', __crestmar__))))
-    rows = []
-    for arg, seq in flow:
-        rows.extend(fn(arg, seed + tag) for tag, fn in seq)
-    dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'night', __night__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rice', __rice__), (b'sorn', __sorn__), (b'tav', __tav__), (b'umber', __umber__), (b'vor', __vor__), (b'wool', __wool__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'dusk', __dusk__), (b'peace', __peace__), (b'quill', __quill__), (b'rust', __rust__), (b'siv', __siv__), (b'tick', __tick__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yarn', __yarn__), (b'zok', __zok__), (b'pearl', __pearl__), (b'lime', __lime__), (b'cedar', __cedar__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'zinc', __zinc__), (b'topaz', __topaz__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'ruby', __ruby__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'sniffer', __sniffer__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'goat', __goat__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'wraith', __wraith__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),))
-    for seq in dual:
-        rows.extend(fn(tree, code, seed + tag) for tag, fn in seq)
-    rows.append(__ore__(tree, code, seed + b'ore')); rows.append(__scroll__(stem, path, seed + b'scroll')); rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
-    mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
-    core = __vine__((tuple(rows), mark)); fog = hashlib.sha512(core).digest(); salt = __mist__(seed + b'atlas' + fog, 64)
-    return hashlib.blake2b(fog + salt + core[:4096], digest_size=64).digest()
+    old = ast.walk
+    cache = {}
+    def roam(row):
+        key = id(row)
+        if key not in cache: cache[key] = tuple(old(row))
+        return iter(cache[key])
+    ast.walk = roam
+    try:
+        flow = ((tree, ((b'shape', __shapeid__), (b'literal', __literal__), (b'label', __label__), (b'flow', __flow__), (b'call', __call__), (b'scope', __scope__), (b'module', __module__), (b'set', __set__), (b'sub', __sub__), (b'bin', __bin__), (b'cmp', __cmp__), (b'form', __form__), (b'trap', __trap__), (b'pat', __pat__), (b'ret', __ret__), (b'loop', __loop__), (b'comp', __comp__), (b'ann', __ann__), (b'ref', __ref__), (b'depth', __depth__), (b'tile', __tile__), (b'context', __context__), (b'discard', __discard__), (b'wth', __wth__), (b'body', __body__), (b'glyph', __glyph__), (b'alph', __alph__), (b'span', __span__), (b'gram', __gram__))), (tree, ((b'tok', __tok__), (b'atom', __atom__), (b'num', __num__), (b'txt', __txt__), (b'bop', __bop__), (b'cmpr', __cmpr__), (b'dial', __dial__), (b'asgn', __asgn__), (b'river', __river__), (b'catch', __catch__), (b'mask', __mask__), (b'coil', __coil__), (b'fmt', __fmt__), (b'match', __match__), (b'imp', __imp__), (b'func', __func__), (b'arg', __arg__), (b'clan', __clan__), (b'deco', __deco__), (b'anno', __anno__))), (tree, ((b'out', __out__), (b'slice', __slice__), (b'seq', __seq__), (b'paper', __paper__), (b'lineage', __lineage__), (b'tree', __tree__), (b'leaf', __leaf__), (b'edge', __edge__), (b'order', __order__), (b'nom', __nom__), (b'attr', __attr__), (b'kwd', __kwd__), (b'place', __place__), (b'sym', __sym__), (b'api', __api__), (b'lit', __lit__), (b'blend', __blend__), (b'block', __block__), (b'expr', __expr__), (b'stmt', __stmt__), (b'hash', __hash__), (b'trace', __trace__), (b'flat', __flat__), (b'rill', __rill__), (b'tor', __tor__), (b'dell', __dell__), (b'fell', __fell__), (b'crux', __crux__), (b'vane', __vane__), (b'pinion', __pinion__), (b'ochre', __ochre__), (b'prong', __prong__), (b'gauze', __gauze__), (b'pylon', __pylon__), (b'keel', __keel__), (b'mast', __mast__), (b'wheel', __wheel__), (b'level', __level__), (b'wrap', __wrap__), (b'source', __source__), (b'middle', __middle__), (b'tail', __tail__), (b'field', __field__), (b'wide', __wide__), (b'den', __den__))), (code, ((b'op', __op__), (b'constant', __constant__), (b'line', __line__), (b'free', __free__), (b'window', __window__), (b'vmap', __vmap__), (b'pool', __pool__), (b'ord', __ord__), (b'sig', __sig__), (b'fvn', __fvn__), (b'rivet', __rivet__), (b'hinge', __hinge__), (b'nickel', __nickel__), (b'tin', __tin__), (b'rope', __rope__), (b'sail', __sail__), (b'anchor', __anchor__), (b'ctor', __ctor__), (b'made', __made__), (b'byte', __byte__), (b'blob', __blob__), (b'opcode', __opcode__), (b'quad', __quad__), (b'const', __const__), (b'nam', __nam__), (b'var', __var__), (b'cell', __cell__), (b'tab', __tab__), (b'except', __except__), (b'coord', __coord__), (b'fname', __fname__), (b'argv', __argv__), (b'flag', __flag__), (b'mar', __mar__), (b'slot', __slot__), (b'ordr', __ordr__), (b'pack', __pack__), (b'dig', __dig__), (b'pond', __pond__), (b'stk', __stk__))), (code, ((b'qual', __qual__), (b'size', __size__), (b'rng', __rng__), (b'duo', __duo__), (b'tri', __tri__), (b'oct', __oct__), (b'cnt', __cnt__), (b'dep', __dep__), (b'kind', __kind__), (b'pak', __pak__), (b'trail', __trail__), (b'split', __split__), (b'xor', __xor__), (b'sum', __sum__), (b'layout', __layout__), (b'mesh', __mesh__), (b'gate', __gate__), (b'fold', __fold__))), (tree, ((b'crestcall', __crestcall__), (b'crestattr', __crestattr__), (b'crestimp', __crestimp__), (b'creststr', __creststr__), (b'crestbytes', __crestbytes__), (b'crestnum', __crestnum__), (b'crestseq', __crestseq__), (b'crestbranch', __crestbranch__), (b'cresttry', __cresttry__), (b'crestfunc', __crestfunc__), (b'crestclass', __crestclass__), (b'crestcomp', __crestcomp__), (b'crestpat', __crestpat__), (b'crestfmt', __crestfmt__), (b'crestscope', __crestscope__), (b'crestname', __crestname__), (b'crestop', __crestop__), (b'crestline', __crestline__), (b'crestapi', __crestapi__))), (tree, ((b'crestio', __crestio__), (b'crestnet', __crestnet__), (b'cresttime', __cresttime__), (b'cresterr', __cresterr__), (b'crestasync', __crestasync__), (b'crestui', __crestui__), (b'crestpack', __crestpack__))), (code, ((b'crestcode', __crestcode__), (b'crestconst', __crestconst__), (b'crestpool', __crestpool__), (b'cresttable', __cresttable__), (b'crestmar', __crestmar__))))
+        rows = []
+        for arg, seq in flow:
+            rows.extend(fn(arg, seed + tag) for tag, fn in seq)
+        dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'night', __night__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rice', __rice__), (b'sorn', __sorn__), (b'tav', __tav__), (b'umber', __umber__), (b'vor', __vor__), (b'wool', __wool__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'dusk', __dusk__), (b'peace', __peace__), (b'quill', __quill__), (b'rust', __rust__), (b'siv', __siv__), (b'tick', __tick__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yarn', __yarn__), (b'zok', __zok__), (b'pearl', __pearl__), (b'lime', __lime__), (b'cedar', __cedar__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'zinc', __zinc__), (b'topaz', __topaz__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'ruby', __ruby__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'sniffer', __sniffer__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'goat', __goat__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'wraith', __wraith__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),))
+        for seq in dual:
+            rows.extend(fn(tree, code, seed + tag) for tag, fn in seq)
+        rows.append(__ore__(tree, code, seed + b'ore')); rows.append(__scroll__(stem, path, seed + b'scroll')); rows.extend((__salt__(tree, code, seed + b'salt').hex(), __ring__(tree, code, seed + b'ring')))
+        mark = (os.path.basename(path), len(stem), hashlib.sha256(stem).hexdigest(), zlib.crc32(stem) & 0xffffffff, zlib.adler32(stem) & 0xffffffff)
+        core = __vine__((tuple(rows), mark)); fog = hashlib.sha512(core).digest(); salt = __mist__(seed + b'atlas' + fog, 64)
+        return hashlib.blake2b(fog + salt + core[:4096], digest_size=64).digest()
+    finally:
+        ast.walk = old
 def __vein__(code):
     tree = ast.parse(code)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
@@ -6097,19 +6112,25 @@ def {veilf}():
 def {nockf}():
  try:
   row=__import__('inspect')
-  for one in ('getsource','getsourcelines','findsource','stack'):
+  for one in ('getsource','getsourcelines','findsource'):
    obj=getattr(row,one,None)
    if obj is not None and getattr(obj,'__module__','inspect')!='inspect':
-    raise RuntimeError('bad')
+    try:obj({nockf})
+    except (OSError,TypeError):pass
+    else:raise RuntimeError('bad')
+  obj=getattr(row,'stack',None)
+  if obj is not None and getattr(obj,'__module__','inspect')!='inspect' and obj()!=[]:
+   raise RuntimeError('bad')
  except ImportError:
   pass
  return 1
 def {snagf}():
  try:
   row=__import__('traceback')
-  for one in ('extract_stack','format_stack','walk_stack'):
+  checks=(('extract_stack',lambda v:v==[]),('format_stack',lambda v:v==[]),('walk_stack',lambda v:list(v)==[]))
+  for one,ok in checks:
    obj=getattr(row,one,None)
-   if obj is not None and getattr(obj,'__module__','traceback')!='traceback':
+   if obj is not None and getattr(obj,'__module__','traceback')!='traceback' and not ok(obj(None) if one=='walk_stack' else obj()):
     raise RuntimeError('bad')
  except ImportError:
   pass
@@ -6170,16 +6191,21 @@ def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,a,n,q,c,d,x):
   (rows[0]!=h or rows[1]!=g or rows[2]!=m) and (_ for _ in ()).throw(RuntimeError('bad'))
   return ash if k=='b' else ash.decode('utf-8')
 def {load}(i):
- global {keep}
- {sentryf}()
- {veilf}()
- {nockf}()
- {snagf}()
- {wardf}()
- {chafff}()
+ global {keep},{load}
  if {keep} is None:
-   row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
-   {keep}=tuple({barkf}(__import__('zlib').decompress({rune}(*{blob}))))
+    {sentryf}()
+    {veilf}()
+    {nockf}()
+    {snagf}()
+    {wardf}()
+    {chafff}()
+    row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
+    {keep}=tuple({barkf}(__import__('zlib').decompress({rune}(*{blob}))))
+    def row(i):
+     i=((i-{crisp})^{mask})-{bend}
+     (i<0 or i>=len({keep})) and (_ for _ in ()).throw(RuntimeError('bad'))
+     return {keep}[i]
+    {load}=row
  i=((i-{crisp})^{mask})-{bend}
  (i<0 or i>=len({keep})) and (_ for _ in ()).throw(RuntimeError('bad'))
  return {keep}[i]
@@ -6583,7 +6609,7 @@ def {bone}(name,home,need):
  if mark not in rows:
   raise SystemExit
  text=str(hold)
- if 'builtins' in rows and mark=='builtins' and 'built-in' not in text:
+ if 'builtins' in rows and mark=='builtins' and type(hold).__name__=='builtin_function_or_method' and 'built-in' not in text:
   raise SystemExit
  return hold
 def {hand}():
@@ -6746,14 +6772,14 @@ def {evalf}(code):
  return run(code,globals(),globals())
 def {guard}(blob,mark,seal):
  glow=0
- slot=0
- while slot < len(blob):
-  row=blob[slot:slot+16]
-  for byte in row:
-   glow=(glow+byte)&0xffffffff
+ at=0
+ while at<len(blob):
+  row=blob[at:at+16]
+  for one in row:
+   glow=(glow+one)&0xffffffff
    glow=((glow<<7)|(glow>>25))&0xffffffff
-   glow^=(byte*131)&0xffffffff
-  slot += 16
+   glow^=(one*131)&0xffffffff
+  at+=16
  if glow!=mark:
   raise SystemExit
  shard=hashlib.sha256(blob).hexdigest()
@@ -6964,11 +6990,11 @@ def {runf}():
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
     mask = __mint__(used, seed + b'coremask', mint)
     coresrc = __show__(*__hide__(base64.a85encode(core).decode('ascii'), seed + b'outercore'), mask)
-    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor')
+    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','ziploader','bytesio')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
-    anlz=('procmon','procmon64','procexp','procexp64','wireshark','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
-    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol')
-    cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','scanmem','artmoney','gameguardian')
+    anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor','chrome','msedge','firefox','browser')
+    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol','microsoft-standard','com.termux')
+    cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','tcpdump','scanmem','artmoney','gameguardian','am start','explorer.exe')
     host=('discord.com','discordapp.com','webhook.site','api.telegram.org','telegram.org','pastebin.com','hastebin.com','transfer.sh','api.ipify.org','ip-api.com','ngrok.io','ngrok.app','pipedream.net','raw.githubusercontent.com','file.io')
     key=('token','password','cookie','session','auth','credit','card','api_key','apikey','bearer','credential','license','webhook','private','secret')
     decomp=('uncompyle6','decompyle3','pycdc','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py')
@@ -6977,10 +7003,12 @@ def {runf}():
     mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection') + decomp
     api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump')
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
-    bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll})
-    hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['env'], bank['pool']
+    net=('requests','httpx','aiohttp','urllib3')
+    proc=('wireshark','httptoolkit','fiddler','charles','burp','tcpdump')
+    bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
+    hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
     outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,sys,traceback,uuid,zlib
-__iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};env={env!r};pool={pool!r}
+__iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};net={net!r};proc={proc!r};env={env!r};pool={pool!r}
 __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
@@ -6995,9 +7023,9 @@ def __uwu__():
   sys.tracebacklimit=0
   try:linecache.cache.clear();linecache.checkcache=lambda *a,**k:None;linecache.getlines=lambda *a,**k:[];linecache.getline=lambda *a,**k:''
   except:pass
-  try:inspect.getsource=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.getsourcelines=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.findsource=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.stack=lambda *a,**k:[]
+  try:inspect.getsource=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.getsourcelines=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.findsource=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.getfile=lambda *a,**k:(_ for _ in ()).throw(OSError);inspect.getmodule=lambda *a,**k:None;inspect.currentframe=lambda *a,**k:None;inspect.stack=lambda *a,**k:[]
   except:pass
-  try:traceback.extract_stack=lambda *a,**k:[];traceback.format_stack=lambda *a,**k:[];traceback.walk_stack=lambda *a,**k:iter(())
+  try:traceback.extract_stack=lambda *a,**k:[];traceback.format_stack=lambda *a,**k:[];traceback.walk_stack=lambda *a,**k:iter(());traceback.extract_tb=lambda *a,**k:[];traceback.format_tb=lambda *a,**k:[];traceback.format_exception=lambda *a,**k:[];traceback.format_exception_only=lambda *a,**k:[];traceback.format_exc=lambda *a,**k:'';traceback.print_exc=lambda *a,**k:None;traceback.print_stack=lambda *a,**k:None;traceback.clear_frames=lambda *a,**k:None
   except:pass
   try:gc.collect()
   except:pass
@@ -7084,8 +7112,10 @@ def __varrrrr__(name,home,need):
  return hold
 def __checkvar__():
  built=__import__('builtins')
- __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('__import__',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
- for one in (eval,exec,compile,__import__,open,type,getattr,setattr):
+ __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
+ for home,name in ((marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
+  if sys.modules.get(name) is not home:return __ditmemay__()
+ for one in (eval,exec,compile,__import__,open,globals,locals,vars,dir,type,getattr,setattr):
   if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return __ditmemay__()
  return 0
 def __owo__():
@@ -7160,21 +7190,43 @@ def __anhdomixi__():
  return 0
 def __mixifood__():
  rows=[]
+ try:
+  mine=globals().get('__file__',None);main=getattr(sys.modules.get('__main__'),'__file__',None)
+  if not mine or (main and os.path.abspath(mine)!=os.path.abspath(main)):return __ditmemay__()
+  way=os.path.abspath(mine)
+  if not os.path.isfile(way):return __ditmemay__()
+  with open(way,'rb') as row:
+   got=row.read()
+   if not got or len(got.splitlines())!=3:return __ditmemay__()
+ except:pass
  try:rows.extend(str(one).lower() for one in sys.modules)
  except:pass
  try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'meta_path',()))
  except:pass
  try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'path_hooks',()))
  except:pass
- text=' '.join(str(one).lower() for one in sys.argv);rows.append(text)
+ try:
+  for mark in net:
+   mod=sys.modules.get(mark)
+   if mod:
+    src=' '.join((str(getattr(mod,'__file__','')),str(getattr(mod,'__loader__','')),str(getattr(mod,'__spec__','')))).lower()
+    if any(one in src for one in hint) or ('zip'+'import') in src:return __ditmemay__()
+ except:pass
+ text=' '.join(str(one).lower() for one in sys.argv);rows.append(text);wide=' '.join(rows)
  for word in pool:
-  if any(word in one for one in rows):return __ditmemay__()
+  if word in wide:return __ditmemay__()
  for word in cmd+host:
   if word in text:return __ditmemay__()
  bits=[]
  for one in sys.argv:bits.extend(part.lower() for part in str(one).replace('/',' ').replace('\\\\',' ').replace(':',' ').replace('-',' ').split())
  for word in key:
   if word in bits:return __ditmemay__()
+ try:
+  if os.name=='nt':
+   out=__import__('subprocess').check_output('tasklist',shell=True,text=True,stderr=__import__('subprocess').DEVNULL).lower()
+   for word in proc:
+    if word in out:return __ditmemay__()
+ except:pass
  try:
   low=' '.join((socket.gethostname(),platform.node(),str(os.environ.get('USERNAME','')),str(os.environ.get('COMPUTERNAME','')))).lower()
   for word in vm+sbx:
@@ -7184,6 +7236,13 @@ def __mixifood__():
   low=' '.join((str(os.environ.get(one,'')) for one in env)).lower()
   for word in pool:
    if word in low:return __ditmemay__()
+ except:pass
+ try:
+  if 'com.termux' in str(os.environ.get('HOME','')).lower():return __ditmemay__()
+ except:pass
+ try:
+  with open('/proc/version','r',encoding='utf-8',errors='ignore') as row:
+   if 'microsoft' in row.read().lower():return __ditmemay__()
  except:pass
  try:
   low=':'.join(['{{:02x}}'.format((uuid.getnode()>>(slot*8))&255) for slot in range(6)][::-1][:3]).lower()
@@ -7214,7 +7273,8 @@ def __alovu__(blob):
  return right
 def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
- return hold(code,globals(),globals())
+ g=globals();g.get('__file__') is None and g.__setitem__('__file__',sys.argv[0] if getattr(sys,'argv',None) else None)
+ return hold(code,g,g)
 def __tooldepphet__():
   shell=__lmao__(base64.a85decode,__ngauvcl__.encode());__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   __lmao__(__cak__,shell)!=grain and (_ for _ in ()).throw(SystemExit)
@@ -7378,7 +7438,7 @@ def __crystal__(tree, path, used):
    stamp = hashlib.sha256(raw).hexdigest()
    mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
    return __onyx__(base64.a85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
-def __forge__(path):
+def __forge__(path, dst=None):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
    with open(path, 'r', encoding='utf-8') as ore: code = ore.read()
@@ -7386,9 +7446,26 @@ def __forge__(path):
    st = time.time()
    tree, used = __vein__(code)
    out = __crystal__(tree, path, used)
-   dst = os.path.splitext(path)[0] + "_obf.py"
+   dst = dst or os.path.splitext(path)[0] + "_obf.py"
    with open(dst, 'w', encoding='utf-8', newline='\n') as ore: ore.write(out if out else "")
    return dst, time.time() - st, len(raw), len(out.encode('utf-8'))
+def __scanpy__(root):
+   rows = []
+   for home, dirs, files in os.walk(root):
+      dirs[:] = [one for one in dirs if not one.startswith('.') and one != '__pycache__']
+      for name in files:
+         if name.endswith('.py') and not name.endswith('_obf.py'):
+            rows.append(os.path.join(home, name))
+   return tuple(rows)
+def __folder__(path):
+   path = os.path.abspath(path); outroot = os.path.join(os.path.dirname(path), 'obf-' + os.path.basename(path.rstrip(os.sep)))
+   rows = __scanpy__(path)
+   if not rows: raise ValueError("no py files")
+   st = time.time(); src = 0; size = 0; done = 0
+   for one in rows:
+      rel = os.path.relpath(one, path); dst = os.path.join(outroot, rel); os.makedirs(os.path.dirname(dst), exist_ok=True)
+      got = __forge__(one, dst); src += got[2]; size += got[3]; done += 1
+   return outroot, time.time() - st, src, size, done
 def __clean__(rows):
    seen = set()
    bag = []
@@ -7673,8 +7750,10 @@ def __trove__(groups):
    api = __apis__(__join__(groups['api'], ('OutputDebugString', 'GetThreadContext', 'SetThreadContext', 'DebugActiveProcess', 'DebugBreak', 'ReadProcessMemory', 'WriteProcessMemory', 'CreateRemoteThread', 'LoadLibrary')))
    dll = __dlls__(__join__(groups['dll'], ('kernelbase.dll', 'advapi32.dll', 'psapi.dll', 'ws2_32.dll', 'wininet.dll', 'winhttp.dll')))
    env = __envs__(__join__(hint, debug, anlz, vm, decomp, sbx, __seen__(cmd, host, key), ('python', 'pydevd', 'coverage', 'frida', 'proxy', 'http_proxy', 'https_proxy')))
-   pool = __graft__(__join__(hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mods, __helix__(__thin__(hint, 12), __thin__(debug, 12)), __sift__(__thin__(anlz + decomp + sbx, 80))))
-   return {'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'env': env, 'pool': pool}
+   net = groups['net']
+   proc = groups['proc']
+   pool = __graft__(__join__(hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mods, net, proc, __helix__(__thin__(hint, 12), __thin__(debug, 12)), __sift__(__thin__(anlz + decomp + sbx, 80))))
+   return {'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc, 'env': env, 'pool': pool}
 def __obsidian__():
    try:
         if len(sys.argv) > 1: path = sys.argv[1].strip().strip('"')
@@ -7683,10 +7762,11 @@ def __obsidian__():
            if Colorate is None: path = input("[?] Nhap file ").strip().strip('"')
            else:
               ask = f" {Col.Symbol('?', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)), 'Nhap file')}{Col.light_gray} "; path = input(ask).strip().strip('"')
-        dst, took, src, out = __forge__(path)
-        if Colorate is None: print(f"[>] Done: {path} -> {dst}"); print(f"[>] Time: {took:.3f}s | Size: {src} -> {out}")
+        if os.path.isdir(path): dst, took, src, out, count = __folder__(path); msg = f"Done: {path} -> {dst} ({count} files)"
+        else: dst, took, src, out = __forge__(path); msg = f"Done: {path} -> {dst}"
+        if Colorate is None: print(f"[>] {msg}"); print(f"[>] Time: {took:.3f}s | Size: {src} -> {out}")
         else:
-           say = Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, f'Done: {path} -> {dst}')}{Col.light_gray}"); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, f'Time: {took:.3f}s | Size: {src} -> {out}')}{Col.light_gray}")
+           say = Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, msg)}{Col.light_gray}"); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, f'Time: {took:.3f}s | Size: {src} -> {out}')}{Col.light_gray}")
    except KeyboardInterrupt:
         print(); print("Cancelled"); sys.exit(1)
    except Exception as err:
