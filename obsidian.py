@@ -5560,7 +5560,7 @@ def __vein__(code):
             if name in row:
                 return True
         return False
-    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox = [__mint__(used, seed, mint) for slot in range(42)]
+    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf = [__mint__(used, seed, mint) for slot in range(60)]
     tick = [0]
     gate = [0]
     lam = [0]
@@ -5621,7 +5621,7 @@ def __vein__(code):
         rock = __spark__(seed + b'ledge' + tick[0].to_bytes(4, 'little'), 1, 999)
         init = ast.Assign(targets=[ast.Name(id=flag, ctx=ast.Store())], value=ast.Constant(rock))
         bump = ast.AugAssign(target=ast.Name(id=flag, ctx=ast.Store()), op=ast.Add(), value=ast.Constant(1))
-        raiser = ast.Raise(exc=ast.Call(func=ast.Name(id='Exception', ctx=ast.Load()), args=[ast.Name(id=flag, ctx=ast.Load())], keywords=[]))
+        raiser = ast.Raise(exc=ast.Call(func=ast.Name(id='MemoryError', ctx=ast.Load()), args=[ast.Name(id=flag, ctx=ast.Load())], keywords=[]))
         real = []
         junk = []
         for slot, one in enumerate(body):
@@ -5631,7 +5631,7 @@ def __vein__(code):
             fake = __spark__(seed + b'ledgejunk' + tick[0].to_bytes(4, 'little'), 10**5, 10**8)
             jcond = ast.Compare(left=ast.Subscript(value=ast.Attribute(value=ast.Name(id=err, ctx=ast.Load()), attr='args', ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(fake)])
             junk.append(ast.If(test=jcond, body=[ast.Assign(targets=[ast.Name(id=trap, ctx=ast.Store())], value=ast.Constant(fake))], orelse=[]))
-        handler = ast.ExceptHandler(type=ast.Name(id='Exception', ctx=ast.Load()), name=err, body=real + junk)
+        handler = ast.ExceptHandler(type=ast.Name(id='MemoryError', ctx=ast.Load()), name=err, body=real + junk)
         wrap = ast.Try(body=[bump, raiser], handlers=[handler], orelse=[], finalbody=[])
         return [init, wrap]
     def __vault__(tag):
@@ -5930,8 +5930,20 @@ def __vein__(code):
             out = ast.BinOp(left=out, op=ast.Add(), right=one)
         return out
     def __stray__(val):
+        try:
+            raw = val.encode('utf-8')
+        except:
+            raw = None
+        if raw and len(raw) <= 16 and ((len(raw) + seed[9] + tick[0]) & 7) == 0:
+            arr = ast.List(elts=[__count__(one) for one in raw], ctx=ast.Load())
+            data = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[arr], keywords=[])
+            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[data, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
         out = __fuse__(__rift__(val), 's')
-        return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
+        out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
+        if val and len(val) <= 64 and ((len(val) + seed[12] + tick[0]) & 7) == 1:
+            for _ in range(1 + ((len(val) + seed[13] + tick[0]) & 1)):
+                out = __carry__(out, b'strnest')
+        return out
     def __haze__(val):
         out = __fuse__(__rift__(val), 'b'); view = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('memoryview')], keywords=[]), args=[out], keywords=[])
         return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[view], keywords=[])
@@ -5945,6 +5957,9 @@ def __vein__(code):
         return ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(off))
     def __calc__(val):
         tick[0] += 1
+        if ((abs(val) + seed[10] + tick[0]) & 3) == 0:
+            name = __mint__(used, seed + b'int' + tick[0].to_bytes(4, 'little'), mint); key = 17 + ((abs(val) * 2654435761 + seed[11] + tick[0]) % 65519)
+            return __lambda__(ast.BinOp(left=ast.Name(id=name, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(key)), [name], [ast.Constant(val ^ key)], b'int')
         off = 193 + ((abs(val) * 1315423911 + seed[0] + tick[0]) % 1048573); key = 257 + ((abs(val) * 2654435761 + seed[1] + tick[0]) % 65521); ash = 89 + ((abs(val) * 2246822519 + seed[2] + tick[0]) % 65519); mul = 3 + ((abs(val) + seed[3] + tick[0]) % 193); bit = 1 + ((abs(val) + seed[4] + tick[0]) % 5); xor = 521 + ((abs(val) + seed[5] + tick[0]) % 131071); salt = 1009 + ((abs(val) + seed[6] + tick[0]) % 104729); ring = 3 + ((abs(val) + seed[7] + tick[0]) % 251)
         core = ((((((((val + off) ^ key) + ash) * mul) << bit) ^ xor) + salt) * ring)
         expr = ast.BinOp(left=ast.Constant(core), op=ast.FloorDiv(), right=ast.Constant(ring))
@@ -5971,26 +5986,61 @@ def __vein__(code):
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
         check = zlib.crc32(test) + zlib.adler32(test)
+        def __alias__(word):
+            bag = []
+            for slot, char in enumerate(word[::-1]):
+                fog = __mist__(seed + b'alias' + word.encode('utf-8') + slot.to_bytes(2, 'little'), 2)
+                bag.append(chr(97 + fog[0] % 26) + chr(97 + fog[1] % 26) + char)
+            return f"{joinf}({tuple(bag)!r})"
         text = f"""{blob}={core!r}
 {proof}={gold!r}
 {keep}=None
 {tint}={{}}
 {opbox}=__import__('operator')
 {biobox}=__import__('builtins')
+{bookf}=vars({biobox})
+{globf}=globals()
+def {joinf}(row):
+ {globf}[{(joinf + 'x')!r}]=''
+ for {globf}[{(joinf + 'i')!r}],{globf}[{(joinf + 'v')!r}] in enumerate(row):
+  if {globf}[{(joinf + 'i')!r}]>0:{globf}[{(joinf + 'x')!r}]+=''
+  {globf}[{(joinf + 'x')!r}]+=str({globf}[{(joinf + 'v')!r}])[-1]
+ return {globf}[{(joinf + 'x')!r}][::-1]
+{evalf}={bookf}[{__alias__('eval')}]
+{boolf}={evalf}({__alias__('bool')})
+{strf}={evalf}({__alias__('str')})
+{typef}={evalf}({__alias__('type')})
+{intf}={evalf}({__alias__('int')})
+{bytesf}={evalf}({__alias__('bytes')})
+{varsf}={evalf}({__alias__('vars')})
+{callf}={evalf}({__alias__('callable')})
+{listf}={evalf}({__alias__('list')})
+{mapf}={evalf}({__alias__('map')})
+{impf}={evalf}({__alias__('__import__')})
+{bytef}={evalf}({__alias__('bytearray')})
+{lenf}={evalf}({__alias__('len')})
+{inputf}={evalf}({__alias__('input')})
+def {hexf}(v):
+ v=v-3333333333333333333333333333333333333333333333333333333333242422222222222222222722222233
+ if v<=0x7F:return {strf}({bytesf}([v]),'utf8')
+ if v<=0x7FF:return {strf}({bytesf}([0xC0|(v>>6),0x80|(v&0x3F)]),'utf8')
+ if v<=0xFFFF:return {strf}({bytesf}([0xE0|(v>>12),0x80|((v>>6)&0x3F),0x80|(v&0x3F)]),'utf8')
+ return {strf}({bytesf}([0xF0|(v>>18),0x80|((v>>12)&0x3F),0x80|((v>>6)&0x3F),0x80|(v&0x3F)]),'utf8')
+({bookf} is not {varsf}({biobox}) or {globf} is not globals() or not {callf}({mapf}) or not {callf}({inputf}) or {typef}({listf}({mapf}({intf},{listf}()))).__name__!='list' or {typef}({bytef}()).__name__!='bytearray' or {strf}({boolf}(1))!='True' or {hexf}(3333333333333333333333333333333333333333333333333333333333242422222222222222222722222298)!='A') and (_ for _ in ()).throw(RuntimeError('bad'))
 def {dawn}(v,o,p):
- rows=bytes.fromhex(p)
- len(rows)!=len(v) and (_ for _ in ()).throw(RuntimeError('bad'))
- return bytes(((ord(one)-o)^rows[slot]) for slot,one in enumerate(v))
+ rows={bytesf}.fromhex(p)
+ {lenf}(rows)!={lenf}(v) and (_ for _ in ()).throw(RuntimeError('bad'))
+ return {bytesf}(((ord(one)-o)^rows[slot]) for slot,one in enumerate(v))
 def {dusk}(v):
- (len(v)&1) and (_ for _ in ()).throw(RuntimeError('bad'))
- return bytes.fromhex(v[1::2])
+ ({lenf}(v)&1) and (_ for _ in ()).throw(RuntimeError('bad'))
+ return {bytesf}.fromhex(v[1::2])
 def {kiln}(v,o,p):
- return bytes((((one-o)&255)^p) for one in v)
+ return {bytesf}((((one-o)&255)^p) for one in v)
 def {loom}(v,p):
- rows=bytes.fromhex(p)
- fog=__import__('base64').b85decode(v.encode())
- len(rows)!=len(fog) and (_ for _ in ()).throw(RuntimeError('bad'))
- return bytes(one^rows[slot] for slot,one in enumerate(fog))
+ rows={bytesf}.fromhex(p)
+ fog={impf}('base64').b85decode(v.encode())
+ {lenf}(rows)!={lenf}(fog) and (_ for _ in ()).throw(RuntimeError('bad'))
+ return {bytesf}(one^rows[slot] for slot,one in enumerate(fog))
 def {mire}(v,o):
  rows=[ord(one) for one in v]
  if not rows:
@@ -6990,9 +7040,9 @@ def {runf}():
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
     mask = __mint__(used, seed + b'coremask', mint)
     coresrc = __show__(*__hide__(base64.a85encode(core).decode('ascii'), seed + b'outercore'), mask)
-    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','ziploader','bytesio')
+    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','chrome','msedge','firefox','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','py___obsidian__','ziploader','bytesio')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
-    anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','burp','processhacker','process hacker','apimonitor','httpdebuggerpro','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor','chrome','msedge','firefox','browser')
+    anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','mitmdump','burp','burpsuite','processhacker','process hacker','apimonitor','httpdebugger','httpdebuggerpro','httpanalyzer','packetsender','proxyman','tshark','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
     vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol','microsoft-standard','com.termux')
     cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','tcpdump','scanmem','artmoney','gameguardian','am start','explorer.exe')
     host=('discord.com','discordapp.com','webhook.site','api.telegram.org','telegram.org','pastebin.com','hastebin.com','transfer.sh','api.ipify.org','ip-api.com','ngrok.io','ngrok.app','pipedream.net','raw.githubusercontent.com','file.io')
@@ -7004,14 +7054,19 @@ def {runf}():
     api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump')
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
     net=('requests','httpx','aiohttp','urllib3')
-    proc=('wireshark','httptoolkit','fiddler','charles','burp','tcpdump')
+    proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpanalyzer','packetsender')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
-    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,sys,traceback,uuid,zlib
+    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,sys,traceback,uuid,zlib
+try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
+except:pass
 __iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};net={net!r};proc={proc!r};env={env!r};pool={pool!r}
 __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
+try:
+ if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
+except:pass
 def __concac__():raise SystemExit
 def __lmao__(f,*a):
  k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __concac__())(k[0],k[1],k[2],f,a)
@@ -7112,11 +7167,14 @@ def __varrrrr__(name,home,need):
  return hold
 def __checkvar__():
  built=__import__('builtins')
- __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
- for home,name in ((marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
+ __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('print',built,('builtins',));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
+ for home,name in ((sys,'sys'),(os,'os'),(socket,'socket'),(platform,'platform'),(ctypes,'ctypes'),(marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
   if sys.modules.get(name) is not home:return __ditmemay__()
- for one in (eval,exec,compile,__import__,open,globals,locals,vars,dir,type,getattr,setattr):
+ for one in (eval,exec,compile,__import__,open,print,globals,locals,vars,dir,type,getattr,setattr):
   if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return __ditmemay__()
+  try:one.__code__;return __ditmemay__()
+  except AttributeError:pass
+  except:return __ditmemay__()
  return 0
 def __owo__():
  for one in (lambda:sys.gettrace() is None,lambda:sys.getprofile() is None,lambda:id(eval)==id(eval),lambda:id(exec)==id(exec),lambda:id(compile)==id(compile),lambda:type(open).__name__=='builtin_function_or_method',lambda:type(print).__name__=='builtin_function_or_method',lambda:__import__.__module__ in ('builtins',None)):
@@ -7206,12 +7264,57 @@ def __mixifood__():
  try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'path_hooks',()))
  except:pass
  try:
+  frame=sys._getframe();deep=0
+  while frame and deep<96:
+   code=getattr(frame,'f_code',None);fname=str(getattr(code,'co_filename','')).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(fname+' '+cname)
+   for word in mods+decomp:
+    if word in fname or word in cname:return __ditmemay__()
+   frame=frame.f_back;deep += 1
+  if frame is not None:return __ditmemay__()
+ except:pass
+ try:
   for mark in net:
    mod=sys.modules.get(mark)
    if mod:
     src=' '.join((str(getattr(mod,'__file__','')),str(getattr(mod,'__loader__','')),str(getattr(mod,'__spec__','')))).lower()
     if any(one in src for one in hint) or ('zip'+'import') in src:return __ditmemay__()
  except:pass
+ try:
+  for mark in net:
+   mod=sys.modules.get(mark)
+   if mod is None:continue
+   try:
+    for hold in vars(mod).values():
+     if callable(hold) and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__)):return __ditmemay__()
+   except:pass
+   box=getattr(mod,'__dict__',{{}}).get('__builtins__',None)
+   if box is None:continue
+   if not isinstance(box,dict):box=vars(box)
+   hold=box.get('__import__')
+   if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__) or hasattr(hold,'__code__')):return __ditmemay__()
+   hold=box.get('open')
+   if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__) or hasattr(hold,'__code__')):return __ditmemay__()
+   hold=box.get('eval')
+   if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__) or hasattr(hold,'__code__')):return __ditmemay__()
+   hold=box.get('exec')
+   if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__) or hasattr(hold,'__code__')):return __ditmemay__()
+  hold=getattr(socket,'socket',None)
+  if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__)):return __ditmemay__()
+  hold=getattr(ssl.SSLContext,'wrap_socket',None)
+  if hold is not None and (hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__)):return __ditmemay__()
+ except:pass
+ try:
+  if linecache.getlines(__file__)!=[] or linecache.getline(__file__,1)!='':return __ditmemay__()
+ except:return __ditmemay__()
+ try:
+  try:inspect.getsource(__mixifood__);return __ditmemay__()
+  except OSError:pass
+  except:return __ditmemay__()
+  if inspect.stack()!=[]:return __ditmemay__()
+ except:return __ditmemay__()
+ try:
+  if traceback.extract_stack()!=[] or traceback.format_stack()!=[] or traceback.format_exc()!='':return __ditmemay__()
+ except:return __ditmemay__()
  text=' '.join(str(one).lower() for one in sys.argv);rows.append(text);wide=' '.join(rows)
  for word in pool:
   if word in wide:return __ditmemay__()
@@ -7273,6 +7376,13 @@ def __alovu__(blob):
  return right
 def __nhinconcac__(code):
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
+ built=globals().get('__builtins__');box=built if isinstance(built,dict) else vars(built)
+ cap={{'Obsidian':box.get('eval'),'Ender_Pearl':box.get('str'),'Crystal':box.get('bytes'),'Bedrock':box.get('dict'),'Gapple':box.get('zip')}}
+ cap['Trident']=cap['Bedrock'](cap['Gapple'](('exec','__import__','marshal','lzma','zlib','bz2','base64'),(box.get('exec'),box.get('__import__'),marshal,lzma,zlib,bz2,base64)))
+ cap['Github']={{'Obsidian':lambda row:row}}
+ chk=cap['Crystal']([65,66,67])
+ mod=(cap['Trident'].get('marshal') is marshal and cap['Trident'].get('lzma') is lzma and cap['Trident'].get('zlib') is zlib and cap['Trident'].get('bz2') is bz2 and cap['Trident'].get('base64') is base64)
+ (cap['Obsidian'] is not eval or cap['Ender_Pearl'] is not str or cap['Crystal'] is not bytes or cap['Bedrock'] is not dict or cap['Gapple'] is not zip or cap['Trident'].get('exec') is not exec or cap['Trident'].get('__import__') is not __import__ or not mod or cap['Ender_Pearl'](chk,'utf8')!='ABC' or cap['Github']['Obsidian'](code) is not code) and __ditmemay__()
  g=globals();g.get('__file__') is None and g.__setitem__('__file__',sys.argv[0] if getattr(sys,'argv',None) else None)
  return hold(code,g,g)
 def __tooldepphet__():
