@@ -1,7 +1,9 @@
 ﻿import ast
 import base64
 import bz2
+import copy
 import hashlib
+import json
 import lzma
 import marshal
 import math
@@ -139,13 +141,18 @@ def __chant__(text, seed):
    rows = tuple((byte ^ fog[slot] ^ key) for slot, byte in enumerate(raw))
    return (rows, key, fog.hex(), __crown__(raw))
 def __prism__(name, data):
-   row, key, fog, mark = data
-   fog = repr(fog) if len(fog) < 80 else "''.join((" + ','.join(repr(fog[at:at + 48]) for at in range(0, len(fog), 48)) + "))"
-   return f"{name}({row!r},{key},{fog},{mark!r})"
+    row, key, fog, mark = data
+    mask=(key+len(row)*11+73)&255;step=((key^len(fog))&31)+3;wide=(mask<<8)|mask
+    row=tuple((one^mask^((slot*step)&255))&255 for slot,one in enumerate(row))
+    row=f"tuple((one^{mask}^((slot*{step})&255))&255 for slot,one in enumerate({row!r}))"
+    turn=(key%17)+5;fog=''.join(chr(32+((ord(ch)-32+turn)%95)) for ch in fog[::-1])
+    fog=f"''.join(chr(32+((ord(ch)-32-{turn})%95)) for ch in {fog!r})[::-1]"
+    left="b''" if not mark[2] else f"bytes(({mark[2][0]^mask}^{mask},))";right="b''" if not mark[3] else f"bytes(({mark[3][0]^mask}^{mask},))"
+    mark=f"({mark[0]}^{mask}^{mask},{mark[1]^wide}^{wide},{left},{right},{mark[4]^wide}^{wide},{mark[5]^wide}^{wide})"
+    return f"{name}({row},{key^mask}^{mask},{fog},{mark})"
 def __iris__(name, way):
-   tail = ".decode('utf-8')" if way else ""
-   text = f"def {name}(row,key,fog,mark):\n fog=bytes.fromhex(fog);raw=bytes((one^key^fog[slot]) for slot,one in enumerate(row));glow=0;bend=0\n for slot,byte in enumerate(raw):glow=(glow+byte+slot)&0xffffffff;bend^=((byte+1)*(slot+3))&0xffffffff;bend=((bend<<5)|(bend>>27))&0xffffffff\n (len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],glow,bend)!=mark and (_ for _ in ()).throw(SystemExit)\n return raw{tail}"
-   return f"exec({text!r})"
+    tail = ".decode('utf-8')" if way else ""
+    return f"{name}=lambda row,key,fog,mark:(lambda raw:(lambda box:((len(raw),sum(raw)&0xffffffff,raw[:1],raw[-1:],box[0],box[1])!=mark and (_ for _ in ()).throw(SystemExit),raw{tail})[-1])(__import__('functools').reduce(lambda box,slot:((box[0]+slot[1]+slot[0])&0xffffffff,(((box[1]^(((slot[1]+1)*(slot[0]+3))&0xffffffff))<<5)|((box[1]^(((slot[1]+1)*(slot[0]+3))&0xffffffff))>>27))&0xffffffff),enumerate(raw),(0,0))))(bytes((one^key^bytes.fromhex(fog)[slot]) for slot,one in enumerate(row)))"
 def __plume__(name):
    way = 1
    return __iris__(name, way)
@@ -237,11 +244,13 @@ def __wisp__(code):
    blob = __vine__(tuple(rows)); return (len(rows), hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest())
 def __gasket__(blob):
    if len(blob) > 4096:
-        pick = min(((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3))), key=lambda row: (len(row[1]), row[0]))
+        rows = ((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3)))
    elif len(blob) < 512:
-        pick = min(((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: (len(row[1]), row[0]))
+        rows = ((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6)))
    else:
-        pick = min(((0, zlib.compress(blob, 4)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6))), key=lambda row: (len(row[1]), row[0]))
+        rows = ((0, zlib.compress(blob, 4)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6)))
+   pick = min(rows, key=lambda row: (len(row[1]), row[0])); fast = min((row for row in rows if row[0] == 0), key=lambda row: len(row[1]))
+   if len(fast[1]) <= (len(pick[1]) * 115) // 100: pick = fast
    return bytes([pick[0]]) + pick[1]
 def __weld__(blob, key):
    rows = bytearray(); glow = key & 255; drift = ((key >> 8) & 255) or 73; tint = ((key >> 16) & 255) or 19
@@ -5490,8 +5499,1104 @@ def __chart__(tree, code, stem, path, seed):
         return hashlib.blake2b(fog + salt + core[:4096], digest_size=64).digest()
     finally:
         ast.walk = old
+def __pare__(tree):
+    lim=4096;num=10**18
+    def __ok__(v): return (v is None or v is Ellipsis or isinstance(v,(bool,int,float,complex,str,bytes,tuple,frozenset))) and not (isinstance(v,int) and abs(v)>num) and not (isinstance(v,(str,bytes)) and len(v)>lim) and not (isinstance(v,(tuple,frozenset)) and (len(v)>256 or any(not __ok__(x) for x in v)))
+    def __val__(n):
+        if isinstance(n,ast.Constant): return True,n.value
+        if isinstance(n,(ast.Tuple,ast.List,ast.Set)):
+            bag=[]
+            for x in n.elts:
+                ok,v=__val__(x)
+                if not ok: return False,None
+                bag.append(v)
+            if len(bag)>256: return False,None
+            if isinstance(n,ast.Tuple): return True,tuple(bag)
+            if isinstance(n,ast.List): return True,bag
+            try: return True,set(bag)
+            except: return False,None
+        if isinstance(n,ast.Dict):
+            bag={}
+            for k,x in zip(n.keys,n.values):
+                if k is None: return False,None
+                ko,kv=__val__(k);xo,xv=__val__(x)
+                if not ko or not xo: return False,None
+                try: bag[kv]=xv
+                except: return False,None
+            return len(bag)<=256,bag
+        return False,None
+    def __mk__(v,n):
+        if not __ok__(v): return n
+        return ast.copy_location(ast.Constant(v),n)
+    def __ev__(fn,*v):
+        try:
+            out=fn(*v)
+            if __ok__(out) or isinstance(out,(list,set,dict)): return True,out
+        except: pass
+        return False,None
+    def __say__(n):
+        if isinstance(n,ast.Constant) and isinstance(n.value,str): return True,n.value
+        if not isinstance(n,ast.JoinedStr): return False,None
+        bag=[]
+        for x in n.values:
+            if isinstance(x,ast.Constant) and isinstance(x.value,str): bag.append(x.value)
+            elif isinstance(x,ast.FormattedValue):
+                ok,v=__val__(x.value);so,s=__say__(x.format_spec) if x.format_spec else (True,'')
+                if not ok or not so: return False,None
+                try:
+                    v=str(v) if x.conversion==115 else repr(v) if x.conversion==114 else ascii(v) if x.conversion==97 else v
+                    if x.conversion not in (-1,97,114,115): return False,None
+                    bag.append(format(v,s))
+                except: return False,None
+            else: return False,None
+        out=''.join(bag);return (len(out)<=lim),out
+    def __sim__(n):
+        if isinstance(n,ast.Name) and n.id=='__debug__': return True,False
+        ok,v=__val__(n)
+        if ok and __ok__(v): return True,v
+        return __say__(n) if isinstance(n,ast.JoinedStr) else (False,None)
+    def __raw__(n):
+        if isinstance(n,ast.Name) and n.id=='__debug__': return True,False
+        ok,v=__val__(n)
+        if ok: return True,v
+        return __say__(n) if isinstance(n,ast.JoinedStr) else (False,None)
+    def __pure__(n):
+        return isinstance(n,ast.Name) and n.id=='__debug__' or isinstance(n,ast.Constant) or isinstance(n,(ast.Tuple,ast.List,ast.Set)) and all(__pure__(x) for x in n.elts) or isinstance(n,ast.Dict) and all(k is not None and __pure__(k) and __pure__(v) for k,v in zip(n.keys,n.values)) or isinstance(n,ast.UnaryOp) and __pure__(n.operand) or isinstance(n,ast.BinOp) and __pure__(n.left) and __pure__(n.right) or isinstance(n,ast.BoolOp) and all(__pure__(x) for x in n.values) or isinstance(n,ast.Compare) and __pure__(n.left) and all(__pure__(x) for x in n.comparators) or isinstance(n,ast.IfExp) and __pure__(n.test) and __pure__(n.body) and __pure__(n.orelse) or isinstance(n,ast.JoinedStr) and all(__pure__(x) for x in n.values) or isinstance(n,ast.FormattedValue) and __pure__(n.value) and (n.format_spec is None or __pure__(n.format_spec)) or isinstance(n,ast.Subscript) and __pure__(n.value) and __pure__(n.slice) or isinstance(n,ast.Slice) and (n.lower is None or __pure__(n.lower)) and (n.upper is None or __pure__(n.upper)) and (n.step is None or __pure__(n.step))
+    def __drop__(x,first):
+        return isinstance(x,(ast.Pass,ast.Assert)) or isinstance(x,ast.Expr) and (isinstance(x.value,ast.Constant) or __pure__(x.value))
+    def __same__(a,b):
+        try: return ast.dump(a,include_attributes=False)==ast.dump(b,include_attributes=False)
+        except: return False
+    def __lift__(v,n):
+        made=__node__(v,n)
+        if made is not None: return made
+        return __mk__(v,n) if __ok__(v) else n
+    def __keyn__(n):
+        if isinstance(n,ast.Name): return {n.id}
+        if isinstance(n,(ast.Tuple,ast.List)):
+            bag=set()
+            for x in n.elts: bag.update(__keyn__(x))
+            return bag
+        if isinstance(n,ast.Starred): return __keyn__(n.value)
+        if isinstance(n,ast.Attribute): return set()
+        if isinstance(n,ast.Subscript): return set()
+        return set()
+    def __readn__(n):
+        bag=set()
+        for x in ast.walk(n):
+            if isinstance(x,ast.Name) and isinstance(x.ctx,ast.Load): bag.add(x.id)
+        return bag
+    def __litok__(v):
+        return v is None or v is Ellipsis or isinstance(v,(bool,int,float,complex,str,bytes,tuple)) and __ok__(v)
+    def __clone__(v,n):
+        return ast.copy_location(ast.Constant(v),n)
+    def __swap__(n,tab):
+        if isinstance(n,ast.Name) and isinstance(n.ctx,ast.Load) and n.id in tab: return __clone__(tab[n.id],n)
+        for f,v in ast.iter_fields(n):
+            if isinstance(v,list):
+                bag=[]
+                for x in v:
+                    bag.append(__swap__(x,tab) if isinstance(x,ast.AST) else x)
+                setattr(n,f,bag)
+            elif isinstance(v,ast.AST): setattr(n,f,__swap__(v,tab))
+        return n
+    def __cutn__(tab,names):
+        for x in names:
+            if x in tab: del tab[x]
+    def __bindn__(tab,x):
+        if isinstance(x,ast.Assign):
+            for t in x.targets: __cutn__(tab,__keyn__(t))
+            if len(x.targets)==1 and isinstance(x.targets[0],ast.Name):
+                ok,v=__raw__(x.value)
+                if ok and __litok__(v): tab[x.targets[0].id]=v
+        elif isinstance(x,ast.AnnAssign):
+            __cutn__(tab,__keyn__(x.target))
+            if isinstance(x.target,ast.Name) and x.value is not None:
+                ok,v=__raw__(x.value)
+                if ok and __litok__(v): tab[x.target.id]=v
+        elif isinstance(x,ast.AugAssign): __cutn__(tab,__keyn__(x.target))
+        elif isinstance(x,ast.For): __cutn__(tab,__keyn__(x.target))
+        elif isinstance(x,ast.With):
+            for y in x.items:
+                if y.optional_vars is not None: __cutn__(tab,__keyn__(y.optional_vars))
+        elif isinstance(x,ast.Import):
+            for y in x.names: __cutn__(tab,{y.asname or y.name.split('.')[0]})
+        elif isinstance(x,ast.ImportFrom):
+            for y in x.names: __cutn__(tab,{y.asname or y.name})
+        elif isinstance(x,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)): __cutn__(tab,{x.name})
+        elif isinstance(x,ast.Delete):
+            for y in x.targets: __cutn__(tab,__keyn__(y))
+    def __hard__(x):
+        return isinstance(x,(ast.Global,ast.Nonlocal,ast.Try,ast.Raise,ast.Match,ast.AsyncFor,ast.AsyncWith))
+    def __lane__(rows):
+        if len(rows)>12: return rows
+        tab={};bag=[]
+        for x in rows:
+            if __hard__(x):
+                tab.clear();bag.append(x);continue
+            if not isinstance(x,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)):
+                x=__swap__(x,tab)
+            bag.append(x);__bindn__(tab,x)
+            if isinstance(x,(ast.Return,ast.Raise,ast.Break,ast.Continue)): tab.clear()
+        return bag
+    def __uses__(rows):
+        bag={}
+        for x in rows:
+            for y in __readn__(x): bag[y]=bag.get(y,0)+1
+        return bag
+    def __dead__(rows):
+        if len(rows)>12: return rows
+        cnt=__uses__(rows)
+        out=[]
+        for x in rows:
+            if isinstance(x,ast.Assign) and len(x.targets)==1 and isinstance(x.targets[0],ast.Name):
+                ok,v=__raw__(x.value)
+                if ok and __litok__(v) and cnt.get(x.targets[0].id,0)==0: continue
+            if isinstance(x,ast.AnnAssign) and isinstance(x.target,ast.Name) and x.value is not None:
+                ok,v=__raw__(x.value)
+                if ok and __litok__(v) and cnt.get(x.target.id,0)==0: continue
+            out.append(x)
+        return out
+    def __isn__(n,v):
+        ok,x=__raw__(n)
+        return ok and x==v
+    def __z__(n): return __isn__(n,0)
+    def __o__(n): return __isn__(n,1)
+    def __mone__(n): return __isn__(n,-1)
+    def __empn__(n):
+        got=__tally__(n)
+        return got==0 if got is not None else False
+    def __copyloc__(x,n):
+        return ast.copy_location(x,n)
+    def __alg__(n):
+        if isinstance(n.op,ast.Mod) and isinstance(n.left,ast.Constant) and isinstance(n.left.value,(str,bytes)):
+            ok,v=__raw__(n.right)
+            if ok:
+                done,out=__ev__(lambda a,b:a%b,n.left.value,v)
+                if done: return __done__(out,n)
+        if isinstance(n.op,ast.Add):
+            if __z__(n.right) and __pure__(n.left): return n.left
+            if __z__(n.left) and __pure__(n.right): return n.right
+            if __empn__(n.right) and __pure__(n.left): return n.left
+            if __empn__(n.left) and __pure__(n.right): return n.right
+        if isinstance(n.op,ast.Sub):
+            if __z__(n.right) and __pure__(n.left): return n.left
+            if __z__(n.left) and __pure__(n.right): return __copyloc__(ast.UnaryOp(op=ast.USub(),operand=n.right),n)
+        if isinstance(n.op,ast.Mult):
+            if __o__(n.right) and __pure__(n.left): return n.left
+            if __o__(n.left) and __pure__(n.right): return n.right
+            if (__z__(n.right) and __pure__(n.left)) or (__z__(n.left) and __pure__(n.right)): return __mk__(0,n)
+        if isinstance(n.op,ast.Div) and __o__(n.right) and __pure__(n.left): return n.left
+        if isinstance(n.op,ast.FloorDiv) and __o__(n.right) and __pure__(n.left): return n.left
+        if isinstance(n.op,ast.Pow):
+            if __o__(n.right) and __pure__(n.left): return n.left
+            if __z__(n.right) and __pure__(n.left): return __mk__(1,n)
+            if __o__(n.left) and __pure__(n.right): return __mk__(1,n)
+        if isinstance(n.op,(ast.BitOr,ast.BitXor)) and __z__(n.right) and __pure__(n.left): return n.left
+        if isinstance(n.op,(ast.BitOr,ast.BitXor)) and __z__(n.left) and __pure__(n.right): return n.right
+        if isinstance(n.op,ast.BitAnd) and __z__(n.right) and __pure__(n.left): return __mk__(0,n)
+        if isinstance(n.op,ast.BitAnd) and __z__(n.left) and __pure__(n.right): return __mk__(0,n)
+        if isinstance(n.op,(ast.LShift,ast.RShift)) and __z__(n.right) and __pure__(n.left): return n.left
+        return n
+    def __boolop__(n):
+        if isinstance(n.op,ast.And):
+            vals=[]
+            for x in n.values:
+                ok,v=__truthy__(x)
+                if ok and v: continue
+                if ok and not v and __pure__(x): return x
+                vals.append(x)
+            return vals[0] if len(vals)==1 else ast.copy_location(ast.BoolOp(op=n.op,values=vals),n) if vals else __mk__(True,n)
+        if isinstance(n.op,ast.Or):
+            vals=[]
+            for x in n.values:
+                ok,v=__truthy__(x)
+                if ok and not v: continue
+                if ok and v and __pure__(x): return x
+                vals.append(x)
+            return vals[0] if len(vals)==1 else ast.copy_location(ast.BoolOp(op=n.op,values=vals),n) if vals else __mk__(False,n)
+        return n
+    def __tern__(n):
+        if __same__(n.body,n.orelse) and __pure__(n.test): return n.body
+        val=__bexp__(n.test,n.body,n.orelse,n)
+        if val is not None: return val
+        if __isn__(n.body,True) and __isn__(n.orelse,False): return ast.copy_location(ast.Call(func=ast.Name(id='bool',ctx=ast.Load()),args=[n.test],keywords=[]),n)
+        if __isn__(n.body,False) and __isn__(n.orelse,True): return ast.copy_location(ast.UnaryOp(op=ast.Not(),operand=n.test),n)
+        return n
+    def __judge__(n):
+        if len(n.ops)==1 and __same__(n.left,n.comparators[0]) and __pure__(n.left):
+            if isinstance(n.ops[0],(ast.Eq,ast.LtE,ast.GtE,ast.Is)): return __mk__(True,n)
+            if isinstance(n.ops[0],(ast.NotEq,ast.Lt,ast.Gt,ast.IsNot)): return __mk__(False,n)
+        return n
+    def __deny__(n):
+        if isinstance(n,ast.Compare) and len(n.ops)==1:
+            tab={ast.Eq:ast.NotEq,ast.NotEq:ast.Eq,ast.Lt:ast.GtE,ast.LtE:ast.Gt,ast.Gt:ast.LtE,ast.GtE:ast.Lt,ast.Is:ast.IsNot,ast.IsNot:ast.Is,ast.In:ast.NotIn,ast.NotIn:ast.In}
+            kind=tab.get(type(n.ops[0]))
+            if kind is not None: return ast.copy_location(ast.Compare(left=n.left,ops=[kind()],comparators=n.comparators),n)
+        return None
+    def __argn__(a):
+        bag=[]
+        for x in a.posonlyargs: bag.append(x.arg)
+        for x in a.args: bag.append(x.arg)
+        return bag
+    def __simplea__(a):
+        return not a.vararg and not a.kwarg and not a.kwonlyargs and not a.kw_defaults and not a.defaults
+    def __lambok__(node):
+        for x in ast.walk(node):
+            if isinstance(x,(ast.Lambda,ast.NamedExpr,ast.Yield,ast.YieldFrom,ast.Await)): return False
+        return True
+    def __lam__(n,args):
+        if not isinstance(n.func,ast.Lambda): return None
+        lam=n.func
+        if not __simplea__(lam.args): return None
+        names=__argn__(lam.args)
+        if len(names)!=len(args): return None
+        if len(set(names))!=len(names): return None
+        if not __lambok__(lam.body): return None
+        tab={}
+        for k,v in zip(names,args):
+            if not __litok__(v): return None
+            tab[k]=v
+        return ast.copy_location(__swap__(lam.body,tab),n)
+    def __noun__(n):
+        if isinstance(n,ast.Call) and not n.keywords and isinstance(n.func,ast.Name) and n.func.id=='type' and len(n.args)==1:
+            ok,v=__raw__(n.args[0])
+            if ok: return True,type(v)
+        return False,None
+    def __typeattr__(n,attr):
+        ok,t=__noun__(n)
+        if ok and attr=='__name__': return True,t.__name__
+        if ok and attr=='__qualname__': return True,t.__qualname__
+        if ok and attr=='__module__': return True,t.__module__
+        return False,None
+    def __typec__(tree):
+        for x in ast.walk(tree):
+            if isinstance(x,ast.Module):
+                x.type_ignores=[]
+            if isinstance(x,ast.FunctionDef):
+                x.type_comment=None
+            if isinstance(x,ast.AsyncFunctionDef):
+                x.type_comment=None
+            if isinstance(x,ast.Assign):
+                x.type_comment=None
+            if isinstance(x,ast.For):
+                x.type_comment=None
+            if isinstance(x,ast.AsyncFor):
+                x.type_comment=None
+            if isinstance(x,ast.With):
+                x.type_comment=None
+            if isinstance(x,ast.AsyncWith):
+                x.type_comment=None
+            if isinstance(x,ast.arg) and hasattr(x,'type_comment'):
+                x.type_comment=None
+            if isinstance(x,ast.arguments):
+                if hasattr(x,'posonlyargs'):
+                    for y in x.posonlyargs:
+                        if hasattr(y,'type_comment'): y.type_comment=None
+                for y in x.args:
+                    if hasattr(y,'type_comment'): y.type_comment=None
+                for y in x.kwonlyargs:
+                    if hasattr(y,'type_comment'): y.type_comment=None
+                if x.vararg is not None and hasattr(x.vararg,'type_comment'):
+                    x.vararg.type_comment=None
+                if x.kwarg is not None and hasattr(x.kwarg,'type_comment'):
+                    x.kwarg.type_comment=None
+        return tree
+    def __argu__(args,t):
+        return len(args)==1 and isinstance(args[0],t) or len(args)==2 and isinstance(args[0],t) and isinstance(args[1],int)
+    def __sets__(obj,name,args):
+        if name in ('isdisjoint','issubset','issuperset') and len(args)==1 and isinstance(args[0],(set,frozenset,tuple,list)): return __ev__(getattr(obj,name),args[0])
+        if name in ('union','intersection','difference','symmetric_difference') and len(args)<=8 and all(isinstance(x,(set,frozenset,tuple,list)) for x in args):
+            try: return True,getattr(obj,name)(*args)
+            except: return False,None
+        if name=='copy' and not args: return True,obj.copy()
+        return __ev__(obj.__contains__,args[0]) if name=='__contains__' and len(args)==1 else (False,None)
+    def __dicts__(obj,name,args):
+        if name=='get' and 1<=len(args)<=2: return __ev__(obj.get,*args)
+        if name=='copy' and not args: return True,obj.copy()
+        if name=='__contains__' and len(args)==1: return __ev__(obj.__contains__,args[0])
+        return __ev__(lambda d,m:tuple(getattr(d,m)()),obj,name) if name in ('keys','values','items') and not args else (False,None)
+    def __lists__(obj,name,args):
+        if name=='copy' and not args: return True,obj.copy()
+        if name=='count' and len(args)==1: return __ev__(obj.count,args[0])
+        if name=='index' and 1<=len(args)<=3: return __ev__(obj.index,*args)
+        return __ev__(obj.__contains__,args[0]) if name=='__contains__' and len(args)==1 else (False,None)
+    def __tup__(obj,name,args):
+        if name=='count' and len(args)==1: return __ev__(obj.count,args[0])
+        if name=='index' and 1<=len(args)<=3: return __ev__(obj.index,*args)
+        return False,None
+    def __octet__(obj,name,args):
+        if name=='capitalize' and not args: return __ev__(obj.capitalize)
+        if name=='title' and not args: return __ev__(obj.title)
+        if name=='swapcase' and not args: return __ev__(obj.swapcase)
+        if name=='expandtabs' and len(args)<=1 and (not args or isinstance(args[0],int)): return __ev__(obj.expandtabs,*args)
+        if name=='translate' and 1<=len(args)<=2 and isinstance(args[0],(bytes,bytearray)) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(obj.translate,*args)
+        return __ev__(getattr(obj,name)) if name in ('lower','upper','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,bytes) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and isinstance(args[0],(bytes,tuple)) and all(isinstance(x,int) for x in args[1:]) else __ev__(obj.hex,*args) if name=='hex' and len(args)<=2 and (not args or isinstance(args[0],str)) and (len(args)<2 or isinstance(args[1],int)) else (False,None)
+    def __text__(obj,name,args):
+        if name=='format' and len(args)<=16: return __ev__(obj.format,*args)
+        if name=='format_map' and len(args)==1 and isinstance(args[0],dict): return __ev__(obj.format_map,args[0])
+        if name=='maketrans' and 1<=len(args)<=3 and all(isinstance(x,(str,dict)) for x in args): return __ev__(str.maketrans,*args)
+        return __ev__(getattr(obj,name)) if name in ('lower','upper','casefold','capitalize','title','swapcase','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,str) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]) else (False,None)
+    def __kwarg__(node):
+        bag={}
+        for x in node.keywords:
+            if x.arg is None: return False,None
+            ok,v=__raw__(x.value)
+            if not ok: return False,None
+            bag[x.arg]=v
+        return True,bag
+    def __safek__(name,args,kw):
+        if name=='sorted' and len(args)==1 and set(kw)<= {'reverse'} and isinstance(args[0],(tuple,list,frozenset,str,bytes,dict)) and len(args[0])<=256 and all(isinstance(x,(int,float,str,bytes)) for x in args[0]) and (not kw or isinstance(kw.get('reverse'),bool)):
+            try: return True,sorted(args[0],**kw)
+            except: return False,None
+        if name=='round' and len(args)==1 and set(kw)<= {'ndigits'} and isinstance(args[0],(int,float)) and (not kw or isinstance(kw.get('ndigits'),int)): return __ev__(round,args[0],**kw)
+        if name=='format' and len(args)==1 and set(kw)<= {'format_spec'} and isinstance(kw.get('format_spec',''),str): return __ev__(format,args[0],**kw)
+        if name=='int' and len(args)==1 and set(kw)<= {'base'} and isinstance(args[0],(str,bytes)) and isinstance(kw.get('base'),int): return __ev__(int,args[0],**kw)
+        if name=='bytes' and len(args)==1 and set(kw)<= {'encoding','errors'} and isinstance(args[0],str) and isinstance(kw.get('encoding'),str) and (not 'errors' in kw or isinstance(kw.get('errors'),str)): return __ev__(bytes,args[0],**kw)
+        if name=='dict' and not args and all(isinstance(k,str) and __ok__(v) for k,v in kw.items()): return True,dict(kw)
+        if name=='complex' and not args and set(kw)<= {'real','imag'} and all(isinstance(x,(int,float,complex,str)) for x in kw.values()): return __ev__(complex,**kw)
+        if name=='pow' and 2<=len(args)<=3 and set(kw)<= {'mod'} and all(isinstance(x,int) for x in args) and all(isinstance(x,int) for x in kw.values()) and abs(args[1])<=32: return __ev__(pow,*args,**kw)
+        return False,None
+    def __methk__(obj,name,args,kw):
+        if isinstance(obj,str):
+            if name=='format' and len(args)<=16 and all(__ok__(x) for x in args) and all(isinstance(k,str) and __ok__(v) for k,v in kw.items()):
+                try: return True,obj.format(*args,**kw)
+                except: return False,None
+            if name in ('split','rsplit') and not args and set(kw)<= {'sep','maxsplit'} and (not 'sep' in kw or isinstance(kw.get('sep'),str) or kw.get('sep') is None) and (not 'maxsplit' in kw or isinstance(kw.get('maxsplit'),int)): return __ev__(getattr(obj,name),**kw)
+            if name=='splitlines' and not args and set(kw)<= {'keepends'} and (not kw or isinstance(kw.get('keepends'),bool)): return __ev__(obj.splitlines,**kw)
+            if name=='replace' and not args and {'old','new'}<=set(kw) and set(kw)<= {'old','new','count'} and isinstance(kw.get('old'),str) and isinstance(kw.get('new'),str) and (not 'count' in kw or isinstance(kw.get('count'),int)): return __ev__(obj.replace,**kw)
+            if name=='encode' and not args and set(kw)<= {'encoding','errors'} and (not 'encoding' in kw or isinstance(kw.get('encoding'),str)) and (not 'errors' in kw or isinstance(kw.get('errors'),str)): return __ev__(obj.encode,**kw)
+            if name in ('center','ljust','rjust') and len(args)==1 and set(kw)<= {'fillchar'} and isinstance(args[0],int) and (not kw or isinstance(kw.get('fillchar'),str)): return __ev__(getattr(obj,name),*args,**kw)
+            if name in ('startswith','endswith') and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),str) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
+            if name in ('find','rfind','index','rindex','count') and not args and {'sub'}<=set(kw) and set(kw)<= {'sub','start','end'} and isinstance(kw.get('sub'),str) and all(isinstance(v,int) for k,v in kw.items() if k!='sub'): return __ev__(getattr(obj,name),**kw)
+        if isinstance(obj,bytes):
+            if name in ('split','rsplit') and not args and set(kw)<= {'sep','maxsplit'} and (not 'sep' in kw or isinstance(kw.get('sep'),bytes) or kw.get('sep') is None) and (not 'maxsplit' in kw or isinstance(kw.get('maxsplit'),int)): return __ev__(getattr(obj,name),**kw)
+            if name=='splitlines' and not args and set(kw)<= {'keepends'} and (not kw or isinstance(kw.get('keepends'),bool)): return __ev__(obj.splitlines,**kw)
+            if name=='replace' and not args and {'old','new'}<=set(kw) and set(kw)<= {'old','new','count'} and isinstance(kw.get('old'),bytes) and isinstance(kw.get('new'),bytes) and (not 'count' in kw or isinstance(kw.get('count'),int)): return __ev__(obj.replace,**kw)
+            if name=='decode' and not args and set(kw)<= {'encoding','errors'} and (not 'encoding' in kw or isinstance(kw.get('encoding'),str)) and (not 'errors' in kw or isinstance(kw.get('errors'),str)): return __ev__(obj.decode,**kw)
+            if name in ('center','ljust','rjust') and len(args)==1 and set(kw)<= {'fillbyte'} and isinstance(args[0],int) and (not kw or isinstance(kw.get('fillbyte'),bytes)): return __ev__(getattr(obj,name),*args,**kw)
+            if name=='hex' and not args and set(kw)<= {'sep','bytes_per_sep'} and (not 'sep' in kw or isinstance(kw.get('sep'),str)) and (not 'bytes_per_sep' in kw or isinstance(kw.get('bytes_per_sep'),int)): return __ev__(obj.hex,**kw)
+            if name in ('startswith','endswith') and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),bytes) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
+            if name in ('find','rfind','index','rindex','count') and not args and {'sub'}<=set(kw) and set(kw)<= {'sub','start','end'} and isinstance(kw.get('sub'),bytes) and all(isinstance(v,int) for k,v in kw.items() if k!='sub'): return __ev__(getattr(obj,name),**kw)
+        if isinstance(obj,int):
+            if name=='to_bytes' and not args and {'length','byteorder'}<=set(kw) and set(kw)<= {'length','byteorder','signed'} and isinstance(kw.get('length'),int) and 0<=kw.get('length')<=lim and isinstance(kw.get('byteorder'),str) and (not 'signed' in kw or isinstance(kw.get('signed'),bool)): return __ev__(obj.to_bytes,**kw)
+        if isinstance(obj,dict) and name=='get' and len(args)==1 and set(kw)<= {'default'}: return __ev__(obj.get,*args,**kw)
+        return False,None
+    def __modk__(head,tail,args,kw):
+        if head=='math' and tail=='isclose' and 2<=len(args)<=3 and set(kw)<= {'rel_tol','abs_tol'} and __numok__(args) and all(isinstance(x,(int,float)) for x in kw.values()): return __ev__(math.isclose,*args,**kw)
+        if head=='base64' and tail in ('b64decode','b32decode','b16decode') and 1<=len(args)<=2 and set(kw)<= {'casefold','map01','altchars','validate'} and isinstance(args[0],(bytes,str)): return __ev__(getattr(base64,tail),*args,**kw)
+        if head=='zlib' and tail=='compress' and len(args)==1 and set(kw)<= {'level'} and isinstance(args[0],bytes) and len(args[0])<=lim and (not kw or isinstance(kw.get('level'),int)): return __ev__(zlib.compress,*args,**kw)
+        if head=='json' and tail=='dumps' and len(args)==1 and set(kw)<= {'skipkeys','ensure_ascii','check_circular','allow_nan','indent','separators','sort_keys'} and isinstance(args[0],(dict,list,tuple,str,int,float,bool,type(None))) and all(isinstance(v,(bool,int,str,tuple,type(None))) for v in kw.values()):
+            try: return True,json.dumps(*args,**kw)
+            except: return False,None
+        done,out=__packk__(head,tail,args,kw)
+        if done: return True,out
+        if head=='dict' and tail=='fromkeys' and len(args)==1 and set(kw)<= {'value'} and isinstance(args[0],(tuple,list,frozenset,str,bytes,dict)) and len(args[0])<=128: return __ev__(dict.fromkeys,*args,**kw)
+        if head=='unicodedata' and tail=='name' and len(args)==1 and set(kw)<= {'default'} and isinstance(args[0],str) and len(args[0])==1: return __ev__(unicodedata.name,*args,**kw)
+        return False,None
+    def __flip__(n): return ast.UnaryOp(op=ast.Not(),operand=n)
+    def __bval__(n):
+        if isinstance(n,ast.Constant) and isinstance(n.value,bool): return True,n.value
+        return False,None
+    def __bexp__(test,left,right,node):
+        lo,lv=__bval__(left);ro,rv=__bval__(right)
+        if not lo or not ro: return None
+        if lv==rv: return None
+        val=ast.Call(func=ast.Name(id='bool',ctx=ast.Load()),args=[test],keywords=[]) if lv and not rv else __flip__(test)
+        return ast.copy_location(val,node)
+    def __tuck__(x,y=None):
+        if isinstance(x,ast.If) and len(x.body)==1 and isinstance(x.body[0],ast.Return):
+            if len(x.orelse)==1 and isinstance(x.orelse[0],ast.Return):
+                val=__bexp__(x.test,x.body[0].value or ast.Constant(None),x.orelse[0].value or ast.Constant(None),x) or ast.IfExp(test=x.test,body=x.body[0].value or ast.Constant(None),orelse=x.orelse[0].value or ast.Constant(None))
+                return ast.copy_location(ast.Return(value=val),x)
+            if y is not None and not x.orelse and isinstance(y,ast.Return):
+                val=__bexp__(x.test,x.body[0].value or ast.Constant(None),y.value or ast.Constant(None),x) or ast.IfExp(test=x.test,body=x.body[0].value or ast.Constant(None),orelse=y.value or ast.Constant(None))
+                return ast.copy_location(ast.Return(value=val),x)
+        if isinstance(x,ast.If) and len(x.body)==1 and isinstance(x.body[0],ast.Assign):
+            left=x.body[0]
+            if len(x.orelse)==1 and isinstance(x.orelse[0],ast.Assign) and len(left.targets)==1 and len(x.orelse[0].targets)==1 and __same__(left.targets[0],x.orelse[0].targets[0]):
+                val=__bexp__(x.test,left.value,x.orelse[0].value,x) or ast.IfExp(test=x.test,body=left.value,orelse=x.orelse[0].value)
+                return ast.copy_location(ast.Assign(targets=left.targets,value=val),x)
+            if y is not None and not x.orelse and isinstance(y,ast.Assign) and len(left.targets)==1 and len(y.targets)==1 and __same__(left.targets[0],y.targets[0]):
+                val=__bexp__(x.test,left.value,y.value,x) or ast.IfExp(test=x.test,body=left.value,orelse=y.value)
+                return ast.copy_location(ast.Assign(targets=left.targets,value=val),x)
+        if isinstance(x,ast.If) and len(x.body)==1 and isinstance(x.body[0],ast.Expr):
+            left=x.body[0]
+            if len(x.orelse)==1 and isinstance(x.orelse[0],ast.Expr) and isinstance(left.value,ast.Call) and isinstance(x.orelse[0].value,ast.Call) and __same__(left.value.func,x.orelse[0].value.func) and not left.value.keywords and not x.orelse[0].value.keywords and len(left.value.args)==1 and len(x.orelse[0].value.args)==1: return ast.copy_location(ast.Expr(value=ast.Call(func=left.value.func,args=[ast.IfExp(test=x.test,body=left.value.args[0],orelse=x.orelse[0].value.args[0])],keywords=[])),x)
+        return None
+    def __bod__(rows):
+        bag=[];first=True;stop=False
+        at=0
+        while at<len(rows):
+            x=rows[at];nxt=rows[at+1] if at+1<len(rows) else None
+            pair=nxt is not None and isinstance(x,ast.If) and not x.orelse and ((len(x.body)==1 and isinstance(x.body[0],ast.Return) and isinstance(nxt,ast.Return)) or (len(x.body)==1 and isinstance(x.body[0],ast.Assign) and isinstance(nxt,ast.Assign) and len(x.body[0].targets)==1 and len(nxt.targets)==1 and __same__(x.body[0].targets[0],nxt.targets[0])))
+            got=__tuck__(x,nxt)
+            if got is not None: x=got;at+=2 if pair else 1
+            else: at+=1
+            if stop: continue
+            if __drop__(x,first) and len(rows)>1: first=False;continue
+            bag.append(x);first=False;stop=isinstance(x,(ast.Return,ast.Raise,ast.Break,ast.Continue))
+        return __dead__(__lane__(bag)) or [ast.Pass()]
+    def __tru__(n):
+        ok,v=__raw__(n)
+        if ok:
+            try: return True,bool(v)
+            except: pass
+        return False,None
+    def __safe__(name,args):
+        if not args and name in ('list','tuple','dict','set','frozenset','str','bytes','int','float','complex','bool'): return True,{'list':[],'tuple':(),'dict':{},'set':set(),'frozenset':frozenset(),'str':'','bytes':b'','int':0,'float':0.0,'complex':0j,'bool':False}[name]
+        if name=='len' and len(args)==1: return __ev__(len,args[0])
+        if name=='bool' and len(args)==1: return __ev__(bool,args[0])
+        if name=='str' and len(args)==1: return __ev__(str,args[0])
+        if name=='repr' and len(args)==1: return __ev__(repr,args[0])
+        if name=='ascii' and len(args)==1: return __ev__(ascii,args[0])
+        if name=='callable' and len(args)==1: return __ev__(callable,args[0])
+        if name=='hash' and len(args)==1 and isinstance(args[0],(int,float,complex)): return __ev__(hash,args[0])
+        if name=='bin' and len(args)==1 and isinstance(args[0],int): return __ev__(bin,args[0])
+        if name=='oct' and len(args)==1 and isinstance(args[0],int): return __ev__(oct,args[0])
+        if name=='hex' and len(args)==1 and isinstance(args[0],int): return __ev__(hex,args[0])
+        if name=='format' and 1<=len(args)<=2 and (len(args)==1 or isinstance(args[1],str)): return __ev__(format,*args)
+        if name=='ord' and len(args)==1 and isinstance(args[0],str) and len(args[0])==1: return __ev__(ord,args[0])
+        if name=='chr' and len(args)==1 and isinstance(args[0],int) and 0<=args[0]<=0x10ffff: return __ev__(chr,args[0])
+        if name=='int' and (len(args)==1 and isinstance(args[0],(int,float,str,bytes)) or len(args)==2 and isinstance(args[0],(str,bytes)) and isinstance(args[1],int)): return __ev__(int,*args)
+        if name=='float' and len(args)==1 and isinstance(args[0],(int,float,str,bytes)): return __ev__(float,args[0])
+        if name=='complex' and 1<=len(args)<=2 and all(isinstance(x,(int,float,complex,str)) for x in args): return __ev__(complex,*args)
+        if name=='bytes' and 2<=len(args)<=3 and isinstance(args[0],str) and isinstance(args[1],str) and (len(args)==2 or isinstance(args[2],str)): return __ev__(bytes,*args)
+        if name=='abs' and len(args)==1 and isinstance(args[0],(int,float,complex)): return __ev__(abs,args[0])
+        if name=='round' and 1<=len(args)<=2 and isinstance(args[0],(int,float)) and (len(args)==1 or isinstance(args[1],int)): return __ev__(round,*args)
+        if name=='divmod' and len(args)==2 and all(isinstance(x,(int,float)) for x in args): return __ev__(divmod,*args)
+        if name=='pow' and 2<=len(args)<=3 and all(isinstance(x,int) for x in args) and abs(args[1])<=32: return __ev__(pow,*args)
+        if name=='sum' and 1<=len(args)<=2 and isinstance(args[0],(tuple,list,set,frozenset)) and all(isinstance(x,(int,float,complex)) for x in args[0]) and len(args[0])<=256 and (len(args)==1 or isinstance(args[1],(int,float,complex))): return __ev__(sum,*args)
+        if name=='all' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset,dict)) and len(args[0])<=256: return __ev__(all,args[0])
+        if name=='any' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset,dict)) and len(args[0])<=256: return __ev__(any,args[0])
+        if name=='min' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset)) and 0<len(args[0])<=256 and all(isinstance(x,(int,float,str,bytes)) for x in args[0]): return __ev__(min,args[0])
+        if name=='max' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset)) and 0<len(args[0])<=256 and all(isinstance(x,(int,float,str,bytes)) for x in args[0]): return __ev__(max,args[0])
+        if name=='min' and 1<len(args)<=16 and all(isinstance(x,(int,float,str,bytes)) for x in args): return __ev__(min,*args)
+        if name=='max' and 1<len(args)<=16 and all(isinstance(x,(int,float,str,bytes)) for x in args): return __ev__(max,*args)
+        if name=='sorted' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset,str,bytes)) and len(args[0])<=256 and all(isinstance(x,(int,float,str,bytes)) for x in args[0]):
+            try: return True,sorted(args[0])
+            except: return False,None
+        if name=='list' and len(args)==1 and isinstance(args[0],(tuple,set,frozenset,str,bytes,dict)) and len(args[0])<=256: return True,list(args[0])
+        if name=='dict' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset)) and len(args[0])<=128:
+            try: return True,dict(args[0])
+            except: return False,None
+        if name in ('tuple','reversed','enumerate') and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset,str,bytes,dict)) and len(args[0])<=256 and (name=='tuple' or not isinstance(args[0],(set,frozenset,dict))): return __ev__(tuple if name=='tuple' else (lambda x:tuple(reversed(x))) if name=='reversed' else (lambda x:tuple(enumerate(x))),args[0])
+        if name in ('frozenset','set') and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset,str,bytes,dict)) and len(args[0])<=256:
+            try: return True,(frozenset if name=='frozenset' else set)(args[0])
+            except: return False,None
+        if name=='bytes' and len(args)==1 and isinstance(args[0],(tuple,list,set,frozenset)) and len(args[0])<=lim and all(isinstance(x,int) and 0<=x<=255 for x in args[0]): return __ev__(bytes,args[0])
+        if name=='getattr' and 2<=len(args)<=3 and isinstance(args[1],str) and not args[1].startswith('__'): return __ev__(getattr,*args)
+        if name=='hasattr' and len(args)==2 and isinstance(args[1],str) and not args[1].startswith('__'): return __ev__(hasattr,*args)
+        return False,None
+    def __klass__(n):
+        tab={'bool':bool,'int':int,'float':float,'complex':complex,'str':str,'bytes':bytes,'tuple':tuple,'list':list,'set':set,'frozenset':frozenset,'dict':dict,'type':type,'object':object}
+        if isinstance(n,ast.Name) and n.id in tab: return True,tab[n.id]
+        if isinstance(n,ast.Tuple):
+            bag=[]
+            for x in n.elts:
+                ok,v=__klass__(x)
+                if not ok: return False,None
+                bag.append(v)
+            return True,tuple(bag)
+        return False,None
+    def __isa__(n,args):
+        if isinstance(n.func,ast.Name) and n.func.id=='isinstance' and len(n.args)==2:
+            ok,obj=__raw__(n.args[0]);ko,kind=__klass__(n.args[1])
+            if ok and ko: return __ev__(isinstance,obj,kind)
+        if isinstance(n.func,ast.Name) and n.func.id=='issubclass' and len(n.args)==2:
+            ko,kind=__klass__(n.args[0]);lo,base=__klass__(n.args[1])
+            if ko and lo: return __ev__(issubclass,kind,base)
+        return False,None
+    def __jag__(n):
+        if not isinstance(n,ast.Call) or n.keywords or not isinstance(n.func,ast.Name) or n.func.id!='range' or not 1<=len(n.args)<=3: return False,None
+        args=[]
+        for x in n.args:
+            ok,v=__raw__(x)
+            if not ok or not isinstance(v,int): return False,None
+            args.append(v)
+        done,out=__ev__(lambda *a:tuple(range(*a)),*args)
+        return (done,out) if done and len(out)<=512 else (False,None)
+    def __fn__(n):
+        tab={'str':str,'repr':repr,'ascii':ascii,'bool':bool,'int':int,'float':float,'complex':complex,'bytes':bytes,'abs':abs,'chr':chr,'ord':ord,'hex':hex,'oct':oct,'bin':bin,'len':len,'sum':sum,'round':round,'tuple':tuple,'list':list,'set':set,'frozenset':frozenset,'divmod':divmod,'pow':lambda a,b,*c:pow(a,b,*c) if isinstance(b,int) and abs(b)<=32 and (not c or isinstance(c[0],int)) else (_ for _ in ()).throw(ValueError)}
+        if isinstance(n,ast.Name) and n.id in tab: return True,tab[n.id]
+        return False,None
+    def __stream__(x,kind):
+        if not isinstance(x,ast.Call) or x.keywords: return False,None
+        if isinstance(x.func,ast.Name) and x.func.id=='map' and 2<=len(x.args)<=8:
+            ok,fn=__fn__(x.args[0]);vals=[]
+            if ok:
+                for row in x.args[1:]:
+                    ko,val=__raw__(row)
+                    if not ko:
+                        ko,val=__jag__(row)
+                    if not ko or not isinstance(val,(tuple,list,frozenset,str,bytes,dict)) or len(val)>256: return False,None
+                    vals.append(val)
+                return __ev__(lambda f,a,k:k(map(f,*a)),fn,vals,kind)
+        if isinstance(x.func,ast.Name) and x.func.id=='filter' and len(x.args)==2:
+            ko,val=__raw__(x.args[1])
+            if not ko:
+                ko,val=__jag__(x.args[1])
+            if ko and isinstance(val,(tuple,list,frozenset,str,bytes,dict)) and len(val)<=256:
+                if isinstance(x.args[0],ast.Constant) and x.args[0].value is None: return __ev__(lambda a,k:k(filter(None,a)),val,kind)
+                ok,fn=__fn__(x.args[0])
+                if ok: return __ev__(lambda f,a,k:k(filter(f,a)),fn,val,kind)
+        if isinstance(x.func,ast.Attribute) and not x.args and x.func.attr in ('keys','values','items'):
+            ok,val=__raw__(x.func.value)
+            if ok and isinstance(val,dict) and len(val)<=128: return __ev__(lambda d,m,k:k(getattr(d,m)()),val,x.func.attr,kind)
+        return False,None
+    def __born__(n,args):
+        if isinstance(n.func,ast.Name) and n.func.id=='tuple' and len(n.args)==1:
+            done,out=__jag__(n.args[0])
+            if done: return True,out
+            x=n.args[0]
+            done,out=__stream__(x,tuple)
+            if done: return True,out
+            if isinstance(x,ast.Call) and not x.keywords and isinstance(x.func,ast.Name) and x.func.id in ('reversed','sorted','enumerate') and 1<=len(x.args)<=2 and (x.func.id=='enumerate' or len(x.args)==1):
+                ok,v=__raw__(x.args[0])
+                if ok and isinstance(v,(tuple,list,frozenset,str,bytes,dict)) and len(v)<=512 and (x.func.id!='reversed' or not isinstance(v,(set,frozenset))) and (len(x.args)==1 or isinstance(x.args[1],ast.Constant) and isinstance(x.args[1].value,int)): return __ev__(lambda f,a,*b:tuple(f(a,*b)), {'reversed':reversed,'sorted':sorted,'enumerate':enumerate}[x.func.id], v, *( [x.args[1].value] if len(x.args)>1 else [] ))
+            if isinstance(x,ast.Call) and (not x.keywords or set(y.arg for y in x.keywords if y.arg)<= {'strict'}) and isinstance(x.func,ast.Name) and x.func.id=='zip' and 1<=len(x.args)<=8:
+                vals=[]
+                ko,kw=__kwarg__(x) if x.keywords else (True,{})
+                if not ko or any(not isinstance(v,bool) for v in kw.values()): return False,None
+                for row in x.args:
+                    ok,v=__raw__(row)
+                    if not ok or not isinstance(v,(tuple,list,frozenset,str,bytes,dict)) or len(v)>512: return False,None
+                    vals.append(v)
+                return __ev__(lambda a,k:tuple(zip(*a,**k)),vals,kw)
+        if isinstance(n.func,ast.Attribute) and isinstance(n.func.value,ast.Name):
+            head=n.func.value.id;tail=n.func.attr
+            if head=='str' and tail=='maketrans' and 1<=len(args)<=3 and all(isinstance(x,(str,dict)) for x in args): return __ev__(str.maketrans,*args)
+            if head=='dict' and tail=='fromkeys' and 1<=len(n.args)<=2:
+                done,out=__jag__(n.args[0])
+                if not done: done,out=__stream__(n.args[0],tuple)
+                if done and len(out)<=128:
+                    if len(n.args)==1: return __ev__(dict.fromkeys,out)
+                    ok,v=__raw__(n.args[1])
+                    if ok: return __ev__(dict.fromkeys,out,v)
+            if head=='dict' and tail=='fromkeys' and 1<=len(args)<=2 and isinstance(args[0],(tuple,list,frozenset,str,bytes,dict)) and len(args[0])<=128: return __ev__(dict.fromkeys,*args)
+            if head=='bytes' and tail=='fromhex' and len(args)==1 and isinstance(args[0],str): return __ev__(bytes.fromhex,args[0])
+            if head=='int' and tail=='from_bytes' and 2<=len(args)<=3 and isinstance(args[0],(bytes,bytearray)) and isinstance(args[1],str) and (len(args)==2 or isinstance(args[2],bool)): return __ev__(int.from_bytes,*args)
+            if head=='float' and tail=='fromhex' and len(args)==1 and isinstance(args[0],str): return __ev__(float.fromhex,args[0])
+        return False,None
+    def __node__(v,n):
+        if isinstance(v,list) and len(v)<=256 and all(__ok__(x) for x in v): return ast.copy_location(ast.List(elts=[ast.Constant(x) for x in v],ctx=ast.Load()),n)
+        if isinstance(v,set) and len(v)<=256 and all(__ok__(x) for x in v):
+            try:
+                for x in v: hash(x)
+                return ast.copy_location(ast.Set(elts=[ast.Constant(x) for x in v]),n)
+            except: return None
+        if isinstance(v,dict) and len(v)<=128 and all(__ok__(k) and __ok__(x) for k,x in v.items()): return ast.copy_location(ast.Dict(keys=[ast.Constant(k) for k in v],values=[ast.Constant(x) for x in v.values()]),n)
+        return None
+    def __done__(v,n):
+        made=__node__(v,n)
+        return made if made is not None else __mk__(v,n)
+    def __morph__(n,args):
+        if not isinstance(n.func,ast.Name): return None
+        name=n.func.id
+        if len(n.args)==1:
+            x=n.args[0];ok,val=__raw__(x)
+            if name=='list':
+                if ok and isinstance(val,(tuple,list,frozenset,str,bytes,dict)) and len(val)<=256: return __node__(list(val),n)
+                done,out=__jag__(n.args[0])
+                if done: return __node__(list(out),n)
+                done,out=__stream__(x,list)
+                if done: return __node__(out,n)
+                if isinstance(x,ast.Call) and not x.keywords and isinstance(x.func,ast.Name) and x.func.id in ('reversed','sorted','enumerate') and 1<=len(x.args)<=2 and (x.func.id=='enumerate' or len(x.args)==1):
+                    ok,v=__raw__(x.args[0])
+                    if ok and isinstance(v,(tuple,list,frozenset,str,bytes,dict)) and len(v)<=256 and (x.func.id!='reversed' or not isinstance(v,(set,frozenset))) and (len(x.args)==1 or isinstance(x.args[1],ast.Constant) and isinstance(x.args[1].value,int)):
+                        done,out=__ev__(lambda f,a,*b:list(f(a,*b)),{'reversed':reversed,'sorted':sorted,'enumerate':enumerate}[x.func.id],v,*( [x.args[1].value] if len(x.args)>1 else [] ))
+                        if done: return __node__(out,n)
+                if isinstance(x,ast.Call) and (not x.keywords or set(y.arg for y in x.keywords if y.arg)<= {'strict'}) and isinstance(x.func,ast.Name) and x.func.id=='zip' and 1<=len(x.args)<=8:
+                    vals=[]
+                    ko,kw=__kwarg__(x) if x.keywords else (True,{})
+                    if not ko or any(not isinstance(v,bool) for v in kw.values()): return None
+                    for row in x.args:
+                        ok,v=__raw__(row)
+                        if not ok or not isinstance(v,(tuple,list,frozenset,str,bytes,dict)) or len(v)>256: return None
+                        vals.append(v)
+                    done,out=__ev__(lambda a,k:list(zip(*a,**k)),vals,kw)
+                    if done: return __node__(out,n)
+            if name=='set':
+                if ok and isinstance(val,(tuple,list,frozenset,str,bytes,dict)) and len(val)<=256: return __node__(set(val),n)
+                done,out=__jag__(n.args[0])
+                if done: return __node__(set(out),n)
+                done,out=__stream__(x,set)
+                if done: return __node__(out,n)
+                if isinstance(x,ast.Call) and not x.keywords and isinstance(x.func,ast.Name) and x.func.id in ('reversed','sorted') and len(x.args)==1:
+                    ok,v=__raw__(x.args[0])
+                    if ok and isinstance(v,(tuple,list,frozenset,str,bytes,dict)) and len(v)<=256 and (x.func.id!='reversed' or not isinstance(v,(set,frozenset))):
+                        done,out=__ev__(lambda f,a:set(f(a)),{'reversed':reversed,'sorted':sorted}[x.func.id],v)
+                        if done: return __node__(out,n)
+            if ok and name=='dict' and isinstance(val,(tuple,list,frozenset,set)) and len(val)<=128:
+                try: return __node__(dict(val),n)
+                except: return None
+        if name=='dict' and len(n.args)==1:
+            x=n.args[0]
+            if isinstance(x,ast.Call) and not x.keywords and isinstance(x.func,ast.Name) and x.func.id=='zip' and len(x.args)==2:
+                ok,a=__raw__(x.args[0]);ko,b=__raw__(x.args[1])
+                if ok and ko and isinstance(a,(tuple,list,frozenset,str,bytes,dict)) and isinstance(b,(tuple,list,frozenset,str,bytes,dict)) and len(a)<=128 and len(b)<=128:
+                    try: return __node__(dict(zip(a,b)),n)
+                    except: return None
+        return None
+    def __empty__(n):
+        done,out=__jag__(n)
+        if done: return len(out)==0
+        ok,val=__raw__(n)
+        if ok and isinstance(val,(tuple,list,set,frozenset,dict,str,bytes)): return len(val)==0
+        return False
+    def __voids__(n):
+        if isinstance(n,ast.ListComp): return ast.copy_location(ast.List(elts=[],ctx=ast.Load()),n)
+        if isinstance(n,ast.SetComp): return ast.copy_location(ast.Set(elts=[]),n)
+        if isinstance(n,ast.DictComp): return ast.copy_location(ast.Dict(keys=[],values=[]),n)
+        return n
+    def __cgen__(n):
+        if not isinstance(n,(ast.ListComp,ast.SetComp,ast.DictComp)) or len(n.generators)!=1: return None
+        gen=n.generators[0]
+        if gen.is_async or not isinstance(gen.target,ast.Name): return None
+        done,seq=__jag__(gen.iter)
+        if not done: done,seq=__stream__(gen.iter,tuple)
+        if not done: done,seq=__raw__(gen.iter)
+        if not done or not isinstance(seq,(tuple,list,frozenset,str,bytes,dict)) or len(seq)>128: return None
+        bag=[];keys=[];vals=[]
+        for val in seq:
+            tab={gen.target.id:val};keep=True
+            for row in gen.ifs:
+                node=__go__(__swap__(copy.deepcopy(row),tab));ok,hit=__truthy__(node)
+                if not ok: return None
+                if not hit: keep=False;break
+            if not keep: continue
+            if isinstance(n,ast.DictComp):
+                ko,k=__raw__(__go__(__swap__(copy.deepcopy(n.key),tab)));vo,v=__raw__(__go__(__swap__(copy.deepcopy(n.value),tab)))
+                if not ko or not vo: return None
+                keys.append(k);vals.append(v)
+            else:
+                ok,out=__raw__(__go__(__swap__(copy.deepcopy(n.elt),tab)))
+                if not ok: return None
+                bag.append(out)
+        return __node__(dict(zip(keys,vals)),n) if isinstance(n,ast.DictComp) else __node__(set(bag),n) if isinstance(n,ast.SetComp) else __node__(bag,n)
+    def __tally__(n):
+        if isinstance(n,ast.List): return len(n.elts)
+        if isinstance(n,ast.Tuple): return len(n.elts)
+        if isinstance(n,ast.Set): return len(n.elts)
+        if isinstance(n,ast.Dict): return len(n.keys)
+        done,out=__jag__(n)
+        if done: return len(out)
+        ok,val=__raw__(n)
+        return len(val) if ok and isinstance(val,(tuple,list,set,frozenset,dict,str,bytes)) else None
+    def __slc__(n):
+        if isinstance(n,ast.Slice):
+            ao,a=(True,None) if n.lower is None else __raw__(n.lower);bo,b=(True,None) if n.upper is None else __raw__(n.upper);co,c=(True,None) if n.step is None else __raw__(n.step)
+            if ao and bo and co: return __ev__(slice,a,b,c)
+        if isinstance(n,ast.Call) and not n.keywords and isinstance(n.func,ast.Name) and n.func.id=='slice' and 1<=len(n.args)<=3:
+            args=[]
+            for x in n.args:
+                ok,v=__raw__(x)
+                if not ok or not (v is None or isinstance(v,int)): return False,None
+                args.append(v)
+            return __ev__(slice,*args)
+        return False,None
+    def __truthy__(n):
+        got=__tally__(n)
+        if got is not None: return True,bool(got)
+        return __tru__(n)
+    def __pref__(x,t):
+        return isinstance(x,t) or isinstance(x,tuple) and all(isinstance(y,t) for y in x)
+    def __spread__(args,t):
+        return all(isinstance(x,t) for x in args) or len(args)>1 and isinstance(args[0],t) and all(isinstance(x,int) for x in args[1:])
+    def __meth__(obj,name,args):
+        if isinstance(obj,str):
+            done,out=__text__(obj,name,args)
+            if done: return True,out
+            if name in ('lower','upper','casefold','capitalize','title','swapcase','strip','lstrip','rstrip') and not args: return __ev__(getattr(obj,name))
+            if name in ('strip','lstrip','rstrip') and len(args)==1 and isinstance(args[0],str): return __ev__(getattr(obj,name),args[0])
+            if name in ('isalpha','isalnum','isascii','isdecimal','isdigit','isidentifier','islower','isnumeric','isprintable','isspace','istitle','isupper') and not args: return __ev__(getattr(obj,name))
+            if name in ('removeprefix','removesuffix') and len(args)==1 and isinstance(args[0],str): return __ev__(getattr(obj,name),*args)
+            if name=='replace' and 2<=len(args)<=3 and isinstance(args[0],str) and isinstance(args[1],str) and (len(args)==2 or isinstance(args[2],int)): return __ev__(obj.replace,*args)
+            if name in ('find','rfind','count','index','rindex') and 1<=len(args)<=3 and __spread__(args,str): return __ev__(getattr(obj,name),*args)
+            if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
+            if name in ('center','ljust','rjust') and 1<=len(args)<=2 and isinstance(args[0],int) and (len(args)==1 or isinstance(args[1],str)): return __ev__(getattr(obj,name),*args)
+            if name=='zfill' and len(args)==1 and isinstance(args[0],int): return __ev__(obj.zfill,args[0])
+            if name in ('partition','rpartition') and len(args)==1 and isinstance(args[0],str): return __ev__(getattr(obj,name),args[0])
+            if name=='expandtabs' and len(args)<=1 and (not args or isinstance(args[0],int)): return __ev__(obj.expandtabs,*args)
+            if name=='translate' and len(args)==1 and isinstance(args[0],dict): return __ev__(obj.translate,args[0])
+            if name=='join' and len(args)==1 and isinstance(args[0],(tuple,list,frozenset)) and all(isinstance(x,str) for x in args[0]): return __ev__(obj.join,args[0])
+            if name in ('split','rsplit') and len(args)<=2 and all(isinstance(x,(str,int)) for x in args) and (len(args)<2 or isinstance(args[1],int)): return __ev__(getattr(obj,name),*args)
+            if name=='splitlines' and len(args)<=1 and (not args or isinstance(args[0],bool)): return __ev__(obj.splitlines,*args)
+            if name=='encode' and len(args)<=2 and all(isinstance(x,str) for x in args): return __ev__(obj.encode,*args)
+        if isinstance(obj,bytes):
+            done,out=__octet__(obj,name,args)
+            if done: return True,out
+            if name in ('lower','upper','strip','lstrip','rstrip') and not args: return __ev__(getattr(obj,name))
+            if name in ('strip','lstrip','rstrip') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),args[0])
+            if name in ('isalnum','isalpha','isascii','isdigit','islower','isspace','istitle','isupper') and not args: return __ev__(getattr(obj,name))
+            if name in ('removeprefix','removesuffix') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),*args)
+            if name=='replace' and 2<=len(args)<=3 and isinstance(args[0],bytes) and isinstance(args[1],bytes) and (len(args)==2 or isinstance(args[2],int)): return __ev__(obj.replace,*args)
+            if name in ('find','rfind','count','index','rindex') and 1<=len(args)<=3 and __spread__(args,bytes): return __ev__(getattr(obj,name),*args)
+            if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],bytes) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
+            if name in ('center','ljust','rjust') and 1<=len(args)<=2 and isinstance(args[0],int) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(getattr(obj,name),*args)
+            if name=='zfill' and len(args)==1 and isinstance(args[0],int): return __ev__(obj.zfill,args[0])
+            if name in ('partition','rpartition') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),args[0])
+            if name=='hex' and (not args or len(args)==2 and isinstance(args[0],str) and isinstance(args[1],int)): return __ev__(obj.hex,*args)
+            if name=='join' and len(args)==1 and isinstance(args[0],(tuple,list,frozenset)) and all(isinstance(x,bytes) for x in args[0]): return __ev__(obj.join,args[0])
+            if name in ('split','rsplit') and len(args)<=2 and all(isinstance(x,(bytes,int)) for x in args) and (len(args)<2 or isinstance(args[1],int)): return __ev__(getattr(obj,name),*args)
+            if name=='splitlines' and len(args)<=1 and (not args or isinstance(args[0],bool)): return __ev__(obj.splitlines,*args)
+            if name=='decode' and len(args)<=2 and all(isinstance(x,str) for x in args): return __ev__(obj.decode,*args)
+        if isinstance(obj,tuple): return __tup__(obj,name,args)
+        if isinstance(obj,list): return __lists__(obj,name,args)
+        if isinstance(obj,dict): return __dicts__(obj,name,args)
+        if isinstance(obj,(set,frozenset)): return __sets__(obj,name,args)
+        if isinstance(obj,int):
+            if name in ('bit_length','bit_count') and not args: return __ev__(getattr(obj,name))
+            if name=='to_bytes' and 1<=len(args)<=3 and isinstance(args[0],int) and 0<=args[0]<=lim and (len(args)<2 or isinstance(args[1],str)) and (len(args)<3 or isinstance(args[2],bool)): return __ev__(obj.to_bytes,*args)
+            if name=='as_integer_ratio' and not args: return __ev__(obj.as_integer_ratio)
+        if isinstance(obj,float):
+            if name in ('hex','is_integer','as_integer_ratio') and not args: return __ev__(getattr(obj,name))
+        return False,None
+    def __prop__(obj,name):
+        if isinstance(obj,(int,float,complex)) and name in ('real','imag'): return __ev__(lambda x,y:getattr(x,y),obj,name)
+        if isinstance(obj,int) and name in ('numerator','denominator'): return __ev__(lambda x,y:getattr(x,y),obj,name)
+        if isinstance(obj,(int,float,complex)) and name=='conjugate': return __ev__(obj.conjugate)
+        return False,None
+    def __modv__(head,tail):
+        if head=='math' and tail in ('pi','e','tau','inf','nan'): return __ev__(lambda x:getattr(math,x),tail)
+        if head=='base64' and tail in ('MAXBINSIZE','MAXLINESIZE'): return __ev__(lambda x:getattr(base64,x),tail)
+        if head=='zlib' and tail in ('MAX_WBITS','DEFLATED','DEF_MEM_LEVEL','Z_DEFAULT_COMPRESSION','Z_BEST_COMPRESSION','Z_BEST_SPEED','Z_NO_COMPRESSION'): return __ev__(lambda x:getattr(zlib,x),tail)
+        if head=='bz2' and tail in ('__doc__','__name__'): return __ev__(lambda x:getattr(bz2,x),tail)
+        if head=='lzma' and tail in ('CHECK_NONE','CHECK_CRC32','CHECK_CRC64','CHECK_SHA256'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('FILTER_LZMA1','FILTER_LZMA2','FILTER_DELTA','FILTER_X86','FILTER_POWERPC'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('FILTER_ARM','FILTER_ARMTHUMB','FILTER_IA64','FILTER_SPARC'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('FORMAT_XZ','FORMAT_ALONE','FORMAT_RAW','FORMAT_AUTO'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('MF_HC3','MF_HC4','MF_BT2','MF_BT3','MF_BT4'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('MODE_FAST','MODE_NORMAL','PRESET_EXTREME'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('FILTER_ARM64','FILTER_RISCV'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='lzma' and tail in ('CHECK_ID_MAX','CHECK_UNKNOWN'): return __ev__(lambda x:getattr(lzma,x),tail)
+        if head=='zlib' and tail in ('Z_FILTERED','Z_HUFFMAN_ONLY','Z_RLE','Z_FIXED','Z_DEFAULT_STRATEGY'): return __ev__(lambda x:getattr(zlib,x),tail)
+        if head=='zlib' and tail in ('Z_NO_FLUSH','Z_SYNC_FLUSH','Z_FULL_FLUSH','Z_FINISH','Z_BLOCK'): return __ev__(lambda x:getattr(zlib,x),tail)
+        if head=='hashlib' and tail in ('algorithms_guaranteed',): return __ev__(lambda:tuple(sorted(hashlib.algorithms_guaranteed)))
+        if head=='hashlib' and tail in ('algorithms_available',): return __ev__(lambda:tuple(sorted(hashlib.algorithms_available)))
+        return False,None
+    def __numok__(args):
+        return all(isinstance(x,(int,float)) and math.isfinite(x) for x in args)
+    def __maths__(tail,args):
+        one={'acos','asin','atan','ceil','cos','cosh','degrees','erf','erfc','exp','expm1','fabs','floor','gamma','isfinite','isinf','isnan','lgamma','log1p','radians','sin','sinh','sqrt','tan','tanh','trunc','ulp'}
+        two={'atan2','copysign','dist','fmod','hypot','isclose','ldexp','log','nextafter','pow','remainder'}
+        if tail in one and len(args)==1 and isinstance(args[0],(int,float)): return __ev__(getattr(math,tail),*args)
+        if tail in two and 2<=len(args)<=3 and __numok__(args): return __ev__(getattr(math,tail),*args)
+        if tail in ('comb','perm') and 1<=len(args)<=2 and all(isinstance(x,int) and 0<=x<=2048 for x in args): return __ev__(getattr(math,tail),*args)
+        if tail in ('factorial','isqrt') and len(args)==1 and isinstance(args[0],int) and 0<=args[0]<=4096: return __ev__(getattr(math,tail),*args)
+        if tail in ('gcd','lcm') and len(args)<=16 and all(isinstance(x,int) for x in args): return __ev__(getattr(math,tail),*args)
+        if tail=='prod' and 1<=len(args)<=2 and isinstance(args[0],(tuple,list,frozenset)) and len(args[0])<=256 and all(isinstance(x,(int,float,complex)) for x in args[0]) and (len(args)==1 or isinstance(args[1],(int,float,complex))): return __ev__(math.prod,*args)
+        if tail=='fsum' and len(args)==1 and isinstance(args[0],(tuple,list,frozenset)) and len(args[0])<=256 and all(isinstance(x,(int,float)) for x in args[0]): return __ev__(math.fsum,args[0])
+        return False,None
+    def __b64__(tail,args):
+        if tail in ('b16encode','b32encode','b64encode','urlsafe_b64encode') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(base64,tail),args[0])
+        if tail in ('b16decode','b32decode','b64decode','urlsafe_b64decode') and 1<=len(args)<=2 and isinstance(args[0],(bytes,str)) and (len(args)==1 or isinstance(args[1],bool)): return __ev__(getattr(base64,tail),*args)
+        if tail in ('standard_b64encode','encodebytes') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(base64,tail),args[0])
+        if tail in ('standard_b64decode','decodebytes') and len(args)==1 and isinstance(args[0],(bytes,str)): return __ev__(getattr(base64,tail),args[0])
+        if tail in ('b32hexencode','b32hexdecode') and 1<=len(args)<=2 and isinstance(args[0],(bytes,str)) and (len(args)==1 or isinstance(args[1],bool)): return __ev__(getattr(base64,tail),*args)
+        if tail in ('a85encode','b85encode') and 1<=len(args)<=4 and isinstance(args[0],bytes): return __ev__(getattr(base64,tail),*args)
+        if tail in ('a85decode','b85decode') and 1<=len(args)<=5 and isinstance(args[0],(bytes,str)): return __ev__(getattr(base64,tail),*args)
+        return False,None
+    def __zlib__(tail,args):
+        if tail in ('crc32','adler32') and 1<=len(args)<=2 and isinstance(args[0],bytes) and (len(args)==1 or isinstance(args[1],int)): return __ev__(getattr(zlib,tail),*args)
+        if tail=='compress' and 1<=len(args)<=2 and isinstance(args[0],bytes) and len(args[0])<=lim and (len(args)==1 or isinstance(args[1],int)): return __ev__(zlib.compress,*args)
+        if tail=='decompress' and 1<=len(args)<=3 and isinstance(args[0],bytes) and len(args[0])<=lim and all(isinstance(x,int) for x in args[1:]): return __ev__(zlib.decompress,*args)
+        return False,None
+    def __bz__(tail,args):
+        if tail=='compress' and 1<=len(args)<=2 and isinstance(args[0],bytes) and len(args[0])<=lim and (len(args)==1 or isinstance(args[1],int)): return __ev__(bz2.compress,*args)
+        if tail=='decompress' and len(args)==1 and isinstance(args[0],bytes) and len(args[0])<=lim: return __ev__(bz2.decompress,args[0])
+        return False,None
+    def __lz__(tail,args):
+        if tail=='compress' and 1<=len(args)<=3 and isinstance(args[0],bytes) and len(args[0])<=lim: return __ev__(lzma.compress,*args)
+        if tail=='decompress' and 1<=len(args)<=4 and isinstance(args[0],bytes) and len(args[0])<=lim: return __ev__(lzma.decompress,*args)
+        if tail=='is_check_supported' and len(args)==1 and isinstance(args[0],int): return __ev__(lzma.is_check_supported,args[0])
+        return False,None
+    def __hashnew__(name,args):
+        tab={'md5':hashlib.md5,'sha1':hashlib.sha1,'sha224':hashlib.sha224,'sha256':hashlib.sha256,'sha384':hashlib.sha384,'sha512':hashlib.sha512,'blake2b':hashlib.blake2b,'blake2s':hashlib.blake2s}
+        if name in tab and len(args)<=1 and (not args or isinstance(args[0],bytes)): return True,tab[name](*args)
+        if name=='new' and 1<=len(args)<=2 and isinstance(args[0],str) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(hashlib.new,*args)
+        return False,None
+    def __hashc__(n):
+        if not isinstance(n.func,ast.Attribute) or not isinstance(n.func.value,ast.Call) or n.args or n.keywords: return False,None
+        call=n.func.value
+        if call.keywords or not isinstance(call.func,ast.Attribute) or not isinstance(call.func.value,ast.Name) or call.func.value.id!='hashlib': return False,None
+        args=[]
+        for x in call.args:
+            ok,v=__raw__(x)
+            if not ok: return False,None
+            args.append(v)
+        ok,obj=__hashnew__(call.func.attr,args)
+        if not ok: return False,None
+        if n.func.attr in ('digest','hexdigest'): return __ev__(getattr(obj,n.func.attr))
+        return False,None
+    def __packk__(head,tail,args,kw):
+        if head=='bz2' and tail=='compress' and len(args)==1 and set(kw)<= {'compresslevel'} and isinstance(args[0],bytes) and len(args[0])<=lim and (not kw or isinstance(kw.get('compresslevel'),int)): return __ev__(bz2.compress,*args,**kw)
+        if head=='lzma' and tail=='compress' and len(args)==1 and set(kw)<= {'format','check','preset'} and isinstance(args[0],bytes) and len(args[0])<=lim and all(isinstance(x,int) for x in kw.values()): return __ev__(lzma.compress,*args,**kw)
+        if head=='lzma' and tail=='decompress' and len(args)==1 and set(kw)<= {'format','memlimit','filters'} and isinstance(args[0],bytes) and len(args[0])<=lim and all(x is None or isinstance(x,int) for x in kw.values()): return __ev__(lzma.decompress,*args,**kw)
+        return False,None
+    def __uni__(tail,args):
+        if tail=='normalize' and len(args)==2 and isinstance(args[0],str) and isinstance(args[1],str): return __ev__(unicodedata.normalize,*args)
+        if tail in ('category','bidirectional','combining','east_asian_width','mirrored','decomposition','name') and 1<=len(args)<=2 and isinstance(args[0],str) and len(args[0])==1: return __ev__(getattr(unicodedata,tail),*args)
+        if tail=='lookup' and len(args)==1 and isinstance(args[0],str): return __ev__(unicodedata.lookup,args[0])
+        if tail=='decimal' and 1<=len(args)<=2 and isinstance(args[0],str) and len(args[0])==1: return __ev__(unicodedata.decimal,*args)
+        if tail=='digit' and 1<=len(args)<=2 and isinstance(args[0],str) and len(args[0])==1: return __ev__(unicodedata.digit,*args)
+        if tail=='numeric' and 1<=len(args)<=2 and isinstance(args[0],str) and len(args[0])==1: return __ev__(unicodedata.numeric,*args)
+        if tail=='is_normalized' and len(args)==2 and isinstance(args[0],str) and isinstance(args[1],str): return __ev__(unicodedata.is_normalized,*args)
+        return False,None
+    def __json__(tail,args):
+        if tail=='dumps' and len(args)==1 and isinstance(args[0],(dict,list,tuple,str,int,float,bool,type(None))): return __ev__(json.dumps,args[0])
+        if tail=='loads' and len(args)==1 and isinstance(args[0],(str,bytes,bytearray)) and len(args[0])<=lim: return __ev__(json.loads,args[0])
+        return False,None
+    def __modu__(head,tail,args):
+        if head=='math': return __maths__(tail,args)
+        if head=='base64': return __b64__(tail,args)
+        if head=='zlib': return __zlib__(tail,args)
+        if head=='bz2': return __bz__(tail,args)
+        if head=='lzma': return __lz__(tail,args)
+        if head=='unicodedata': return __uni__(tail,args)
+        if head=='json': return __json__(tail,args)
+        if head=='hashlib': return __hashnew__(tail,args)
+        return False,None
+    def __patv__(p):
+        if isinstance(p,ast.MatchValue): return __raw__(p.value)
+        if isinstance(p,ast.MatchSingleton): return True,p.value
+        if isinstance(p,ast.MatchSequence):
+            bag=[]
+            for x in p.patterns:
+                ok,v=__patv__(x)
+                if not ok: return False,None
+                bag.append(v)
+            return True,tuple(bag)
+        return False,None
+    def __hitp__(val,p):
+        if isinstance(p,ast.MatchAs) and p.name is None and p.pattern is None: return True
+        if isinstance(p,ast.MatchOr): return any(__hitp__(val,x) for x in p.patterns)
+        ok,got=__patv__(p)
+        if ok:
+            try: return val==got
+            except: return False
+        return False
+    def __cap__(p):
+        if isinstance(p,ast.MatchAs): return p.name is not None or p.pattern is not None and __cap__(p.pattern)
+        if isinstance(p,ast.MatchStar): return True
+        if isinstance(p,ast.MatchMapping): return bool(p.rest) or any(__cap__(x) for x in p.patterns)
+        if isinstance(p,ast.MatchClass): return True
+        if isinstance(p,ast.MatchSequence): return any(__cap__(x) for x in p.patterns)
+        if isinstance(p,ast.MatchOr): return any(__cap__(x) for x in p.patterns)
+        return False
+    def __mcase__(n):
+        ok,val=__raw__(n.subject)
+        if not ok: return None
+        for x in n.cases:
+            if __cap__(x.pattern): return None
+            if __hitp__(val,x.pattern):
+                if x.guard is None: return x.body
+                go,gv=__truthy__(x.guard)
+                if go and gv: return x.body
+                if not go: return None
+        return []
+    bmap={ast.Add:lambda a,b:a+b,ast.Sub:lambda a,b:a-b,ast.Mult:lambda a,b:a*b,ast.Div:lambda a,b:a/b,ast.FloorDiv:lambda a,b:a//b,ast.Mod:lambda a,b:a%b,ast.BitOr:lambda a,b:a|b,ast.BitXor:lambda a,b:a^b,ast.BitAnd:lambda a,b:a&b,ast.LShift:lambda a,b:a<<b if isinstance(b,int) and 0<=b<=64 else (_ for _ in ()).throw(ValueError),ast.RShift:lambda a,b:a>>b if isinstance(b,int) and 0<=b<=64 else (_ for _ in ()).throw(ValueError),ast.Pow:lambda a,b:a**b if not isinstance(b,int) or abs(b)<=32 else (_ for _ in ()).throw(ValueError)}
+    umap={ast.UAdd:lambda a:+a,ast.USub:lambda a:-a,ast.Invert:lambda a:~a,ast.Not:lambda a:not a};cmap={ast.Eq:lambda a,b:a==b,ast.NotEq:lambda a,b:a!=b,ast.Lt:lambda a,b:a<b,ast.LtE:lambda a,b:a<=b,ast.Gt:lambda a,b:a>b,ast.GtE:lambda a,b:a>=b,ast.In:lambda a,b:a in b,ast.NotIn:lambda a,b:a not in b,ast.Is:lambda a,b:a is b,ast.IsNot:lambda a,b:a is not b}
+    def __go__(n):
+        if n is None: return None
+        for f,v in ast.iter_fields(n):
+            if isinstance(v,list):
+                bag=[]
+                for x in v:
+                    y=__go__(x) if isinstance(x,ast.AST) else x
+                    if y is None: continue
+                    bag.extend(y) if isinstance(y,list) else bag.append(y)
+                setattr(n,f,bag)
+            elif isinstance(v,ast.AST):
+                y=__go__(v)
+                if y is None:
+                    try: delattr(n,f)
+                    except: pass
+                else: setattr(n,f,y)
+        if isinstance(n,(ast.Module,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)): n.body=__bod__(n.body);return n
+        if isinstance(n,ast.ExceptHandler): n.body=__bod__(n.body);return n
+        if hasattr(ast,'match_case') and isinstance(n,ast.match_case): n.body=__bod__(n.body);return n
+        if isinstance(n,(ast.Assert,)): return None
+        if isinstance(n,ast.If):
+            ok,v=__tru__(n.test)
+            if ok: return n.body if v else n.orelse
+            n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else []
+            if len(n.body)==1 and isinstance(n.body[0],ast.Pass) and n.orelse: n.test=__flip__(n.test);n.body=n.orelse;n.orelse=[];return n
+            if len(n.orelse)==1 and isinstance(n.orelse[0],ast.Pass): n.orelse=[];return n
+            if len(n.body)==1 and isinstance(n.body[0],ast.Pass) and not n.orelse and __pure__(n.test): return None
+            if n.orelse and len(n.body)==len(n.orelse) and all(__same__(a,b) for a,b in zip(n.body,n.orelse)) and __pure__(n.test): return n.body
+            return n
+        if isinstance(n,ast.While):
+            ok,v=__tru__(n.test)
+            if ok and not v: return n.orelse
+            n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];return n
+        if isinstance(n,ast.For):
+            if __empty__(n.iter): return n.orelse
+            n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];return n
+        if isinstance(n,ast.AsyncFor): n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];return n
+        if isinstance(n,(ast.With,ast.AsyncWith)): n.body=__bod__(n.body);return n
+        if isinstance(n,ast.Try):
+            n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];n.finalbody=__bod__(n.finalbody) if n.finalbody else []
+            for x in n.handlers: x.body=__bod__(x.body)
+            return n
+        if isinstance(n,ast.Match):
+            got=__mcase__(n)
+            if got is not None: return got
+            for x in n.cases: x.body=__bod__(x.body)
+            return n
+        if isinstance(n,ast.IfExp):
+            ok,v=__truthy__(n.test);return n.body if ok and v else n.orelse if ok else __tern__(n)
+        if isinstance(n,(ast.ListComp,ast.SetComp,ast.DictComp)):
+            made=__cgen__(n)
+            if made is not None: return made
+            pure=all(__pure__(g.iter) for g in n.generators)
+            for g in n.generators:
+                keep=[]
+                for x in g.ifs:
+                    ok,v=__truthy__(x)
+                    if ok and not v:
+                        if pure: return __voids__(n)
+                        keep.append(x)
+                    if not ok: keep.append(x)
+                g.ifs=keep
+            if n.generators and __empty__(n.generators[0].iter): return __voids__(n)
+        if isinstance(n,ast.UnaryOp):
+            if isinstance(n.op,ast.Not) and isinstance(n.operand,ast.UnaryOp) and isinstance(n.operand.op,ast.Not): return ast.copy_location(ast.Call(func=ast.Name(id='bool',ctx=ast.Load()),args=[n.operand.operand],keywords=[]),n)
+            if isinstance(n.op,ast.Not):
+                got=__deny__(n.operand)
+                if got is not None: return got
+            ok,v=__sim__(n.operand);fn=umap.get(type(n.op));done,out=__ev__(fn,v) if ok and fn else (False,None);return __mk__(out,n) if done else n
+        if isinstance(n,ast.BinOp):
+            lo,l=__sim__(n.left);ro,r=__sim__(n.right);fn=bmap.get(type(n.op));done,out=__ev__(fn,l,r) if lo and ro and fn else (False,None);return __mk__(out,n) if done else __alg__(n)
+        if isinstance(n,ast.BoolOp):
+            got=__boolop__(n)
+            if got is not n: return got
+            vals=[]
+            for x in n.values:
+                ok,v=__raw__(x)
+                if not ok: return n
+                vals.append(v)
+            if isinstance(n.op,ast.And):
+                out=vals[-1] if vals else True
+                for x in vals:
+                    if not x: out=x;break
+                return __mk__(out,n)
+            if isinstance(n.op,ast.Or):
+                out=vals[-1] if vals else False
+                for x in vals:
+                    if x: out=x;break
+                return __mk__(out,n)
+        if isinstance(n,ast.Compare):
+            got=__judge__(n)
+            if got is not n: return got
+            ok,cur=__raw__(n.left)
+            if not ok: return n
+            for op,x in zip(n.ops,n.comparators):
+                ro,r=__raw__(x);fn=cmap.get(type(op));done,out=__ev__(fn,cur,r) if ro and fn else (False,None)
+                if not done: return n
+                if not out: return __mk__(False,n)
+                cur=r
+            return __mk__(True,n)
+        if isinstance(n,ast.JoinedStr):
+            ok,v=__say__(n);return __mk__(v,n) if ok else n
+        if isinstance(n,ast.FormattedValue):
+            ok,v=__say__(ast.JoinedStr(values=[n]));return __mk__(v,n) if ok else n
+        if isinstance(n,ast.Name) and isinstance(n.ctx,ast.Load) and n.id=='__debug__': return ast.copy_location(ast.Constant(False),n)
+        if isinstance(n,ast.Attribute) and isinstance(n.ctx,ast.Load):
+            done,out=__typeattr__(n.value,n.attr)
+            if done: return __done__(out,n)
+            if isinstance(n.value,ast.Name):
+                done,out=__modv__(n.value.id,n.attr)
+                if done: return __done__(out,n)
+            ok,obj=__raw__(n.value)
+            if ok:
+                done,out=__prop__(obj,n.attr)
+                return __mk__(out,n) if done else n
+        if isinstance(n,ast.Subscript):
+            lo,l=__raw__(n.value);ro,r=__raw__(n.slice)
+            if lo and ro:
+                done,out=__ev__(lambda a,b:a[b],l,r)
+                if done: return __done__(out,n)
+            so,s=__slc__(n.slice)
+            if lo and so:
+                done,out=__ev__(lambda x,y:x[y],l,s)
+                if done: return __done__(out,n)
+        if isinstance(n,ast.Call) and not n.keywords:
+            if isinstance(n.func,ast.Attribute) and n.func.attr=='join' and len(n.args)==1:
+                ok,obj=__raw__(n.func.value)
+                if ok and isinstance(obj,(str,bytes)):
+                    done,out=__stream__(n.args[0],list)
+                    if done and isinstance(out,list) and all(isinstance(x,type(obj)) for x in out): return __done__(obj.join(out),n)
+            if isinstance(n.func,ast.Attribute) and isinstance(n.func.value,ast.Name) and n.func.value.id=='dict' and n.func.attr=='fromkeys':
+                done,out=__born__(n,[])
+                if done: return __done__(out,n)
+            if isinstance(n.func,ast.Name) and n.func.id in ('len','bool') and len(n.args)==1:
+                got=__tally__(n.args[0])
+                if got is not None: return __mk__(got if n.func.id=='len' else bool(got),n)
+            if isinstance(n.func,ast.Name) and len(n.args)==1:
+                done,out=__jag__(n.args[0])
+                if done:
+                    done,out=__safe__(n.func.id,[out])
+                    if done: return __done__(out,n)
+                done,out=__stream__(n.args[0],tuple)
+                if done:
+                    done,out=__safe__(n.func.id,[out])
+                    if done: return __done__(out,n)
+            if isinstance(n.func,ast.Name) and n.func.id in ('list','set','dict','tuple') and len(n.args)==1:
+                cast=__morph__(n,[])
+                if cast is not None: return cast
+                done,out=__born__(n,[])
+                if done: return __done__(out,n)
+            args=[]
+            for x in n.args:
+                ok,v=__raw__(x)
+                if not ok: return n
+                args.append(v)
+            got=__lam__(n,args)
+            if got is not None: return got
+            cast=__morph__(n,args)
+            if cast is not None: return cast
+            done,out=__isa__(n,args)
+            if done: return __done__(out,n)
+            done,out=__born__(n,args)
+            if done: return __done__(out,n)
+            if isinstance(n.func,ast.Name):
+                done,out=__safe__(n.func.id,args)
+                return __done__(out,n) if done else n
+            if isinstance(n.func,ast.Attribute):
+                if isinstance(n.func.value,ast.Name):
+                    done,out=__modu__(n.func.value.id,n.func.attr,args)
+                    if done: return __done__(out,n)
+                done,out=__hashc__(n)
+                if done: return __done__(out,n)
+                ok,obj=__raw__(n.func.value)
+                if ok:
+                    done,out=__meth__(obj,n.func.attr,args)
+                    return __done__(out,n) if done else n
+        if isinstance(n,ast.Call) and n.keywords:
+            args=[]
+            for x in n.args:
+                ok,v=__raw__(x)
+                if not ok: return n
+                args.append(v)
+            ko,kw=__kwarg__(n)
+            if not ko: return n
+            if isinstance(n.func,ast.Name):
+                done,out=__safek__(n.func.id,args,kw)
+                return __done__(out,n) if done else n
+            if isinstance(n.func,ast.Attribute):
+                if isinstance(n.func.value,ast.Name):
+                    done,out=__modk__(n.func.value.id,n.func.attr,args,kw)
+                    if done: return __done__(out,n)
+                ok,obj=__raw__(n.func.value)
+                if ok:
+                    done,out=__methk__(obj,n.func.attr,args,kw)
+                    return __done__(out,n) if done else n
+        return n
+    tree=__typec__(__go__(tree));ast.fix_missing_locations(tree);return tree
 def __vein__(code):
     tree = ast.parse(code)
+    tree = __pare__(tree)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
     plain = []
     seen = {}
@@ -6038,7 +7143,7 @@ def {kiln}(v,o,p):
  return {bytesf}((((one-o)&255)^p) for one in v)
 def {loom}(v,p):
  rows={bytesf}.fromhex(p)
- fog={impf}('base64').b85decode(v.encode())
+ fog={impf}('base64').b85decode(v)
  {lenf}(rows)!={lenf}(fog) and (_ for _ in ()).throw(RuntimeError('bad'))
  return {bytesf}(one^rows[slot] for slot,one in enumerate(fog))
 def {mire}(v,o):
@@ -6083,7 +7188,7 @@ def {cordf}(c,f):
  all(isinstance(one,int) for one in c) or (_ for _ in ()).throw(RuntimeError('bad'))
  return bytes(((one-f-(slot*3))&255) for slot,one in enumerate(c))
 def {pathf}(d,f):
- row=__import__('base64').b85decode(d.encode())
+ row=__import__('base64').b85decode(d)
  return bytes(((one-f-slot)&255) for slot,one in enumerate(row))
 def {lockf}(ash):
  glow=0
@@ -6206,7 +7311,7 @@ def {chafff}():
 def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,a,n,q,c,d,x):
   rows={mire}(v,o)
   spin={sootf}(u)
-  (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len(__import__('base64').b85decode(t.encode()))) and (_ for _ in ()).throw(RuntimeError('bad'))
+  (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len(__import__('base64').b85decode(t))) and (_ for _ in ()).throw(RuntimeError('bad'))
   {brimf}(r)
   {huskf}(len(bytes.fromhex(p)),rows[0])
   spec={cask}(r)
@@ -6249,7 +7354,7 @@ def {load}(i):
     {snagf}()
     {wardf}()
     {chafff}()
-    row=__import__('base64').b85decode({proof}.encode());(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
+    row=__import__('base64').b85decode({proof});(__import__('zlib').crc32(row)+__import__('zlib').adler32(row)!={check}) and (_ for _ in ()).throw(RuntimeError('bad'))
     {keep}=tuple({barkf}(__import__('zlib').decompress({rune}(*{blob}))))
     def row(i):
      i=((i-{crisp})^{mask})-{bend}
@@ -6961,7 +8066,7 @@ def {shalef}(blob):
   raise SystemExit
  return rows
 def {shardy}(blob):
- tab=base64.b85decode({codonf}[0].encode());inv=base64.b85decode({codonf}[1].encode());salt=base64.b85decode({codonf}[2].encode());add,step,twist,turn,drift,mask={codonf}[3];sig={codonf}[4]
+ tab=base64.b85decode({codonf}[0]);inv=base64.b85decode({codonf}[1]);salt=base64.b85decode({codonf}[2]);add,step,twist,turn,drift,mask={codonf}[3];sig={codonf}[4]
  hashlib.sha256(tab+inv+salt+{vinef}((add,step,twist,turn,drift,mask))).hexdigest()!=sig and (_ for _ in ()).throw(SystemExit)
  rows=bytearray();glow=drift&255
  for slot,byte in enumerate(blob):
@@ -6973,10 +8078,10 @@ def {shardy}(blob):
  return bytes(rows)
 def {stampf}(blob):
  {hand}()
- shell=base64.a85decode({blob})
+ shell=base64.b85decode({blob})
  hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (_ for _ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (_ for _ in ()).throw(SystemExit)
- {guard}(shell,{__flare__(base64.a85decode(rack))},{stamp!r})
+ {guard}(shell,{__flare__(base64.b85decode(rack))},{stamp!r})
  {beryl}(shell)
  {gully}(shell)
  {obsf}(shell)
@@ -7039,7 +8144,7 @@ def {runf}():
     flag = hashlib.sha256(core).hexdigest()
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
     mask = __mint__(used, seed + b'coremask', mint)
-    coresrc = __show__(*__hide__(base64.a85encode(core).decode('ascii'), seed + b'outercore'), mask)
+    coresrc = __show__(*__hide__(base64.b85encode(core).decode('ascii'), seed + b'outercore'), mask)
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','chrome','msedge','firefox','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','py___obsidian__','ziploader','bytesio')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
     anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','mitmdump','burp','burpsuite','processhacker','process hacker','apimonitor','httpdebugger','httpdebuggerpro','httpanalyzer','packetsender','proxyman','tshark','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
@@ -7386,7 +8491,7 @@ def __nhinconcac__(code):
  g=globals();g.get('__file__') is None and g.__setitem__('__file__',sys.argv[0] if getattr(sys,'argv',None) else None)
  return hold(code,g,g)
 def __tooldepphet__():
-  shell=__lmao__(base64.a85decode,__ngauvcl__.encode());__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
+  shell=__lmao__(base64.b85decode,__ngauvcl__);__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   __lmao__(__cak__,shell)!=grain and (_ for _ in ()).throw(SystemExit)
   shell=__lmao__(__skibiditoilet__,shell,__yeppro__);shell=__lmao__(__pnhamaidinh__,shell,__yepvip__);shell=__lmao__(__luvpnha__,shell,__yepngau__);shell=__lmao__(__yeupnha__,shell,__meocute__,__yepyep__);shell=__lmao__({heart},shell,__meowmeow__);way=__lmaoo__(shell[0]);shell=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:]);shell=__lmao__({heart},shell,__manhvcl__)
   way=shell[0];way not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
@@ -7404,10 +8509,10 @@ __depvcl__()
     crest = hashlib.sha256(wrap).hexdigest()
     mark = (len(wrap), zlib.crc32(wrap) & 0xffffffff, zlib.adler32(wrap) & 0xffffffff, hashlib.sha1(wrap).hexdigest(), crest, sys.version_info[:2])
     grain = __spark__(seed + b'outer', 1, 255)
-    word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','a85decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','exec','eval','compile','__import__','open','globals','locals','vars','dir','type','len','bytes')
+    word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','b85decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','exec','eval','compile','__import__','open','globals','locals','vars','dir','type','len','bytes')
     word = tuple(tuple(ord(char) ^ grain for char in item) for item in word)
     mask = __mint__(used, seed + b'wrapmask', mint)
-    wrapsrc = __show__(*__hide__(base64.a85encode(wrap).decode('ascii'), seed + b'wrapblob'), mask)
+    wrapsrc = __show__(*__hide__(base64.b85encode(wrap).decode('ascii'), seed + b'wrapblob'), mask)
     crust = f"{shell}={wrapsrc};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
     cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')"
     ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=getattr(b,{bone}({storm}[9]))({shell});({guard}(blob,z,h,sys)!={seal} or getattr(built[{bone}({storm}[30])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[31])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[32])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[33])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[34])],'__module__','_io') not in ('_io','io','builtins') or any(getattr(built[{bone}({storm}[slot])],'__module__','builtins')!='builtins' for slot in range(35,42)) or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or hit) and (_ for _ in ()).throw(SystemExit);blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});way=blob[0];(way not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);blob={heart}(blob,{glass});way=blob[0];(way not in (0,1,2)) and (_ for _ in ()).throw(SystemExit);blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];box=getattr(ct,{bone}({storm}[26]))(blob);code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),len(blob));run=getattr(getattr(ct,{bone}({storm}[15])),runn);run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
@@ -7424,13 +8529,13 @@ def __sear__(text, seed):
         iron = secrets.randbelow(254) + 1
     while lead == gold:
         lead = secrets.randbelow(200) + 7
-    melt = base64.a85encode(bytes((b ^ zinc ^ ((slot * gold) & 0xFF) ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(fog))).decode('ascii')
+    melt = base64.b85encode(bytes((b ^ zinc ^ ((slot * gold) & 0xFF) ^ iron ^ ((slot * lead) & 0xFF)) & 0xFF for slot, b in enumerate(fog))).decode('ascii')
     watermark = __shingle__(seed, 8)
     ident = __gravel__(seed)
     utext = __coral__(seed, 12)
     chain = __chalk__(seed, 3)
     lace, knot = __lily__(seed + b'searlace', '|'.join(chain[:2]))
-    text, book = __script__(seed + b'searword', ('zlib', 'crc32', 'builtins', 'exec', 'decompress', 'base64', 'a85decode', 'bz2', 'lzma'))
+    text, book = __script__(seed + b'searword', ('zlib', 'crc32', 'builtins', 'exec', 'decompress', 'base64', 'b85decode', 'bz2', 'lzma'))
     name = __sigil__(seed + b'searname', 8)
     melt = __show__(*__hide__(melt, seed + b'searmelt'), name[1])
     bags = []
@@ -7447,10 +8552,10 @@ def __sear__(text, seed):
     wind = __lotus__(book, 'zlib')
     metal = __lotus__(book, 'decompress')
     wood = __lotus__(book, 'base64')
-    void = __lotus__(book, 'a85decode')
+    void = __lotus__(book, 'b85decode')
     ice = __lotus__(book, 'bz2')
     rock = __lotus__(book, 'lzma')
-    coal = f"(lambda {name[4]}:(lambda {name[5]}:{name[5]})({name[4]}))((lambda q,m:(int.from_bytes(q,'little')^int.from_bytes((m*((len(q)>>8)+1))[:len(q)],'little')).to_bytes(len(q),'little'))(getattr(__import__({wood}),{void})({name[2]}.encode()),bytes((({name[0]}*{lead})&255)^{iron}^(({name[0]}*{gold})&255)^{zinc} for {name[0]} in range(256))))"
+    coal = f"(lambda {name[4]}:(lambda {name[5]}:{name[5]})({name[4]}))((lambda q,m:(int.from_bytes(q,'little')^int.from_bytes((m*((len(q)>>8)+1))[:len(q)],'little')).to_bytes(len(q),'little'))(getattr(__import__({wood}),{void})({name[2]}),bytes((({name[0]}*{lead})&255)^{iron}^(({name[0]}*{gold})&255)^{zinc} for {name[0]} in range(256))))"
     ash = f"(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))((lambda __p:(getattr(__import__({wind}),{metal}),getattr(__import__({ice}),{metal}),getattr(__import__({rock}),{metal}))[__p[0]](__p[1:]))({coal}))"
 
     inner = (
@@ -7470,9 +8575,9 @@ def __flux__(code, seed):
    fog = __weld__(__gasket__(raw), key)
    shot = hashlib.sha256(fog).hexdigest()
    tag = __spark__(seed + b'fluxtag', 1, 7)
-   blob = base64.a85encode(fog).decode('ascii')
+   blob = base64.b85encode(fog).decode('ascii')
    wkey = __spark__(seed + b'fluxword', 1, 255)
-   words = ('base64', 'bz2', 'hashlib', 'lzma', 'marshal', 'zlib', 'a85decode', 'sha256', 'decompress', 'loads', 'exec', 'range', 'builtins', 'bytes', 'enumerate', 'type', 'hexdigest', 'ascii', 'len', 'int', 'from_bytes', 'to_bytes', 'little')
+   words = ('base64', 'bz2', 'hashlib', 'lzma', 'marshal', 'zlib', 'b85decode', 'sha256', 'decompress', 'loads', 'exec', 'range', 'builtins', 'bytes', 'enumerate', 'type', 'hexdigest', 'ascii', 'len', 'int', 'from_bytes', 'to_bytes', 'little')
    words = tuple(tuple(ord(char) ^ wkey for char in word) for word in words)
    names = __sigil__(seed + b'fluxname', 18)
    spray = __spray__(seed + b'fluxspray', 0)
@@ -7488,15 +8593,15 @@ def __flux__(code, seed):
    return f"{spray}{rawsrc + ';' if rawsrc else ''}{bone}=lambda r:''.join(map(chr,(x^{wkey} for x in r)));{hand}=__import__;{ash}={words!r};{body}={blobsrc};{code}={key};{libc}={shot!r};{libd}={tag};{liba}={hand}({bone}({ash}[0]));{libb}={hand}({bone}({ash}[1]));{libe}={hand}({bone}({ash}[2]));{libf}={hand}({bone}({ash}[4]));{rows}={hand}({bone}({ash}[5]));{glow}={hand}({bone}({ash}[3]));{coal}=vars({hand}({bone}({ash}[12])));{body}=vars({liba})[{bone}({ash}[6])]({coal}[{bone}({ash}[13])]({body},{bone}({ash}[17])));{func}=vars({libe})[{bone}({ash}[7])]({body});{func}=vars({coal}[{bone}({ash}[15])]({func}))[{bone}({ash}[16])]({func});{func}!={libc} and 1/0;{drift}={coal}[{bone}({ash}[18])]({body});{tint}={coal}[{bone}({ash}[13])]((((({code}&255)+((i+1)*(((({code}>>8)&255) or 73)+((({code}>>16)&255) or 19)))+(i*(i+1)//2))&255)^(((({code}>>16)&255) or 19)+i&255)) for i in {coal}[{bone}({ash}[11])](512));{tint}=({tint}*(({drift}>>9)+1))[:{drift}];{body}=vars({coal}[{bone}({ash}[19])])[{bone}({ash}[21])]((vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{body},{bone}({ash}[22]))^vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{tint},{bone}({ash}[22]))),{drift},{bone}({ash}[22]));{way}={body}[0];{way} not in (0,1,2) and 1/0;{body}=(vars({rows})[{bone}({ash}[8])],vars({libb})[{bone}({ash}[8])],vars({glow})[{bone}({ash}[8])])[{way}]({body}[1:]);{libd} not in {coal}[{bone}({ash}[11])](1,8) and 1/0;{coal}[{bone}({ash}[10])](vars({libf})[{bone}({ash}[9])]({body}),vars())"
 def __cowl__(code, seed):
    raw = marshal.dumps(compile(code, __gravel__(seed + b'mask'), 'exec', optimize=2, dont_inherit=True))
-   pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.a85encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
-   words = ('base64', 'a85decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec')
+   pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.b85encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
+   words = ('base64', 'b85decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec')
    words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
    name = __sigil__(seed + b'maskname', 9)
    name[:3] = ['__yepppppp__', '__meoooo__', '__deptrai__']
    blob = __show__(*__hide__(blob, seed + b'cowlblob'), name[3])
    spray = __spray__(seed + b'maskspray', 0)
    spray = f"{spray};" if spray else ''
-   body = f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}.encode()),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob},{shot!r})"
+   body = f"(lambda {name[0]},{name[1]},{name[2]},{name[3]},{name[4]}:(lambda {name[5]}:(lambda {name[6]}:(lambda {name[7]}:{name[7]})({name[6]}))({name[5]}))((lambda b,h,z,j,l,m:(getattr(h,{name[1]}({name[2]}[9]))(b).hexdigest()!={name[4]} and (_ for _ in ()).throw(SystemExit),getattr({name[0]}({name[1]}({name[2]}[10])),{name[1]}({name[2]}[11]))(getattr(m,{name[1]}({name[2]}[7]))((getattr(z,{name[1]}({name[2]}[5])),getattr(j,{name[1]}({name[2]}[5])),getattr(l,{name[1]}({name[2]}[5])))[b[0]](b[1:])),globals()))[-1])(getattr({name[0]}({name[1]}({name[2]}[0])),{name[1]}({name[2]}[1]))({name[3]}),{name[0]}({name[1]}({name[2]}[8])),{name[0]}({name[1]}({name[2]}[2])),{name[0]}({name[1]}({name[2]}[3])),{name[0]}({name[1]}({name[2]}[4])),{name[0]}({name[1]}({name[2]}[6])))))(__import__,lambda r:''.join(chr(x^{key}) for x in r),{words!r},{blob},{shot!r})"
    get = __spell__('getattr', seed + b'cowlget')
    return f"{spray}{name[8]}=__import__({__spell__('builtins', seed + b'cowlbuilt')}).__dict__[{get}];" + body.replace('getattr', name[8])
 def __crystal__(tree, path, used):
@@ -7547,7 +8652,7 @@ def __crystal__(tree, path, used):
    peek != stem and (_ for _ in ()).throw(ValueError('pack'))
    stamp = hashlib.sha256(raw).hexdigest()
    mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
-   return __onyx__(base64.a85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
+   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
 def __forge__(path, dst=None):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
