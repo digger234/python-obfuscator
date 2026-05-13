@@ -28,10 +28,11 @@ try: sys.setrecursionlimit(max(sys.getrecursionlimit(), 500000))
 except: pass
 def __slate__():
    if Colorate is None:
-        print(); print("OBSIDIAN"); print("dense fused shell // deobf thu di"); print(); return
-   mix = Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)); glow = Colors.DynamicMIX((Col.blue, Col.cyan, Col.light_gray)); print()
-   for row in ("   ____  ____  _____ ___ ____ ___    _    _   _", "  / __ )/ __ \\/ ___//  _/ __ \\_ _|  / \\  | \\ | |", " / __  / / / /\\__ \\ / // / / /| |  / _ \\ |  \\| |", "/ /_/ / /_/ /___/ // // /_/ / | | / ___ \\| |\\  |", "/_____/\\____//____/___/\\____/ |___/_/   \\_\\_| \\_|"): print(Colorate.Diagonal(mix, row))
-   glow and print(Colorate.Diagonal(glow, "             dense fused shell // deobf thu di")); print()
+        print(); [print(row) for row in ("      ______________________________________________________________", "     /\\                                                             \\", "    /##\\      OOOOO   BBBBB    SSSSS  III  DDDDD   III   AAAA  NN  NN", "   /####\\    OO   OO  BB  BB  SS       I   DD  DD   I   AA  AA NNN NN", "  /######\\   OO   OO  BBBBB    SSSS    I   DD  DD   I   AAAAAA NN NNN", " /###/\\###\\  OO   OO  BB  BB      SS   I   DD  DD   I   AA  AA NN  NN", "/___/  \\___\\  OOOOO   BBBBB   SSSSS  III  DDDDD   III  AA  AA NN  NN", "\\   \\  /   /______________________________________________________/", " \\___\\/___/        [Obsidian] Premium Protect  |  Owner: yeppp")]; print("  >> Ready"); print(); return
+   mix = Colors.DynamicMIX((Col.cyan, Col.pink, Col.light_gray)); glow = Colors.DynamicMIX((Col.pink, Col.cyan, Col.light_gray)); hot = Colors.DynamicMIX((Col.blue, Col.cyan, Col.pink)); print()
+   for row in ("      ______________________________________________________________", "     /\\                                                             \\", "    /##\\      OOOOO   BBBBB    SSSSS  III  DDDDD   III   AAAA  NN  NN", "   /####\\    OO   OO  BB  BB  SS       I   DD  DD   I   AA  AA NNN NN", "  /######\\   OO   OO  BBBBB    SSSS    I   DD  DD   I   AAAAAA NN NNN", " /###/\\###\\  OO   OO  BB  BB      SS   I   DD  DD   I   AA  AA NN  NN", "/___/  \\___\\  OOOOO   BBBBB   SSSSS  III  DDDDD   III  AA  AA NN  NN", "\\   \\  /   /______________________________________________________/"): print(Colorate.Diagonal(mix, row))
+   for row in (" \\___\\/___/        [Obsidian] Premium Protect  |  Owner: yeppp", "             [Mode] Heavy Obfuscation  |  [Status] Ready", "             >> Dung co deobf em yeu a <<"): print(Colorate.Diagonal(glow if '>>' not in row else hot, row))
+   print()
 def __mist__(seed, need):
    if isinstance(seed, str): seed = seed.encode('utf-8')
    elif not isinstance(seed, (bytes, bytearray)): seed = repr(seed).encode('utf-8')
@@ -8178,7 +8179,9 @@ __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mis
 try:
  if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
 except:pass
-def __concac__():raise SystemExit
+try:print('\\033[96m>> Loading...\\033[0m',end='\\r');print(' '*30,end='\\r')
+except:pass
+def __concac__():print('\\033[91m>> Version mismatch!\\033[0m');print('\\033[95m>> Dung co deobf em yeu a.\\033[0m');raise SystemExit
 def __lmao__(f,*a):
  k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __concac__())(k[0],k[1],k[2],f,a)
 def __lmaoo__(v):
@@ -8507,7 +8510,7 @@ def __depvcl__():
  __iloveyou__ and __concac__();core=__lmao__(__tooldepphet__);__iloveyou__ and __concac__();code=__lmao__(__alovu__,core);__iloveyou__ and __concac__();__lmao__(__nhinconcac__,code)
 __depvcl__()
 """
-    outer=outer.replace("(_ for _ in ()).throw(SystemExit)","1/0").replace("raise SystemExit","1/0")
+    outer=outer.replace("(_ for _ in ()).throw(SystemExit)","1/0").replace("raise SystemExit","1/0").replace(" and 1/0"," and (print('\\\\033[93m>> Check fail! Dung co deobf em yeu a.\\\\033[0m') or 1/0)")
     ore = marshal.dumps(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True))
     pack = __gasket__(ore)
     shellk, glassk, forgek, stampk = __keys__(seed, ((b'shell', 1000000, 2147483647), (b'glasswrap', 1000000, 2147483647), (b'forgewrap', 17, 251), (b'stampwrap', 3, 29)))
