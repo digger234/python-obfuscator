@@ -7087,11 +7087,21 @@ def __vein__(code):
         return __carry__(out, b'plex') if ((int(abs(float(val.real)) + abs(float(val.imag))) + seed[17] + tick[0]) & 3) == 0 else out
     def __truth__(val):
         left = (seed[4] & 1) + 1
-        return ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
+        out = ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
+        if ((seed[18] + tick[0] + int(val)) & 3) == 1:
+            mark = ((seed[18] + tick[0]) & 7) + 2
+            out = ast.IfExp(test=out, body=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark)]), orelse=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark + 1)]))
+        return out
     def __void__():
-        return __carry__(ast.Constant(None), b'none')
+        out = ast.Constant(None)
+        if ((seed[19] + tick[0]) & 7) == 0:
+            out = ast.IfExp(test=ast.Compare(left=__count__(0), ops=[ast.Eq()], comparators=[__count__(1)]), body=__crash__(), orelse=out)
+        return __carry__(out, b'none')
     def __dot__():
-        return __carry__(ast.Constant(Ellipsis), b'dot')
+        out = ast.Constant(Ellipsis)
+        if ((seed[20] + tick[0]) & 3) == 0:
+            out = ast.Subscript(value=ast.Tuple(elts=[out], ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load())
+        return __carry__(out, b'dot')
     def __slab__():
         raw = marshal.dumps(tuple(plain))
         core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
