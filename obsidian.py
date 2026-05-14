@@ -5574,6 +5574,7 @@ def __pare__(tree):
         bag=set()
         for x in ast.walk(n):
             if isinstance(x,ast.Name) and isinstance(x.ctx,ast.Load): bag.add(x.id)
+            elif isinstance(x,ast.AugAssign): bag.update(__keyn__(x.target))
         return bag
     def __litok__(v):
         return v is None or v is Ellipsis or isinstance(v,(bool,int,float,complex,str,bytes,tuple)) and __ok__(v)
@@ -5592,6 +5593,15 @@ def __pare__(tree):
     def __cutn__(tab,names):
         for x in names:
             if x in tab: del tab[x]
+    def __storen__(n):
+        bag=set()
+        def go(x,root=False):
+            if not root and isinstance(x,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Lambda)): return
+            if isinstance(x,ast.Name) and isinstance(x.ctx,(ast.Store,ast.Del)): bag.add(x.id)
+            elif isinstance(x,ast.arg): bag.add(x.arg)
+            elif isinstance(x,ast.ExceptHandler) and x.name: bag.add(x.name)
+            for y in ast.iter_child_nodes(x): go(y)
+        go(n,True);return bag
     def __bindn__(tab,x):
         if isinstance(x,ast.Assign):
             for t in x.targets: __cutn__(tab,__keyn__(t))
@@ -5604,7 +5614,7 @@ def __pare__(tree):
                 ok,v=__raw__(x.value)
                 if ok and __litok__(v): tab[x.target.id]=v
         elif isinstance(x,ast.AugAssign): __cutn__(tab,__keyn__(x.target))
-        elif isinstance(x,ast.For): __cutn__(tab,__keyn__(x.target))
+        elif isinstance(x,(ast.For,ast.AsyncFor,ast.While,ast.If,ast.With,ast.AsyncWith,ast.Try,ast.Match)): __cutn__(tab,__storen__(x))
         elif isinstance(x,ast.With):
             for y in x.items:
                 if y.optional_vars is not None: __cutn__(tab,__keyn__(y.optional_vars))
@@ -6816,7 +6826,7 @@ def __vein__(code):
         slag = __mint__(used, seed, mint)
         coal = __mint__(used, seed, mint)
         utext = ''.join(chr(__spark__(seed + b'reefu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x0400, 0x04ff)) for s in range(7))
-        return ast.While(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=coal, ctx=ast.Load())], keywords=[]))], orelse=[])
+        return ast.While(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=slag, ctx=ast.Load())], keywords=[]))], orelse=[])
     def __dune__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -6882,14 +6892,14 @@ def __vein__(code):
         glass = __mint__(used, seed, mint)
         rock = __spark__(seed + b'junk' + tick[0].to_bytes(4, 'little'), 10**7, 10**9)
         text = ['obsidian', 'glass', 'ash', 'vein'][__spark__(seed + b'text' + tick[0].to_bytes(4, 'little'), 0, 3)]
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(text)), ast.Expr(value=ast.Call(func=ast.Name(id='str', ctx=ast.Load()), args=[ast.Name(id=glass, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
+        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(text)), ast.Assign(targets=[ast.Name(id=glass, ctx=ast.Store())], value=ast.Tuple(elts=[ast.Name(id=slag, ctx=ast.Load()), ast.Name(id=coal, ctx=ast.Load())], ctx=ast.Load())), ast.Expr(value=ast.Call(func=ast.Name(id='str', ctx=ast.Load()), args=[ast.Name(id=glass, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
         bag.append(__seam__())
         bag.append(__gorge__())
         slag2 = __mint__(used, seed, mint)
         coal2 = __mint__(used, seed, mint)
         rock2 = __spark__(seed + b'ujunk' + tick[0].to_bytes(4, 'little'), 0x4e00, 0x9fff)
         utext = ''.join(chr(__spark__(seed + b'uchar' + tick[0].to_bytes(4, 'little') + slot.to_bytes(2, 'little'), 0x4e00, 0x9fff)) for slot in range(8))
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(rock2), ops=[ast.Lt()], comparators=[ast.Constant(0)]), body=[ast.Assign(targets=[ast.Name(id=slag2, ctx=ast.Store())], value=ast.Constant(utext)), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=coal2, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
+        bag.append(ast.If(test=ast.Compare(left=ast.Constant(rock2), ops=[ast.Lt()], comparators=[ast.Constant(0)]), body=[ast.Assign(targets=[ast.Name(id=slag2, ctx=ast.Store())], value=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=coal2, ctx=ast.Store())], value=ast.Name(id=slag2, ctx=ast.Load())), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=coal2, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
         bag.append(__knoll__())
         bag.append(__dale__())
         bag.append(__scree__())
@@ -7042,6 +7052,8 @@ def __vein__(code):
             return __carry__(out, b'strayquarry')
         out = __fuse__(__rift__(val), 's')
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
+        if val and len(val) <= 96 and ((len(val) + seed[24] + tick[0]) & 7) == 2:
+            out = ast.BinOp(left=__ember__('%s'), op=ast.Mod(), right=out)
         if val and len(val) <= 64 and ((len(val) + seed[12] + tick[0]) & 7) == 1:
             for _ in range(1 + ((len(val) + seed[13] + tick[0]) & 1)):
                 out = __carry__(out, b'strnest')
@@ -7051,7 +7063,10 @@ def __vein__(code):
             raw, trio = __mortar__(seed + val[:32] + b'haze', val); slot = __mint__(used, seed + b'hazeslot' + tick[0].to_bytes(4, 'little'), mint); byte = __mint__(used, seed + b'hazebyte' + tick[0].to_bytes(4, 'little'), mint)
             out = ast.GeneratorExp(elt=ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Name(id=byte, ctx=ast.Load()), op=ast.BitXor(), right=ast.BinOp(left=ast.BinOp(left=ast.Constant(trio[2]), op=ast.RShift(), right=ast.BinOp(left=ast.Name(id=slot, ctx=ast.Load()), op=ast.Mod(), right=ast.Constant(64))), op=ast.BitAnd(), right=ast.Constant(255))), op=ast.BitXor(), right=ast.BinOp(left=ast.BinOp(left=ast.Constant(trio[1]), op=ast.RShift(), right=ast.BinOp(left=ast.Name(id=slot, ctx=ast.Load()), op=ast.Mod(), right=ast.Constant(64))), op=ast.BitAnd(), right=ast.Constant(255))), op=ast.BitXor(), right=ast.BinOp(left=ast.BinOp(left=ast.Constant(trio[0]), op=ast.RShift(), right=ast.BinOp(left=ast.Name(id=slot, ctx=ast.Load()), op=ast.Mod(), right=ast.Constant(64))), op=ast.BitAnd(), right=ast.Constant(255))), generators=[ast.comprehension(target=ast.Tuple(elts=[ast.Name(id=slot, ctx=ast.Store()), ast.Name(id=byte, ctx=ast.Store())], ctx=ast.Store()), iter=ast.Call(func=ast.Name(id='enumerate', ctx=ast.Load()), args=[__fuse__(__rift__(raw), 'b')], keywords=[]), ifs=[], is_async=0)])
             return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[out], keywords=[]), b'hazemortar')
-        out = __fuse__(__rift__(val), 'b'); view = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('memoryview')], keywords=[]), args=[out], keywords=[])
+        out = __fuse__(__rift__(val), 'b')
+        if val and len(val) <= 96 and ((len(val) + seed[25] + tick[0]) & 7) == 3:
+            out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytearray')], keywords=[]), args=[out], keywords=[])
+        view = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('memoryview')], keywords=[]), args=[out], keywords=[])
         return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[view], keywords=[]), b'haze')
     def __count__(val):
         off = 97 + ((abs(val) * 1315423911 + seed[0] + tick[0]) % 999903); key = 17 + ((abs(val) * 2654435761 + seed[1] + tick[0]) % 65519); ash = 33 + ((abs(val) * 2246822519 + seed[2] + tick[0]) % 65503); mul = 3 + ((abs(val) + seed[4] + tick[0]) % 97); bit = 1 + ((abs(val) + seed[5] + tick[0]) % 5); xor = 257 + ((abs(val) + seed[6] + tick[0]) % 65521)
@@ -7078,12 +7093,15 @@ def __vein__(code):
         if ((abs(val) + seed[12] + tick[0]) & 3) == 2:
             name = __mint__(used, seed + b'num' + tick[0].to_bytes(4, 'little'), mint); pad = 31 + ((abs(val) + seed[13] + tick[0]) % 4093)
             expr = __lambda__(ast.BinOp(left=ast.BinOp(left=ast.Name(id=name, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(pad)), op=ast.BitXor(), right=ast.Constant(pad)), [name], [expr], b'num')
+        if ((abs(val) + seed[26] + tick[0]) & 7) == 5:
+            pad = 73 + ((abs(val) + seed[27] + tick[0]) % 8191)
+            expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Add(), right=ast.Constant(pad)), op=ast.Sub(), right=ast.Constant(pad))
         return expr
     def __float__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
         return __carry__(out, b'float') if ((len(val.hex()) + seed[16] + tick[0]) & 3) == 1 else out
     def __plex__(val):
-        out = ast.Call(func=ast.Name(id='complex', ctx=ast.Load()), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
+        out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('complex')], keywords=[]), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
         return __carry__(out, b'plex') if ((int(abs(float(val.real)) + abs(float(val.imag))) + seed[17] + tick[0]) & 3) == 0 else out
     def __truth__(val):
         left = (seed[4] & 1) + 1
@@ -7535,11 +7553,17 @@ def {load}(i):
         if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__('__getitem__')], keywords=[]), args=[node.slice], keywords=[])
         if isinstance(node, ast.List) and isinstance(node.ctx, ast.Load):
+            if node.elts and ((len(node.elts) + seed[21] + tick[0]) & 3) == 0:
+                name = __mint__(used, seed + b'list' + len(node.elts).to_bytes(2, 'little'), mint)
+                return __lambda__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('list')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), [], node.elts, b'list', vararg=name)
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('list')], keywords=[]), args=[ast.Tuple(elts=node.elts, ctx=ast.Load())], keywords=[])
         if isinstance(node, ast.Tuple) and isinstance(node.ctx, ast.Load) and not any(isinstance(one, ast.Starred) for one in node.elts):
+            if node.elts and ((len(node.elts) + seed[22] + tick[0]) & 3) == 1:
+                name = __mint__(used, seed + b'tuple' + len(node.elts).to_bytes(2, 'little'), mint)
+                return __lambda__(ast.Name(id=name, ctx=ast.Load()), [], node.elts, b'tuple', vararg=name)
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('tuple')], keywords=[]), args=[ast.List(elts=node.elts, ctx=ast.Load())], keywords=[])
         if isinstance(node, ast.Slice):
-            return ast.Call(func=ast.Name(id='slice', ctx=ast.Load()), args=[__gloom__(node.lower) if node.lower else ast.Constant(None), __gloom__(node.upper) if node.upper else ast.Constant(None), __gloom__(node.step) if node.step else ast.Constant(None)], keywords=[])
+            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('slice')], keywords=[]), args=[__gloom__(node.lower) if node.lower else ast.Constant(None), __gloom__(node.upper) if node.upper else ast.Constant(None), __gloom__(node.step) if node.step else ast.Constant(None)], keywords=[])
         if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Attribute) and isinstance(node.targets[0].ctx, ast.Store):
             bag = node.targets[0]
             return ast.Expr(value=ast.Call(func=ast.Name(id='setattr', ctx=ast.Load()), args=[bag.value, __ember__(bag.attr), node.value], keywords=[]))
@@ -7601,19 +7625,21 @@ def {load}(i):
         if isinstance(node, ast.Set) and node.elts:
             name = __mint__(used, seed, mint)
             return __lambda__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('set')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), [], node.elts, b'set', vararg=name)
+        if isinstance(node, ast.Dict) and node.keys and len(node.keys) <= 32 and all(one is not None for one in node.keys) and ((len(node.keys) + seed[23] + tick[0]) & 3) == 2:
+            name = __mint__(used, seed + b'dict' + len(node.keys).to_bytes(2, 'little'), mint)
+            rows = [ast.Tuple(elts=[one, two], ctx=ast.Load()) for one, two in zip(node.keys, node.values)]
+            return __lambda__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('dict')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), [], rows, b'dict', vararg=name)
         if isinstance(node, ast.Dict) and node.keys and all(isinstance(one, ast.Constant) and isinstance(one.value, str) and one.value.isidentifier() and not __import__('keyword').iskeyword(one.value) for one in node.keys if one is not None):
             name = __mint__(used, seed, mint)
             return __lambda__(ast.Name(id=name, ctx=ast.Load()), [], [], b'dict', kwarg=name, keys=[ast.keyword(arg=one.value, value=two) for one, two in zip(node.keys, node.values)])
         if isinstance(node, ast.Call):
-            keys = []
             gate = {'super','eval','exec','globals','locals','vars','dir','hasattr','getattr','setattr','__import__','type','isinstance','issubclass'}
-            for one in node.keywords:
-                if one.arg is None:
-                    keys.append(one)
-                else:
-                    keys.append(ast.keyword(arg=None, value=ast.Dict(keys=[__ember__(one.arg)], values=[one.value])))
-            node.keywords = keys
-            if not (isinstance(node.func, ast.Name) and node.func.id in gate):
+            node = __mesa__(node)
+            ok = not (isinstance(node.func, ast.Name) and node.func.id in gate)
+            if ok and node.args and not node.keywords and len(node.args) <= 4 and ((len(node.args) + seed[28] + tick[0]) & 7) == 4:
+                name = __mint__(used, seed + b'call' + len(node.args).to_bytes(2, 'little'), mint)
+                return __lambda__(ast.Call(func=ast.Name(id=name, ctx=ast.Load()), args=node.args, keywords=[]), [name], [node.func], b'call')
+            if ok:
                 node.func = __gloom__(node.func)
             return node
         if isinstance(node, ast.Compare) and len(node.ops) == 1 and len(node.comparators) == 1:
@@ -7621,6 +7647,13 @@ def {load}(i):
             op = look.get(type(node.ops[0]))
             if op:
                 return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.left, __ember__(op)], keywords=[]), args=[node.comparators[0]], keywords=[])
+            look = {ast.Is: 'is_', ast.IsNot: 'is_not', ast.In: 'contains', ast.NotIn: 'contains'}
+            op = look.get(type(node.ops[0]))
+            if op:
+                left, right = __mint__(used, seed + b'cmp' + tick[0].to_bytes(4, 'little'), mint), __mint__(used, seed + b'cmp' + len(op).to_bytes(2, 'little'), mint)
+                args = [ast.Name(id=left, ctx=ast.Load()), ast.Name(id=right, ctx=ast.Load())] if not isinstance(node.ops[0], (ast.In, ast.NotIn)) else [ast.Name(id=right, ctx=ast.Load()), ast.Name(id=left, ctx=ast.Load())]
+                out = ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=args, keywords=[])
+                return __lambda__(ast.UnaryOp(op=ast.Not(), operand=out) if isinstance(node.ops[0], ast.NotIn) else out, [left, right], [node.left, node.comparators[0]], b'cmp')
         if isinstance(node, ast.BinOp) and (op := {ast.Add: 'add', ast.Sub: 'sub', ast.Mult: 'mul', ast.Div: 'truediv', ast.FloorDiv: 'floordiv', ast.Mod: 'mod', ast.Pow: 'pow', ast.LShift: 'lshift', ast.RShift: 'rshift', ast.BitOr: 'or_', ast.BitXor: 'xor', ast.BitAnd: 'and_'}.get(type(node.op))):
             return ast.Call(func=ast.Attribute(value=ast.Name(id=opbox, ctx=ast.Load()), attr=op, ctx=ast.Load()), args=[node.left, node.right], keywords=[])
         if isinstance(node, ast.UnaryOp) and (name := __mint__(used, seed, mint)): return __lambda__(ast.UnaryOp(op=node.op, operand=ast.Name(id=name, ctx=ast.Load())), [name], [node.operand], b'unary')
@@ -7693,9 +7726,6 @@ def {load}(i):
             return node
         if isinstance(node, ast.Await):
             node.value = __gloom__(node.value)
-            return node
-        if isinstance(node, ast.Call) and node.keywords:
-            node = __mesa__(node)
             return node
         return node
     def __gem__(node):
