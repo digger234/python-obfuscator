@@ -7054,6 +7054,8 @@ def __vein__(code):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
         if val and len(val) <= 96 and ((len(val) + seed[24] + tick[0]) & 7) == 2:
             out = ast.BinOp(left=__ember__('%s'), op=ast.Mod(), right=out)
+        if val and len(val) <= 48 and ((len(val) + seed[29] + tick[0]) & 31) == 5:
+            out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('str')], keywords=[]), args=[out], keywords=[])
         if val and len(val) <= 64 and ((len(val) + seed[12] + tick[0]) & 7) == 1:
             for _ in range(1 + ((len(val) + seed[13] + tick[0]) & 1)):
                 out = __carry__(out, b'strnest')
