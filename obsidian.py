@@ -8211,12 +8211,12 @@ def {runf}():
     proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpanalyzer','packetsender')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
-    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,sys,traceback,uuid,zlib
+    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,sys,threading,traceback,uuid,zlib
 try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
 except:pass
 __iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};net={net!r};proc={proc!r};env={env!r};pool={pool!r}
-__dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
-__yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
+__dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__meow__=id(threading.settrace);__mlem__=id(threading.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
+__yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__^__meow__^__mlem__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
 try:
  if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
@@ -8323,8 +8323,8 @@ def __varrrrr__(name,home,need):
  return hold
 def __checkvar__():
  built=__import__('builtins')
- __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('print',built,('builtins',));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
- for home,name in ((sys,'sys'),(os,'os'),(socket,'socket'),(platform,'platform'),(ctypes,'ctypes'),(marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
+ __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('print',built,('builtins',));__varrrrr__('breakpoint',built,('builtins',));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('breakpointhook',sys,('sys',));__varrrrr__('excepthook',sys,('sys',));__varrrrr__('displayhook',sys,('sys',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
+ for home,name in ((sys,'sys'),(os,'os'),(socket,'socket'),(platform,'platform'),(ctypes,'ctypes'),(threading,'threading'),(marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
   if sys.modules.get(name) is not home:return __ditmemay__()
  for one in (eval,exec,compile,__import__,open,print,globals,locals,vars,dir,type,getattr,setattr):
   if hasattr(one,'__wrapped__') or (hasattr(one,'__closure__') and one.__closure__):return __ditmemay__()
@@ -8333,13 +8333,19 @@ def __checkvar__():
   except:return __ditmemay__()
  return 0
 def __owo__():
- for one in (lambda:sys.gettrace() is None,lambda:sys.getprofile() is None,lambda:id(eval)==id(eval),lambda:id(exec)==id(exec),lambda:id(compile)==id(compile),lambda:type(open).__name__=='builtin_function_or_method',lambda:type(print).__name__=='builtin_function_or_method',lambda:__import__.__module__ in ('builtins',None)):
+ for one in (lambda:sys.gettrace() is None,lambda:sys.getprofile() is None,lambda:getattr(threading,'_trace_hook',None) is None,lambda:getattr(threading,'_profile_hook',None) is None,lambda:not getattr(sys.flags,'inspect',0),lambda:not getattr(sys.flags,'debug',0),lambda:sys.breakpointhook is sys.__breakpointhook__,lambda:sys.excepthook is sys.__excepthook__,lambda:sys.displayhook is sys.__displayhook__,lambda:id(eval)==id(eval),lambda:id(exec)==id(exec),lambda:id(compile)==id(compile),lambda:type(open).__name__=='builtin_function_or_method',lambda:type(print).__name__=='builtin_function_or_method',lambda:__import__.__module__ in ('builtins',None)):
   try:
    if not one():return __ditmemay__()
   except:return __ditmemay__()
+ mon=getattr(sys,'monitoring',None)
+ if mon:
+  for one in range(6):
+   try:
+    if mon.get_tool(one):return __ditmemay__()
+   except:pass
  return 0
 def __OwO__():
- built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print')
+ built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print','breakpoint')
  if isinstance(built,dict):
   for one in rows:
    if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return __ditmemay__()
@@ -8350,11 +8356,12 @@ def __OwO__():
  return 0
 def __haha__():
  if id(sys.settrace)!=__deptraivailon__ or id(sys.setprofile)!=__deptraivcl__:return __ditmemay__()
+ if id(threading.settrace)!=__meow__ or id(threading.setprofile)!=__mlem__:return __ditmemay__()
  hold=id(globals().get('__builtins__'))
  if __dmm__ and hold!=__dmm__:return __ditmemay__()
  if hasattr(sys,'meta_path') and len(sys.meta_path)>__toolvip__+2:return __ditmemay__()
  if hasattr(sys,'path_hooks') and len(sys.path_hooks)>__chatvcl__+2:return __ditmemay__()
- if ((hold^id(sys.settrace)^id(sys.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return __ditmemay__()
+ if ((hold^id(sys.settrace)^id(sys.setprofile)^id(threading.settrace)^id(threading.setprofile))+(((len(sys.meta_path) if hasattr(sys,'meta_path') else 0)<<8)^(len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0)))&0xffffffffffffffff!=__deptrai__:return __ditmemay__()
  return 0
 def __hihi__():
  for one in (exec,eval,compile):
@@ -8375,8 +8382,12 @@ def __hoho__():
 def __hahaha__():
  if os.name!='nt':return 0
  try:
-  hold=ctypes.windll.ntdll.NtQueryInformationProcess;flag=ctypes.c_ulong(0);side=hold(ctypes.windll.kernel32.GetCurrentProcess(),0x1F,ctypes.byref(flag),ctypes.sizeof(flag),None)
+  proc=ctypes.windll.kernel32.GetCurrentProcess();hold=ctypes.windll.ntdll.NtQueryInformationProcess;flag=ctypes.c_ulong(0);side=hold(proc,0x1F,ctypes.byref(flag),ctypes.sizeof(flag),None)
   if not side and not flag.value:return __ditmemay__()
+  port=ctypes.c_void_p();side=hold(proc,7,ctypes.byref(port),ctypes.sizeof(port),None)
+  if not side and port.value:return __ditmemay__()
+  obj=ctypes.c_void_p();side=hold(proc,0x1E,ctypes.byref(obj),ctypes.sizeof(obj),None)
+  if not side and obj.value:return __ditmemay__()
  except:pass
  return 0
 def __hihihi__():
@@ -8391,7 +8402,7 @@ def __hihihi__():
     except:ptr=0
     if not ptr:continue
     row=ctypes.cast(ptr,ctypes.POINTER(ctypes.c_ubyte))
-    if row[0] in (0xE9,0xEB) or (row[0]==0xFF and row[1]==0x25):return __ditmemay__()
+    if row[0] in (0xCC,0xC3,0xE9,0xEB) or (row[0]==0xFF and row[1] in (0x15,0x25)):return __ditmemay__()
  except:pass
  return 0
 class __hohoho__(ctypes.Structure):_fields_=[('ContextFlags',ctypes.c_ulong),('Dr0',ctypes.c_ulonglong),('Dr1',ctypes.c_ulonglong),('Dr2',ctypes.c_ulonglong),('Dr3',ctypes.c_ulonglong),('Dr6',ctypes.c_ulonglong),('Dr7',ctypes.c_ulonglong)]
@@ -8497,6 +8508,10 @@ def __mixifood__():
    if word in low:return __ditmemay__()
  except:pass
  try:
+  for one in ('PYTHONBREAKPOINT','PYTHONINSPECT','PYTHONTRACEMALLOC','PYTHONPROFILEIMPORTTIME'):
+   if os.environ.get(one):return __ditmemay__()
+ except:pass
+ try:
   if 'com.termux' in str(os.environ.get('HOME','')).lower():return __ditmemay__()
  except:pass
  try:
@@ -8516,10 +8531,10 @@ def __codev__(code):
 def __meme__():
  try:
   code=(lambda x=1:x).__code__;kind=type(code)
-  if not isinstance(code,kind):return __ditmemay__()
+  if not isinstance(code,kind) or kind.__module__!='builtins' or kind.__name__!='code':return __ditmemay__()
   if callable(getattr(code,'replace',None)):
    new=code.replace(co_consts=code.co_consts)
-   if not isinstance(new,kind) or __codev__(new)!=__codev__(code):return __ditmemay__()
+   if not isinstance(new,kind) or type(new) is not kind or __codev__(new)!=__codev__(code):return __ditmemay__()
  except:return __ditmemay__()
  return 0
 def __alovu__(blob):
@@ -8561,14 +8576,14 @@ __depvcl__()
     crest = hashlib.sha256(wrap).hexdigest()
     mark = (len(wrap), zlib.crc32(wrap) & 0xffffffff, zlib.adler32(wrap) & 0xffffffff, hashlib.sha1(wrap).hexdigest(), crest, sys.version_info[:2])
     grain = __spark__(seed + b'outer', 1, 255)
-    word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','b85decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','exec','eval','compile','__import__','open','globals','locals','vars','dir','type','len','bytes')
+    word = ('base64','bz2','hashlib','lzma','zlib','sys','os','ctypes','builtins','b85decode','sha256','sha1','crc32','adler32','decompress','pythonapi','PyMarshal_ReadObjectFromString','PyEval_EvalCode','IsDebuggerPresent','CheckRemoteDebuggerPresent','GetCurrentProcess','byref','c_int','c_char_p','c_long','py_object','create_string_buffer','cast','gettrace','getprofile','breakpointhook','__breakpointhook__','excepthook','__excepthook__','displayhook','__displayhook__','exec','eval','compile','__import__','open','globals','locals','vars','dir','type','len','bytes','monitoring','get_tool','threading','_trace_hook','_profile_hook','flags','inspect','debug')
     word = tuple(tuple(ord(char) ^ grain for char in item) for item in word)
     mask = __mint__(used, seed + b'wrapmask', mint)
     wrapsrc = __show__(*__hide__(base64.b85encode(wrap).decode('ascii'), seed + b'wrapblob'), mask)
     crust = f"{shell}={wrapsrc};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
     cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')"
-    ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));blob=getattr(b,{bone}({storm}[9]))({shell});({guard}(blob,z,h,sys)!={seal} or getattr(built[{bone}({storm}[30])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[31])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[32])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[33])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[34])],'__module__','_io') not in ('_io','io','builtins') or any(getattr(built[{bone}({storm}[slot])],'__module__','builtins')!='builtins' for slot in range(35,42)) or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or hit) and 1/0;blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});way=blob[0];(way not in (0,1,2)) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);blob={heart}(blob,{glass});way=blob[0];(way not in (0,1,2)) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];box=getattr(ct,{bone}({storm}[26]))(blob);code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),len(blob));run=getattr(getattr(ct,{bone}({storm}[15])),runn);run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
-    tags=('blob','built','drift','right','readn','runn','glow','tint','need','base','mask','left','tmp','hit','byte','way','read','box','code','run','row','one','slot','key','sys','os','ct','b','j','h','l','z','s')
+    ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));thr={hand}(50);sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));mon=getattr(sys,{bone}({storm}[48]),None);flag=getattr(sys,{bone}({storm}[53]),None);blob=getattr(b,{bone}({storm}[9]))({shell});({guard}(blob,z,h,sys)!={seal} or getattr(built[{bone}({storm}[36])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[37])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[38])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[39])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[40])],'__module__','_io') not in ('_io','io','builtins') or any(getattr(built[{bone}({storm}[slot])],'__module__','builtins')!='builtins' for slot in range(41,48)) or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or getattr(sys,{bone}({storm}[30])) is not getattr(sys,{bone}({storm}[31])) or getattr(sys,{bone}({storm}[32])) is not getattr(sys,{bone}({storm}[33])) or getattr(sys,{bone}({storm}[34])) is not getattr(sys,{bone}({storm}[35])) or getattr(thr,{bone}({storm}[51]),None) or getattr(thr,{bone}({storm}[52]),None) or (flag and (getattr(flag,{bone}({storm}[54]),0) or getattr(flag,{bone}({storm}[55]),0))) or (mon and any(getattr(mon,{bone}({storm}[49]))(slot) for slot in range(6))) or hit) and 1/0;blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});way=blob[0];(way not in (0,1,2)) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);blob={heart}(blob,{glass});way=blob[0];(way not in (0,1,2)) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];box=getattr(ct,{bone}({storm}[26]))(blob);code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),len(blob));run=getattr(getattr(ct,{bone}({storm}[15])),runn);run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
+    tags=('blob','built','drift','right','readn','runn','glow','tint','need','base','mask','left','tmp','hit','byte','way','read','box','code','run','row','one','slot','key','sys','os','ct','b','j','h','l','z','s','thr','flag')
     ash=ore if isinstance(ore,bytes) else bytes.fromhex(ore);wild=__sigil__(hashlib.sha256(ash+mesh.encode()+b'wrapname').digest(),len(tags));book=dict(zip(tags,wild));rex=__import__('re');pat=rex.compile(r'(?<![A-Za-z0-9_])('+'|'.join(map(rex.escape,sorted(tags,key=len,reverse=True)))+r')(?![A-Za-z0-9_])')
     cave=pat.sub(lambda m:book[m.group(1)],cave);ember=pat.sub(lambda m:book[m.group(1)],ember)
     return "\n\n" + __cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed)
@@ -9008,17 +9023,17 @@ def __rank__(rows):
    bag.sort(reverse=True)
    return tuple(row for score, row in bag)
 def __trove__(groups):
-   hint = __join__(groups['hint'], __cuts__(groups['hint']), __tags__(groups['hint']), __case__(groups['hint']), __more__(groups['hint'], ('er', 'ing', 'ed')), ('loader', 'finder', 'watcher', 'profiler', 'breakpoint', 'instrument', 'instrumentation', 'monkeypatch', 'shim', 'wrapper', 'proxy'))
-   debug = __join__(groups['debug'], __cuts__(groups['debug']), __ends__(groups['debug']), __proc__(groups['debug']), __case__(groups['debug']), ('pycharm', 'vscode', 'visual studio', 'debugger', 'debugadapter', 'debug adapter', 'remote debugger', 'breakpoint'))
-   anlz = __join__(groups['anlz'], __cuts__(groups['anlz']), __ends__(groups['anlz']), __proc__(groups['anlz']), __case__(groups['anlz']), ('sysinternals', 'process monitor', 'process explorer', 'network monitor', 'api monitor', 'import monitor', 'memory viewer', 'hex editor'))
+   hint = __join__(groups['hint'], __cuts__(groups['hint']), __tags__(groups['hint']), __case__(groups['hint']), __more__(groups['hint'], ('er', 'ing', 'ed')), ('loader', 'finder', 'watcher', 'profiler', 'breakpoint', 'instrument', 'instrumentation', 'monitoring', 'monkeypatch', 'shim', 'wrapper', 'proxy', 'audit', 'audithook'))
+   debug = __join__(groups['debug'], __cuts__(groups['debug']), __ends__(groups['debug']), __proc__(groups['debug']), __case__(groups['debug']), ('pycharm', 'vscode', 'visual studio', 'debugger', 'debugadapter', 'debug adapter', 'remote debugger', 'breakpoint', 'debugpy', 'ptvsd', 'pdb', 'bdb'))
+   anlz = __join__(groups['anlz'], __cuts__(groups['anlz']), __ends__(groups['anlz']), __proc__(groups['anlz']), __case__(groups['anlz']), ('sysinternals', 'process monitor', 'process explorer', 'api monitor', 'import monitor', 'memory viewer', 'hex editor', 'cutter', 'radare2', 'ghidra', 'ida', 'x64dbg'))
    vm = __join__(groups['vm'], __cuts__(groups['vm']), __ends__(groups['vm']), __proc__(groups['vm']), __case__(groups['vm']), ('parallels', 'vmware', 'virtual machine', 'hypervisor', 'sandboxed', 'container', 'docker', 'wsl', 'wine'))
    cmd = __join__(groups['cmd'], __cuts__(groups['cmd']), __proc__(groups['cmd']), ('powershell', 'pwsh', 'cmd.exe', 'where', 'whereis', 'which', 'ps', 'lsof', 'otool', 'codesign', 'fs_usage', 'dtruss', 'ktrace', 'procstat', 'sockstat'))
    host = __join__(groups['host'], __host__(groups['host']), __avenue__(groups['host']), ('localhost', '127.0.0.1', '0.0.0.0', 'requestbin', 'beeceptor', 'hookbin', 'interactsh', 'canarytokens', 'paste.rs', 'dpaste', 'termbin'))
    key = __join__(groups['key'], __cuts__(groups['key']), __tags__(groups['key']), __case__(groups['key']), ('passwd', 'pwd', 'secretkey', 'accesskey', 'refresh', 'oauth', 'jwt', 'authorization', 'x-api-key', 'clientsecret', 'client_secret'))
-   decomp = __join__(groups['decomp'], __cuts__(groups['decomp']), __proc__(groups['decomp']), ('pyinstxtractor', 'pyarmor', 'pytransform', 'decompiler', 'decompile3', 'pylingual', 'pydecipher', 'pyre', 'pyrebox', 'pytype'))
+   decomp = __join__(groups['decomp'], __cuts__(groups['decomp']), __proc__(groups['decomp']), ('pyinstxtractor', 'pyarmor', 'pytransform', 'decompiler', 'decompile3', 'uncompyle6', 'unpyc', 'pycdc', 'pycdas', 'pylingual', 'pydecipher', 'pydisasm', 'xdis', 'bytecode', 'depyf', 'pyre', 'pyrebox', 'pytype'))
    sbx = __join__(groups['sbx'], __cuts__(groups['sbx']), __file__(groups['sbx']), ('detonate', 'detonation', 'analysisbox', 'malwarelab', 'reversing', 'reverse engineering', 'dynamic analysis', 'static analysis', 'threatgrid'))
    mac = __join__(groups['mac'], ('00-05-69', '00-0c-29', '00-1c-14', '00-50-56', '08-00-27', '52-54-00', '00-15-5d'))
-   mods = __join__(groups['mods'], __mods__(groups['mods']), decomp, ('importlib', 'pkgutil', 'pkg_resources', 'sitecustomize', 'usercustomize', 'coverage', 'sys.settrace', 'sys.setprofile'))
+   mods = __join__(groups['mods'], __mods__(groups['mods']), decomp, ('importlib', 'pkgutil', 'pkg_resources', 'sitecustomize', 'usercustomize', 'coverage', 'threading.settrace', 'threading.setprofile', 'sys.settrace', 'sys.setprofile'))
    api = __apis__(__join__(groups['api'], ('OutputDebugString', 'GetThreadContext', 'SetThreadContext', 'DebugActiveProcess', 'DebugBreak', 'ReadProcessMemory', 'WriteProcessMemory', 'CreateRemoteThread', 'LoadLibrary')))
    dll = __dlls__(__join__(groups['dll'], ('kernelbase.dll', 'advapi32.dll', 'psapi.dll', 'ws2_32.dll', 'wininet.dll', 'winhttp.dll')))
    env = __envs__(__join__(hint, debug, anlz, vm, decomp, sbx, __seen__(cmd, host, key), ('python', 'pydevd', 'coverage', 'frida', 'proxy', 'http_proxy', 'https_proxy')))
