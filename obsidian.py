@@ -7633,7 +7633,7 @@ def {load}(i):
             name = __mint__(used, seed + b'dict' + len(node.keys).to_bytes(2, 'little'), mint)
             rows = [ast.Tuple(elts=[one, two], ctx=ast.Load()) for one, two in zip(node.keys, node.values)]
             return __lambda__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('dict')], keywords=[]), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), [], rows, b'dict', vararg=name)
-        if isinstance(node, ast.Dict) and node.keys and all(isinstance(one, ast.Constant) and isinstance(one.value, str) and one.value.isidentifier() and not __import__('keyword').iskeyword(one.value) for one in node.keys if one is not None):
+        if isinstance(node, ast.Dict) and node.keys and all(one is not None and isinstance(one, ast.Constant) and isinstance(one.value, str) and one.value.isidentifier() and not __import__('keyword').iskeyword(one.value) for one in node.keys):
             name = __mint__(used, seed, mint)
             return __lambda__(ast.Name(id=name, ctx=ast.Load()), [], [], b'dict', kwarg=name, keys=[ast.keyword(arg=one.value, value=two) for one, two in zip(node.keys, node.values)])
         if isinstance(node, ast.Call):
@@ -7706,18 +7706,22 @@ def {load}(i):
             return node
         if isinstance(node, ast.IfExp):
             node.test = __gloom__(node.test)
+            node.body = __gloom__(node.body); node.orelse = __gloom__(node.orelse)
             return node
         if isinstance(node, ast.Assert):
             node.test = __gloom__(node.test)
+            if node.msg is not None: node.msg = __gloom__(node.msg)
             return node
         if isinstance(node, ast.Return) and node.value is not None:
             node.value = __gloom__(node.value)
             return node
         if isinstance(node, ast.Raise) and node.exc is not None:
             node.exc = __gloom__(node.exc)
+            if node.cause is not None: node.cause = __gloom__(node.cause)
             return node
         if isinstance(node, ast.FormattedValue):
             node.value = __gloom__(node.value)
+            if node.format_spec is not None: node.format_spec = __gloom__(node.format_spec)
             return node
         if isinstance(node, ast.Starred):
             node.value = __gloom__(node.value)
