@@ -2514,7 +2514,7 @@ def __crestline__(tree, seed):
     fog = __mix__(seed, (__hist__(spans), tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
 def __crestapi__(tree, seed):
-    keys = ('exec','eval','compile','open','__import__','getattr','setattr','delattr','globals','locals','vars','dir','type','isinstance','issubclass','input','print','subprocess','socket','requests','httpx','aiohttp','ctypes','marshal','base64','zlib','bz2','lzma')
+    keys = ('exec','eval','compile','open','__import__','getattr','setattr','delattr','globals','locals','vars','dir','type','isinstance','issubclass','input','print','len','list','bytearray','subprocess','socket','requests','requests.sessions','requests.api','httpx','aiohttp','urllib','urllib3','ssl','pystyle','ctypes','marshal','base64','zlib','bz2','lzma')
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Name) and node.id in keys: rows.append(('n', node.id, getattr(node, 'lineno', 0)))
@@ -2534,7 +2534,7 @@ def __crestio__(tree, seed):
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:384]), len(rows)))
     return (len(rows), fog.hex())
 def __crestnet__(tree, seed):
-    keys = ('get','post','request','connect','send','recv','socket','AsyncClient','Client','Session','timeout','headers','proxy','proxies')
+    keys = ('get','post','request','connect','send','recv','socket','urlopen','urlparse','wrap_socket','AsyncClient','Client','Session','HTTPConnectionPool','HTTPSConnectionPool','SSLContext','timeout','headers','proxy','proxies')
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('a', node.attr, getattr(node, 'lineno', 0)))
@@ -2753,7 +2753,7 @@ def __umber__(tree, code, seed):
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
 def __vor__(tree, code, seed):
-    keys = ('open','read','write','close','exists','isfile','isdir','join','remove','rename','replace','socket','connect','send','recv','request','get','post','AsyncClient','Client','Session')
+    keys = ('open','read','write','close','exists','isfile','isdir','join','remove','rename','replace','socket','connect','send','recv','request','get','post','urlopen','urlparse','wrap_socket','AsyncClient','Client','Session','HTTPConnectionPool','HTTPSConnectionPool','SSLContext')
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr in keys: rows.append(('a', node.attr, type(node.value).__name__, getattr(node, 'lineno', 0)))
@@ -2939,7 +2939,7 @@ def __yarn__(tree, code, seed):
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(codebag[:256]), len(rows)))
     return (len(rows), fog.hex())
 def __zok__(tree, code, seed):
-    keys = ('trace','debug','profile','inspect','frame','ctypes','pythonapi','marshal','exec','eval','compile','open','socket','httpx','aiohttp','requests','proxy','thread','asyncio')
+    keys = ('trace','debug','profile','inspect','frame','ctypes','pythonapi','marshal','exec','eval','compile','open','socket','ssl','urllib','urllib3','httpx','aiohttp','requests','pystyle','proxy','thread','asyncio')
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Name) and any(key in node.id.lower() for key in keys): rows.append(('n', node.id, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
@@ -3612,7 +3612,7 @@ def __fox__(tree, code, seed):
     return (len(rows), fog.hex())
 def __goat__(tree, code, seed):
     rows = []
-    mods = {'os','sys','subprocess','socket','requests','httpx','urllib','ssl','hashlib','hmac','base64','marshal','pickle','zlib','bz2','lzma','ctypes','inspect','dis','ast','traceback','threading','asyncio','time','random','secrets'}
+    mods = {'os','sys','subprocess','socket','requests','httpx','urllib','urllib3','ssl','pystyle','hashlib','hmac','base64','marshal','pickle','zlib','bz2','lzma','ctypes','inspect','dis','ast','traceback','threading','asyncio','time','random','secrets'}
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -5137,7 +5137,7 @@ def __brine__(text, lex, path, seed):
     return ('saltxt', len(raw), fog.hex())
 def __scan__(text, lex, path, seed):
     rows = []
-    keys = ('exec', 'eval', 'compile', 'open', '__import__', 'getattr', 'setattr', 'globals', 'locals', 'vars', 'input', 'socket', 'subprocess', 'requests', 'httpx', 'aiohttp', 'pickle', 'marshal', 'base64', 'zlib', 'bz2', 'lzma', 'ctypes', 'threading', 'asyncio', 'password', 'token', 'secret', 'cookie', 'session', 'apikey', 'webhook', 'bearer', 'credential', 'license')
+    keys = ('exec', 'eval', 'compile', 'open', '__import__', 'getattr', 'setattr', 'globals', 'locals', 'vars', 'input', 'print', 'len', 'list', 'bytearray', 'socket', 'subprocess', 'requests', 'requests.sessions', 'requests.api', 'httpx', 'aiohttp', 'urllib', 'urllib3', 'ssl', 'pystyle', 'pickle', 'marshal', 'base64', 'zlib', 'bz2', 'lzma', 'ctypes', 'threading', 'asyncio', 'password', 'token', 'secret', 'cookie', 'session', 'apikey', 'webhook', 'bearer', 'credential', 'license')
     low = text.lower()
     for key in keys:
         count = low.count(key)
@@ -6600,7 +6600,7 @@ def __vein__(code):
     seed = hashlib.sha256(code.encode('utf-8')).digest()
     plain = []
     seen = {}
-    dust = {'__import__','abs','all','any','ascii','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip','Ellipsis','NotImplemented'}
+    dust = {'__import__','abs','all','any','ascii','aiter','anext','bin','breakpoint','callable','chr','classmethod','compile','delattr','dir','divmod','eval','exec','format','getattr','globals','hasattr','hash','hex','id','input','isinstance','issubclass','iter','len','locals','max','memoryview','min','next','oct','open','ord','pow','print','property','repr','round','setattr','slice','sorted','staticmethod','sum','vars','bool','bytearray','bytes','complex','dict','enumerate','filter','float','frozenset','int','list','map','object','range','reversed','set','str','super','tuple','type','zip','Ellipsis','NotImplemented'}
     dust.update({'BaseException','BaseExceptionGroup','Exception','ExceptionGroup','ArithmeticError','BufferError','LookupError','AssertionError','AttributeError','EOFError','FloatingPointError','GeneratorExit','ImportError','ModuleNotFoundError','IndexError','KeyError','KeyboardInterrupt','MemoryError','NameError','NotImplementedError','OSError','OverflowError','RecursionError','ReferenceError','RuntimeError','StopAsyncIteration','StopIteration','SyntaxError','IndentationError','TabError','SystemError','SystemExit','TypeError','UnboundLocalError','UnicodeError','UnicodeEncodeError','UnicodeDecodeError','UnicodeTranslateError','ValueError','ZeroDivisionError','BlockingIOError','ChildProcessError','ConnectionError','BrokenPipeError','ConnectionAbortedError','ConnectionRefusedError','ConnectionResetError','FileExistsError','FileNotFoundError','InterruptedError','IsADirectoryError','NotADirectoryError','PermissionError','ProcessLookupError','TimeoutError','Warning','UserWarning','DeprecationWarning','PendingDeprecationWarning','SyntaxWarning','RuntimeWarning','FutureWarning','ImportWarning','UnicodeWarning','BytesWarning','ResourceWarning'})
     ward = {'__name__','__file__','__package__','__spec__','__loader__','__builtins__','__doc__','__annotations__','__cached__','__path__','__slots__','__class__'}
     def __gather__(root):
@@ -6960,6 +6960,17 @@ def __vein__(code):
         bag.append(__talus__())
         bag.append(__cairn__())
         bag.append(__delta__())
+        if ((seed[26] + tick[0]) & 1) == 0:
+            slag6 = __mint__(used, seed, mint); coal6 = __mint__(used, seed, mint); glass6 = __mint__(used, seed, mint)
+            grit6 = ''.join(chr(__spark__(seed + b'antiu' + tick[0].to_bytes(4, 'little') + slot.to_bytes(2, 'little'), 0xac00, 0xd7a3)) for slot in range(6))
+            mist6 = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag6)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Call(func=ast.Attribute(value=ast.Constant(''), attr='join', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='map', ctx=ast.Load()), args=[ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=coal6)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Call(func=ast.Attribute(value=ast.Constant('{}'), attr='format', ctx=ast.Load()), args=[ast.BinOp(left=ast.Name(id=coal6, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(64))], keywords=[])), ast.Name(id=slag6, ctx=ast.Load())], keywords=[])], keywords=[])), args=[ast.Tuple(elts=[ast.Constant(ord(one) ^ 64) for one in grit6], ctx=ast.Load())], keywords=[])
+            bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=glass6, ctx=ast.Store())], value=mist6)], orelse=[]))
+        else:
+            slag7 = __mint__(used, seed, mint); coal7 = __mint__(used, seed, mint)
+            gem7 = ''.join(chr(__spark__(seed + b'chain' + tick[0].to_bytes(4, 'little') + slot.to_bytes(2, 'little'), 0x0400, 0x04ff)) for slot in range(5))
+            mist7 = ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag7)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Name(id=slag7, ctx=ast.Load()))
+            chain7 = ast.Call(func=mist7, args=[ast.Call(func=mist7, args=[ast.Call(func=mist7, args=[ast.Constant(gem7)], keywords=[])], keywords=[])], keywords=[])
+            bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=coal7, ctx=ast.Store())], value=chain7)], orelse=[]))
         tick[0] += 1
         rubbles = __rubble__(seed + tick[0].to_bytes(4, 'little'), 3)
         pebbles = __pebble__(seed + tick[0].to_bytes(4, 'little'), 2, 6)
@@ -7087,11 +7098,37 @@ def __vein__(code):
             raw = val.encode('utf-8')
         except:
             raw = None
+        if val and len(val) <= 40 and max(map(ord, val), default=0) < 65536 and ((len(val) + seed[31] + tick[0]) & 255) == 6:
+            off = (0x1f620 + ((len(val) + seed[7] + tick[0]) % 6), 0x0300 + ((len(val) + seed[8] + tick[0]) % 112), 0x3041 + ((len(val) + seed[9] + tick[0]) % 3))[(seed[6] + len(val) + tick[0]) % 3]
+            k1 = 1000 + ((seed[10] + len(val) + tick[0]) % 9000); k2 = 100 + ((seed[11] + len(val) + tick[0]) % 900)
+            enc = ''.join(chr(((ord(one) ^ k1) + off) ^ k2) for one in val)
+            if all(ord(one) <= 0x10ffff and not 0xd800 <= ord(one) <= 0xdfff for one in enc):
+                name = __mint__(used, seed + b'ustr' + len(val).to_bytes(2, 'little') + tick[0].to_bytes(4, 'little'), mint)
+                body = ast.Call(func=ast.Name(id='chr', ctx=ast.Load()), args=[ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Call(func=ast.Name(id='ord', ctx=ast.Load()), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), op=ast.BitXor(), right=__count__(k2)), op=ast.Sub(), right=__count__(off)), op=ast.BitXor(), right=__count__(k1))], keywords=[])
+                gen = ast.GeneratorExp(elt=body, generators=[ast.comprehension(target=ast.Name(id=name, ctx=ast.Store()), iter=ast.Constant(enc), ifs=[], is_async=0)])
+                return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[gen], keywords=[]), b'ustr')
+        if val and len(val) <= 8 and ((len(val) + seed[5] + tick[0]) & 255) == 9:
+            big = 3333333333333333333333333333333333333333333333333333333333242422222222222222222722222233
+            rows = []
+            for slot, char in enumerate(val):
+                base = ord(char) + big
+                magic = 7 + ((seed[(slot + 6) % len(seed)] + slot + len(val)) % 29)
+                mode = (seed[(slot + 9) % len(seed)] + slot) & 3
+                if mode == 0: expr = ast.BinOp(left=__count__(base ^ magic), op=ast.BitXor(), right=__count__(magic))
+                elif mode == 1:
+                    shift = 1 + (magic % 5); expr = ast.BinOp(left=__count__(base << shift), op=ast.RShift(), right=__count__(shift))
+                elif mode == 2: expr = ast.BinOp(left=__count__(base + magic), op=ast.Sub(), right=__count__(magic))
+                else: expr = ast.BinOp(left=__count__(base * magic), op=ast.FloorDiv(), right=__count__(magic))
+                rows.append(ast.Call(func=ast.Name(id=hexf, ctx=ast.Load()), args=[expr], keywords=[]))
+            return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=rows, ctx=ast.Load())], keywords=[]), b'strhex')
         if raw and len(raw) <= 16 and ((len(raw) + seed[9] + tick[0]) & 7) == 0:
             arr = ast.List(elts=[__count__(one) for one in raw], ctx=ast.Load())
             data = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[arr], keywords=[])
             out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[data, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
             return out
+        if val and len(val) <= 12 and ((len(val) + seed[19] + tick[0]) & 255) == 4:
+            rows = ast.Tuple(elts=[__ember__(one) if one else ast.Constant('') for one in val], ctx=ast.Load())
+            return __carry__(ast.BinOp(left=__ember__('%s' * len(val)), op=ast.Mod(), right=rows), b'strfmt')
         if raw and len(raw) <= 32 and ((len(raw) + seed[15] + tick[0]) & 31) == 3:
             pack, fog = __quarry__(val, seed + raw[:32] + b'stray'); slot = __mint__(used, seed + b'strslot' + tick[0].to_bytes(4, 'little'), mint); byte = __mint__(used, seed + b'strbyte' + tick[0].to_bytes(4, 'little'), mint)
             dec = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('zlib')], keywords=[]), __ember__('decompress')], keywords=[]), args=[ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('base64')], keywords=[]), __ember__('b85decode')], keywords=[]), args=[__ember__(pack)], keywords=[])], keywords=[])
@@ -7129,6 +7166,12 @@ def __vein__(code):
         return ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(off))
     def __calc__(val):
         tick[0] += 1
+        if val >= 0 and val.bit_length() <= 192 and ((val + seed[18] + tick[0]) & 255) == 3:
+            tag = b'0xFFFFFFFF/'
+            raw = tag + int(val).to_bytes(max(1, (val.bit_length() + 7) // 8), 'big')
+            cut = ast.Subscript(value=ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytearray')], keywords=[]), args=[ast.Constant(raw)], keywords=[]), slice=ast.Slice(lower=__count__(len(tag)), upper=None, step=None), ctx=ast.Load())
+            fun = ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('int')], keywords=[]), __ember__('from_bytes')], keywords=[])
+            return __carry__(ast.Call(func=fun, args=[cut, __ember__('big')], keywords=[]), b'intbyte')
         if ((abs(val) + seed[10] + tick[0]) & 3) == 0:
             name = __mint__(used, seed + b'int' + tick[0].to_bytes(4, 'little'), mint); key = 17 + ((abs(val) * 2654435761 + seed[11] + tick[0]) % 65519)
             return __lambda__(ast.BinOp(left=ast.Name(id=name, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(key)), [name], [ast.Constant(val ^ key)], b'int')
@@ -7155,6 +7198,11 @@ def __vein__(code):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('complex')], keywords=[]), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
         return __rim__(__carry__(out, b'plex'), (len(float(val.real).hex()) + len(float(val.imag).hex()) + seed[17] + tick[0]) & 7)
     def __truth__(val):
+        if ((seed[22] + tick[0] + int(val)) & 255) == 1:
+            name = __mint__(used, seed + b'bool' + tick[0].to_bytes(4, 'little'), mint)
+            left = 1 + ((seed[23] + tick[0]) % 7); gap = 1 + ((seed[24] + tick[0]) % 7)
+            test = ast.Compare(left=ast.BinOp(left=ast.Name(id=name, ctx=ast.Load()), op=ast.Sub(), right=__count__(gap)), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
+            return __rim__(__lambda__(test, [name], [__count__(left + gap)], b'bool'), (seed[25] + tick[0] + int(val)) & 7)
         left = (seed[4] & 1) + 1
         out = ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
         mark = ((seed[18] + tick[0] + int(val)) & 7) + 2
@@ -7177,8 +7225,9 @@ def __vein__(code):
         def __alias__(word):
             bag = []
             for slot, char in enumerate(word[::-1]):
-                fog = __mist__(seed + b'alias' + word.encode('utf-8') + slot.to_bytes(2, 'little'), 2)
-                bag.append(chr(97 + fog[0] % 26) + chr(97 + fog[1] % 26) + char)
+                fog = __mist__(seed + b'alias' + word.encode('utf-8') + slot.to_bytes(2, 'little'), 5)
+                head = ''.join(chr((0x4e00, 0xac00, 0x3041, 0x0370)[fog[pos] & 3] + (fog[(pos + 1) % len(fog)] % 96)) for pos in range(3))
+                bag.append(head + char)
             return f"{joinf}({tuple(bag)!r})"
         text = f"""{blob}={core!r}
 {proof}={gold!r}
@@ -7572,6 +7621,21 @@ def {load}(i):
                 return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__(node.id)], keywords=[])
             return node
         if isinstance(node, ast.JoinedStr):
+            if ((len(node.values) + seed[30] + tick[0]) & 3) == 1:
+                parts = []
+                for one in node.values:
+                    if isinstance(one, ast.Constant) and isinstance(one.value, str):
+                        parts.append(ast.Constant(one.value))
+                    elif isinstance(one, ast.FormattedValue):
+                        val = __shape__(one.value)
+                        if one.conversion == 115: val = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('str')], keywords=[]), args=[val], keywords=[])
+                        elif one.conversion == 114: val = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('repr')], keywords=[]), args=[val], keywords=[])
+                        elif one.conversion == 97: val = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('ascii')], keywords=[]), args=[val], keywords=[])
+                        spec = __shape__(one.format_spec) if one.format_spec else ast.Constant('')
+                        parts.append(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('format')], keywords=[]), args=[val, spec], keywords=[]))
+                    else:
+                        parts.append(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('format')], keywords=[]), args=[__shape__(one), ast.Constant('')], keywords=[]))
+                return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.Tuple(elts=parts, ctx=ast.Load())], keywords=[])
             bag = []
             out = []
             for one in node.values:
@@ -8256,10 +8320,10 @@ def {runf}():
     decomp=('uncompyle6','decompyle3','pycdc','pycdas','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py','pydisasm','xdis','depyf','pylingual','pydecipher')
     sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer')
     mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
-    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection','xposed','substrate') + decomp
+    mods=('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','pydevd','debugpy','frida','objection','xposed','substrate','urllib','urllib.request','urllib.parse','ssl','pystyle') + decomp
     api=('NtQueryInformationProcess','NtSetInformationThread','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump','OutputDebugString','DebugActiveProcess','DebugBreak')
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll','advapi32.dll')
-    net=('requests','httpx','aiohttp','urllib3')
+    net=('requests','httpx','aiohttp','urllib3','urllib','ssl','pystyle','requests.sessions','requests.api')
     proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','processhacker','process hacker','ida64','ida.exe','x64dbg','x32dbg','ollydbg','cheatengine','frida-server','re.frida.server','xposedbridge')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
@@ -8397,7 +8461,7 @@ def __owo__():
    except:pass
  return 0
 def __OwO__():
- built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print','breakpoint')
+ built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print','input','len','list','bytearray','breakpoint')
  if isinstance(built,dict):
   for one in rows:
    if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return __ditmemay__()
@@ -9280,11 +9344,11 @@ def __trove__(groups):
    decomp = __join__(groups['decomp'], __cuts__(groups['decomp']), __proc__(groups['decomp']), ('pyinstxtractor', 'pyarmor', 'pytransform', 'decompiler', 'decompile3', 'uncompyle6', 'uncompyle2', 'unpyc', 'pycdc', 'pycdas', 'pycparser', 'astor', 'easy_python_decompiler', 'pylingual', 'pydecipher', 'pydisasm', 'xdis', 'bytecode', 'depyf', 'pyre', 'pyrebox', 'pytype'))
    sbx = __join__(groups['sbx'], __cuts__(groups['sbx']), __file__(groups['sbx']), ('detonate', 'detonation', 'analysisbox', 'malwarelab', 'reversing', 'reverse engineering', 'dynamic analysis', 'static analysis', 'threatgrid', 'any.run', 'hybrid', 'joe', 'cape', 'triage', 'hatching', 'intezer'))
    mac = __join__(groups['mac'], ('00-05-69', '00-0c-29', '00-1c-14', '00-50-56', '08-00-27', '52-54-00', '00-15-5d'))
-   mods = __join__(groups['mods'], __mods__(groups['mods']), decomp, ('importlib', 'pkgutil', 'pkg_resources', 'sitecustomize', 'usercustomize', 'coverage', 'threading.settrace', 'threading.setprofile', 'sys.settrace', 'sys.setprofile'))
+   mods = __join__(groups['mods'], __mods__(groups['mods']), decomp, ('importlib', 'pkgutil', 'pkg_resources', 'sitecustomize', 'usercustomize', 'coverage', 'threading.settrace', 'threading.setprofile', 'sys.settrace', 'sys.setprofile', 'urllib.request', 'urllib.parse', 'requests.sessions', 'requests.api', 'pystyle'))
    api = __apis__(__join__(groups['api'], ('OutputDebugString', 'NtSetInformationThread', 'GetThreadContext', 'SetThreadContext', 'DebugActiveProcess', 'DebugBreak', 'ReadProcessMemory', 'WriteProcessMemory', 'CreateRemoteThread', 'LoadLibrary', 'MiniDumpWriteDump')))
    dll = __dlls__(__join__(groups['dll'], ('kernelbase.dll', 'advapi32.dll', 'psapi.dll', 'ws2_32.dll', 'wininet.dll', 'winhttp.dll')))
    env = __envs__(__join__(hint, debug, anlz, vm, decomp, sbx, __seen__(cmd, host, key), ('python', 'pydevd', 'coverage', 'frida', 'xposed', 'substrate', 'proxy', 'http_proxy', 'https_proxy', 'pythonbreakpoint', 'pythoninspect', 'pycharm_debug', 'pycharm_hosted')))
-   net = groups['net']
+   net = __join__(groups['net'], __mods__(groups['net']), ('urllib', 'urllib3', 'ssl', 'pystyle', 'requests.sessions', 'requests.api'))
    proc = groups['proc']
    pool = __graft__(__join__(hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mods, net, proc, __helix__(__thin__(hint, 12), __thin__(debug, 12)), __sift__(__thin__(anlz + decomp + sbx, 80))))
    return {'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc, 'env': env, 'pool': pool}
