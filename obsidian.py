@@ -6756,6 +6756,8 @@ def __vein__(code):
         call = lock + list(vals) if (vararg or kwarg) and not args else list(vals) + lock
         body = ast.IfExp(test=__guard__(left, right, mark), body=body, orelse=__crash__())
         return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=rows, vararg=ast.arg(arg=vararg) if vararg else None, kwonlyargs=[], kw_defaults=[], kwarg=ast.arg(arg=kwarg) if kwarg else None, defaults=[]), body=body), args=call, keywords=keys or [])
+    def __rim__(node, raw):
+        return ast.Subscript(value=ast.Tuple(elts=[node], ctx=ast.Load()), slice=ast.BinOp(left=ast.Constant(raw), op=ast.BitXor(), right=ast.Constant(raw)), ctx=ast.Load())
     def __carry__(node, tag):
         name = __mint__(used, seed, mint)
         return __lambda__(ast.Name(id=name, ctx=ast.Load()), [name], [node], tag)
@@ -6997,12 +6999,12 @@ def __vein__(code):
             for one in vals[1:]:
                 name = __mint__(used, seed + b'and' + len(vals).to_bytes(2, 'little'), mint)
                 out = __lambda__(ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=one, orelse=ast.Name(id=name, ctx=ast.Load())), [name], [out], b'and')
-            return out
+            return __rim__(out, (len(vals) + lam[0] + seed[3]) & 7)
         if isinstance(node.op, ast.Or):
             for one in vals[1:]:
                 name = __mint__(used, seed + b'or' + len(vals).to_bytes(2, 'little'), mint)
                 out = __lambda__(ast.IfExp(test=ast.Name(id=name, ctx=ast.Load()), body=ast.Name(id=name, ctx=ast.Load()), orelse=one), [name], [out], b'or')
-            return out
+            return __rim__(out, (len(vals) + lam[0] + seed[5]) & 7)
         return node
     def __ember__(val):
         key = ('s', val) if isinstance(val, str) else ('b', val)
@@ -7042,7 +7044,8 @@ def __vein__(code):
         if raw and len(raw) <= 16 and ((len(raw) + seed[9] + tick[0]) & 7) == 0:
             arr = ast.List(elts=[__count__(one) for one in raw], ctx=ast.Load())
             data = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[arr], keywords=[])
-            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[data, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
+            out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[data, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
+            return out
         if raw and len(raw) <= 32 and ((len(raw) + seed[15] + tick[0]) & 31) == 3:
             pack, fog = __quarry__(val, seed + raw[:32] + b'stray'); slot = __mint__(used, seed + b'strslot' + tick[0].to_bytes(4, 'little'), mint); byte = __mint__(used, seed + b'strbyte' + tick[0].to_bytes(4, 'little'), mint)
             dec = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('zlib')], keywords=[]), __ember__('decompress')], keywords=[]), args=[ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__ember__('base64')], keywords=[]), __ember__('b85decode')], keywords=[]), args=[__ember__(pack)], keywords=[])], keywords=[])
@@ -7101,27 +7104,24 @@ def __vein__(code):
         return expr
     def __float__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
-        return __carry__(out, b'float') if ((len(val.hex()) + seed[16] + tick[0]) & 3) == 1 else out
+        return __rim__(__carry__(out, b'float'), (len(val.hex()) + seed[16] + tick[0]) & 7)
     def __plex__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('complex')], keywords=[]), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
-        return __carry__(out, b'plex') if ((int(abs(float(val.real)) + abs(float(val.imag))) + seed[17] + tick[0]) & 3) == 0 else out
+        return __rim__(__carry__(out, b'plex'), (int(abs(float(val.real)) + abs(float(val.imag))) + seed[17] + tick[0]) & 7)
     def __truth__(val):
         left = (seed[4] & 1) + 1
         out = ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
-        if ((seed[18] + tick[0] + int(val)) & 3) == 1:
-            mark = ((seed[18] + tick[0]) & 7) + 2
-            out = ast.IfExp(test=out, body=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark)]), orelse=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark + 1)]))
-        return out
+        mark = ((seed[18] + tick[0] + int(val)) & 7) + 2
+        out = ast.IfExp(test=out, body=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark)]), orelse=ast.Compare(left=__count__(mark), ops=[ast.Eq()], comparators=[__count__(mark + 1)]))
+        return __rim__(out, (seed[18] + tick[0] + int(val)) & 7)
     def __void__():
         out = ast.Constant(None)
-        if ((seed[19] + tick[0]) & 7) == 0:
-            out = ast.IfExp(test=ast.Compare(left=__count__(0), ops=[ast.Eq()], comparators=[__count__(1)]), body=__crash__(), orelse=out)
-        return __carry__(out, b'none')
+        out = ast.IfExp(test=ast.Compare(left=__count__(0), ops=[ast.Eq()], comparators=[__count__(1)]), body=__crash__(), orelse=out)
+        return __rim__(__carry__(out, b'none'), (seed[19] + tick[0]) & 7)
     def __dot__():
         out = ast.Constant(Ellipsis)
-        if ((seed[20] + tick[0]) & 3) == 0:
-            out = ast.Subscript(value=ast.Tuple(elts=[out], ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load())
-        return __carry__(out, b'dot')
+        out = ast.Subscript(value=ast.Tuple(elts=[out], ctx=ast.Load()), slice=ast.BinOp(left=ast.Constant(seed[20] & 7), op=ast.BitXor(), right=ast.Constant(seed[20] & 7)), ctx=ast.Load())
+        return __rim__(__carry__(out, b'dot'), (seed[20] + tick[0]) & 7)
     def __slab__():
         raw = marshal.dumps(tuple(plain))
         core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
