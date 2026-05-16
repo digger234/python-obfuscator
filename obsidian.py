@@ -5684,6 +5684,8 @@ def __pare__(tree):
         if isinstance(n.op,ast.Mult):
             if __o__(n.right) and __pure__(n.left): return n.left
             if __o__(n.left) and __pure__(n.right): return n.right
+            if __mone__(n.right) and __pure__(n.left): return ast.copy_location(ast.UnaryOp(op=ast.USub(),operand=n.left),n)
+            if __mone__(n.left) and __pure__(n.right): return ast.copy_location(ast.UnaryOp(op=ast.USub(),operand=n.right),n)
             if (__z__(n.right) and __pure__(n.left)) or (__z__(n.left) and __pure__(n.right)): return __mk__(0,n)
         if isinstance(n.op,ast.Div) and __o__(n.right) and __pure__(n.left): return n.left
         if isinstance(n.op,ast.FloorDiv) and __o__(n.right) and __pure__(n.left): return n.left
@@ -5830,7 +5832,7 @@ def __pare__(tree):
         if name=='swapcase' and not args: return __ev__(obj.swapcase)
         if name=='expandtabs' and len(args)<=1 and (not args or isinstance(args[0],int)): return __ev__(obj.expandtabs,*args)
         if name=='translate' and 1<=len(args)<=2 and isinstance(args[0],(bytes,bytearray)) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(obj.translate,*args)
-        return __ev__(getattr(obj,name)) if name in ('lower','upper','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,bytes) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and isinstance(args[0],(bytes,tuple)) and all(isinstance(x,int) for x in args[1:]) else __ev__(obj.hex,*args) if name=='hex' and len(args)<=2 and (not args or isinstance(args[0],str)) and (len(args)<2 or isinstance(args[1],int)) else (False,None)
+        return __ev__(getattr(obj,name)) if name in ('lower','upper','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,bytes) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and isinstance(args[0],(bytes,tuple)) and all(isinstance(x,int) for x in args[1:]) else __ev__(obj.hex,*args) if name=='hex' and (not args or __argu__(args,str)) else (False,None)
     def __text__(obj,name,args):
         if name=='format' and len(args)<=16: return __ev__(obj.format,*args)
         if name=='format_map' and len(args)==1 and isinstance(args[0],dict): return __ev__(obj.format_map,args[0])
@@ -6087,8 +6089,7 @@ def __pare__(tree):
         if isinstance(v,dict) and len(v)<=128 and all(__ok__(k) and __ok__(x) for k,x in v.items()): return ast.copy_location(ast.Dict(keys=[ast.Constant(k) for k in v],values=[ast.Constant(x) for x in v.values()]),n)
         return None
     def __done__(v,n):
-        made=__node__(v,n)
-        return made if made is not None else __mk__(v,n)
+        return __lift__(v,n)
     def __morph__(n,args):
         if not isinstance(n.func,ast.Name): return None
         name=n.func.id
@@ -6671,9 +6672,54 @@ def __vein__(code):
     bend = 257 + int.from_bytes(seed[8:12], 'little')
     mask = int.from_bytes(seed[12:16], 'little') | 1
     crisp = 1009 + int.from_bytes(seed[16:20], 'little')
+    def __pval__(node):
+        if isinstance(node, ast.Attribute):
+            node.value = __pval__(node.value)
+            return node
+        if isinstance(node, ast.Name):
+            if not __held__(node.id) and __token__(node.id):
+                node.id = __pick__(node.id)
+            return node
+        return node
+    def __patt__(node):
+        if isinstance(node, ast.MatchValue):
+            node.value = __pval__(node.value)
+            return node
+        if isinstance(node, ast.MatchSingleton):
+            return node
+        if isinstance(node, ast.MatchStar):
+            if node.name and __token__(node.name):
+                node.name = __pick__(node.name)
+            return node
+        if isinstance(node, ast.MatchAs):
+            if node.pattern is not None:
+                node.pattern = __patt__(node.pattern)
+            if node.name and __token__(node.name):
+                node.name = __pick__(node.name)
+            return node
+        if isinstance(node, ast.MatchMapping):
+            node.patterns = [__patt__(one) for one in node.patterns]
+            if node.rest and __token__(node.rest):
+                node.rest = __pick__(node.rest)
+            return node
+        if isinstance(node, ast.MatchClass):
+            node.cls = __pval__(node.cls)
+            node.patterns = [__patt__(one) for one in node.patterns]
+            node.kwd_patterns = [__patt__(one) for one in node.kwd_patterns]
+            return node
+        if isinstance(node, ast.MatchSequence):
+            node.patterns = [__patt__(one) for one in node.patterns]
+            return node
+        if isinstance(node, ast.MatchOr):
+            node.patterns = [__patt__(one) for one in node.patterns]
+            return node
+        return node
     def __cast__(node, kind, skip):
         for field, value in ast.iter_fields(node):
             if field in skip:
+                continue
+            if field == 'pattern' and isinstance(value, ast.AST):
+                setattr(node, field, __patt__(value) if kind == 'shape' else value)
                 continue
             if isinstance(value, list):
                 bag = []
@@ -7107,7 +7153,7 @@ def __vein__(code):
         return __rim__(__carry__(out, b'float'), (len(val.hex()) + seed[16] + tick[0]) & 7)
     def __plex__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('complex')], keywords=[]), args=[__float__(float(val.real)), __float__(float(val.imag))], keywords=[])
-        return __rim__(__carry__(out, b'plex'), (int(abs(float(val.real)) + abs(float(val.imag))) + seed[17] + tick[0]) & 7)
+        return __rim__(__carry__(out, b'plex'), (len(float(val.real).hex()) + len(float(val.imag).hex()) + seed[17] + tick[0]) & 7)
     def __truth__(val):
         left = (seed[4] & 1) + 1
         out = ast.Compare(left=__count__(left), ops=[ast.Eq()], comparators=[__count__(left if val else left + 1)])
