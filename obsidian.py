@@ -290,12 +290,7 @@ def __wisp__(code):
 def __gasket__(blob):
    hit = __gaskbag__.get(blob)
    if hit is not None: return hit
-   if len(blob) > 4096:
-        rows = ((0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3)))
-   elif len(blob) < 512:
-        rows = ((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6)))
-   else:
-        rows = ((0, zlib.compress(blob, 4)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=6)))
+   rows = ((0, zlib.compress(blob, 1)), (0, zlib.compress(blob, 4)), (0, zlib.compress(blob, 6)), (0, zlib.compress(blob, 9)), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3)))
    pick = min(rows, key=lambda row: (len(row[1]), row[0])); fast = min((row for row in rows if row[0] == 0), key=lambda row: len(row[1]))
    if len(fast[1]) <= (len(pick[1]) * 115) // 100: pick = fast
    out = bytes([pick[0]]) + pick[1]
@@ -9023,6 +9018,21 @@ def __sear__(text, seed):
         f")({melt})"
     )
     return text + ";" + lace + ";" + pack + ";" + spray + inner
+def __cloak__(src, seed):
+   raw = marshal.dumps(compile(src, __gravel__(seed + b'veil'), 'exec', optimize=2, dont_inherit=True))
+   shot = hashlib.sha256(raw).hexdigest()
+   fog = __gasket__(raw)
+   key = secrets.randbelow(254) + 1
+   ash = bytes((one ^ key ^ ((slot * 31 + key + 17) & 255)) for slot, one in enumerate(fog))
+   name = __sigil__(seed + b'veilname', 26);name[:3] = ['__yepppppp__', '__meoooo__', '__deptrai__']
+   wkey = __spark__(seed + b'veilword', 1, 255)
+   words = ('base64', 'b85decode', 'zlib', 'bz2', 'lzma', 'decompress', 'ctypes', 'pythonapi', 'PyMarshal_ReadObjectFromString', 'PyEval_EvalCode', 'create_string_buffer', 'cast', 'c_char_p', 'c_long', 'py_object', '_CFuncPtr', 'hashlib', 'sha256', 'hexdigest', 'globals', 'builtins', 'builtin_function_or_method')
+   words = tuple(tuple(ord(char) ^ wkey for char in word) for word in words)
+   msg = tuple(ord(char) ^ wkey for char in "\033[95m>> Dung co deobf em yeu a.\033[0m")
+   blob = __show__(*__hide__(base64.b85encode(ash).decode('ascii'), seed + b'veilblob'), name[3])
+   w = lambda at: f"{name[1]}({name[2]}[{at}])"
+   b64, b85, zlibn, bz2n, lzman, dec, ctn, api, readn, runn, buf, castn, charp, longn, pyobj, ptr, hashn, sha, hexd, glb, built, fun = w(0), w(1), w(2), w(3), w(4), w(5), w(6), w(7), w(8), w(9), w(10), w(11), w(12), w(13), w(14), w(15), w(16), w(17), w(18), w(19), w(20), w(21)
+   return f"{name[0]}=__import__;{name[1]}=lambda {name[4]}:''.join(chr({name[5]}^{wkey}) for {name[5]} in {name[4]});{name[2]}={words!r};{name[22]}=lambda:((print({name[1]}({msg!r}),flush=True),(_ for _ in ()).throw(SystemExit))[-1]);len({name[2]})!=22 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[6]}={blob};{name[7]}={shot!r};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=bytes(({name[10]}^{key}^(({name[11]}*31+{key}+17)&255)) for {name[11]},{name[10]} in enumerate({name[9]}));{name[12]}={name[9]}[0];({name[12]} not in (0,1,2)) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[13]}={name[0]}({ctn});{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[16]}=getattr({name[13]},{buf})({name[9]});{name[17]}={name[15]}(getattr({name[13]},{castn})({name[16]},getattr({name[13]},{charp})),len({name[9]}));{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[19]}=getattr({name[0]}({built}),{glb});{name[18]}({name[17]},{name[19]}(),{name[19]}())"
 def __flux__(code, seed):
    raw = marshal.dumps(compile(code, __gravel__(seed + b'flux'), 'exec', optimize=2, dont_inherit=True))
    key = __spark__(seed + b'fluxkey', 1000000, 2147483647)
@@ -9055,9 +9065,10 @@ def __cowl__(code, seed):
    body += f";{name[5]}={name[27]}({name[3]});{name[8]}({name[8]}({name[25]},{name[1]}({name[2]}[9]))({name[5]}),{name[1]}({name[2]}[13]))()!={name[4]} and 1/0;{name[5]}=({name[28]},{name[29]},{name[30]})[{name[5]}[0]]({name[5]}[1:]);{name[37]}={name[8]}({name[8]}({name[34]},{name[1]}({name[2]}[23])),{name[1]}({name[2]}[24]));not isinstance({name[37]},{name[8]}({name[34]},{name[1]}({name[2]}[31]))) and 1/0;{name[37]}.restype={name[8]}({name[34]},{name[1]}({name[2]}[28]));{name[37]}.argtypes=[{name[8]}({name[34]},{name[1]}({name[2]}[26])),{name[8]}({name[34]},{name[1]}({name[2]}[27]))];{name[38]}={name[8]}({name[34]},{name[1]}({name[2]}[29]))({name[5]});{name[39]}={name[37]}({name[8]}({name[34]},{name[1]}({name[2]}[30]))({name[38]},{name[8]}({name[34]},{name[1]}({name[2]}[26]))),len({name[5]}));{name[40]}={name[8]}({name[8]}({name[34]},{name[1]}({name[2]}[23])),{name[1]}({name[2]}[25]));not isinstance({name[40]},{name[8]}({name[34]},{name[1]}({name[2]}[31]))) and 1/0;{name[40]}.restype={name[8]}({name[34]},{name[1]}({name[2]}[28]));{name[40]}.argtypes=[{name[8]}({name[34]},{name[1]}({name[2]}[28])),{name[8]}({name[34]},{name[1]}({name[2]}[28])),{name[8]}({name[34]},{name[1]}({name[2]}[28]))];{name[40]}({name[39]},{name[33]}(),{name[33]}())"
    for left, right in (("!='builtins'", f"!={name[1]}({name[2]}[10])"), ("!='base64'", f"!={name[1]}({name[2]}[0])"), ("!='b85decode'", f"!={name[1]}({name[2]}[1])"), ("!='zlib'", f"!={name[1]}({name[2]}[2])"), ("!='bz2'", f"!={name[1]}({name[2]}[3])"), ("!='lzma'", f"!={name[1]}({name[2]}[4])"), ("!='decompress'", f"!={name[1]}({name[2]}[5])"), ("!='marshal'", f"!={name[1]}({name[2]}[6])"), ("!='loads'", f"!={name[1]}({name[2]}[7])"), ("!='exec'", f"!={name[1]}({name[2]}[11])"), ("!='globals'", f"!={name[1]}({name[2]}[12])"), ("!='builtin_function_or_method'", f"!={name[1]}({name[2]}[21])"), ("!='function'", f"!={name[1]}({name[2]}[22])")):body=body.replace(left,right)
    body=body.replace(" and 1/0",f" and {name[41]}()")
-   return f"{spray}" + body
+   return __cloak__(f"{spray}" + body, seed + b'cowlveil')
 def __crystal__(tree, path, used):
-   code = compile(tree, os.path.basename(path), 'exec', optimize=2, dont_inherit=True)
+   path = os.path.basename(path)
+   code = compile(tree, path, 'exec', optimize=2, dont_inherit=True)
    stem = marshal.dumps(code)
    brand = __brand__(stem)
    blaze = brand[0]
