@@ -90,7 +90,7 @@ def obf(name, tool):
         return False, f"Output file not created: {out}", {}
     new = meta(out)
     info = {"src": old["size"], "out": new["size"], "slines": old["lines"], "olines": new["lines"], "ratio": new["size"] / old["size"] if old["size"] else 0, "time": took}
-    if info["olines"] > 5:
+    if info["olines"] > 4:
         return False, f"Output too long: {info['olines']} lines", info
     return True, out, info
 def check(out, src, cfg):
