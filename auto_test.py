@@ -32,7 +32,6 @@ def pick():
 def run(args, data=None, timeout=60, cwd=None):
     env = os.environ.copy()
     env['PYTHONIOENCODING'] = 'utf-8'
-    env['AEGIS_SAFE_MODE'] = '1'
     try:
         proc = subprocess.run([PYTHON] + args, cwd=cwd or DIR, input=data, capture_output=True, text=True, timeout=timeout, encoding='utf-8', errors='replace', env=env)
         return proc.returncode, proc.stdout, proc.stderr
@@ -59,9 +58,13 @@ def tail(one):
             return row[:120]
     return rows[-1][:120] if rows else 'unknown'
 def norm(one):
-    return '\n'.join(row.strip() for row in one.strip().split('\n') if row.strip())
+    import re
+    one = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', one)
+    return '\n'.join(row.strip() for row in one.strip().split('\n') if row.strip() and '>> Loading...' not in row)
 def words(one):
     import unicodedata
+    import re
+    one = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', one)
     bag = set()
     for row in one.split('\n'):
         clean = ''.join(ch for ch in row if unicodedata.category(ch)[0] in ('L', 'N') or ch in ' ._-:')
@@ -175,7 +178,7 @@ def main():
             print(f"{RED}FAILED{RESET}")
             print(f"  {RED}{result}{RESET}")
             done[name] = ("FAIL", result, "")
-            continue
+            break
         print(f"{GREEN}OK{RESET} ({info['time']:.1f}s) [{info['src']/1024:.1f}KB -> {info['out']/1024:.1f}KB | {info['olines']} lines]")
         print(f"  {CYAN}[2/2] Running obfuscated code...{RESET}", end=" ", flush=True)
         ok, state, stdout, stderr, took = check(result, path(name), cfg)
@@ -190,6 +193,7 @@ def main():
                 for row in stderr.split('\n')[:10]:
                     print(f"    {row}")
             done[name] = ("FAIL", state, stderr)
+            break
     clean(tool)
     print(f"\n{CYAN}{'='*60}{RESET}")
     print(f"{CYAN}                    SUMMARY{RESET}")
