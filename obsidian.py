@@ -8382,8 +8382,11 @@ __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mis
 try:
  if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
 except:pass
-try:print('\\033[96m>> Loading...\\033[0m',end='',flush=True);time.sleep(0.15);print('\\r\\033[2K\\033[H\\033[2J',end='',flush=True)
+try:print('\\033[96m>> Loading...\\033[0m',end='',flush=True);time.sleep(0.15)
 except:pass
+def __sang__():
+ try:print('\\r\\033[2K\\033[H\\033[2J',end='',flush=True)
+ except:pass
 def __baoloi__():
  __b__=__import__('builtins');__t__='__'+hashlib.sha1(mark.encode()).hexdigest()[:12]+'__';getattr(__b__,__t__,0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(__b__,__t__,1);os._exit(1)
 def __lmao__(f,*a):
@@ -8402,6 +8405,7 @@ def __concac__():
    val^=(len(row)<<7) if isinstance(getattr(api,row,None),ctypes._CFuncPtr) else len(row)
   code=(lambda:None).__code__;kind=type(code);raw=marshal.dumps(code);back=marshal.loads(raw)
   val^=(len(raw)<<1) if isinstance(back,kind) and getattr(back,'co_code',b'')==code.co_code and len(getattr(back,'co_consts',()))==len(code.co_consts) else len(raw)
+  val^=int.from_bytes(hashlib.sha256(raw+code.co_code+tag.encode()).digest()[:4],'little')
   val^=0x1f2d3b4a if getattr(code,'replace',None) and type(code.replace(co_consts=code.co_consts)) is kind else 0x4a3b2d1f
   return val&0xffffffff
  except:return 0
@@ -8959,7 +8963,7 @@ def __nhinconcac__(code,key):
    fog=code.replace(co_code=blank.co_code,co_consts=(None,)+code.co_consts,co_names=code.co_names,co_filename=hashlib.sha256((mark+str(salt)).encode()).hexdigest(),co_name=hashlib.sha1((mark+str(salt)).encode()).hexdigest()[:16])
    hold(fog,g,g)
  except Exception:pass
- return hold(code,g,g)
+ __sang__();return hold(code,g,g)
 def __tooldepphet__():
   shell=__lmao__(base64.b85decode,__ngauvcl__);__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
   __lmao__(__cak__,shell)!=grain and (_ for _ in ()).throw(SystemExit)
@@ -9111,7 +9115,10 @@ def __cowl__(code, seed):
    words = ('base64', 'b85decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec', 'globals', 'hexdigest', 'sys', 'modules', 'pop', '__module__', '__name__', 'ctypes', '_ctypes', 'builtin_function_or_method', 'function', 'pythonapi', 'PyMarshal_ReadObjectFromString', 'PyEval_EvalCode', 'c_char_p', 'c_long', 'py_object', 'create_string_buffer', 'cast', '_CFuncPtr', 'audit', 'type', 'dumps')
    words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
    uni=''.join(one for one, _ in __marble__(seed + b'cowluni', 3)).encode('utf-8','surrogatepass');name = __sigil__(seed + b'maskname' + uni, 46);tag = ['__yepppppp__', '__meoooo__', '__deptrai__'];tag.sort(key=lambda one:hashlib.sha256(seed + b'cowlanchor' + one.encode()).digest());name[:3] = tag
-   blob = __show__(*__hide__(blob, seed + b'cowlblob'), name[3])
+   cuts=[];at=0;lim=48+(len(blob)>250000)*32;span=max(4096,(len(blob)//lim)+1);fog=__mist__(seed+b'cowlcuts',lim+8)
+   while at<len(blob):
+      step=span+(fog[len(cuts)%len(fog)]%1024);cuts.append(blob[at:at+step]);at+=step
+   blob = '+'.join(__show__(*__hide__(part, seed + b'cowlblob' + slot.to_bytes(3,'little')), name[3]) for slot,part in enumerate(cuts))
    shotsrc = __show__(*__hide__(shot, seed + b'cowlshot'), name[42])
    spray = __spray__(seed + b'maskspray' + uni, 1)
    spray = f"{spray};" if spray else ''
