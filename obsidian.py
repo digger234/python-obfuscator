@@ -8617,16 +8617,28 @@ def __mixifood__():
    got=row.read()
    if not got or b"__OWNER__='yep'" not in got[:96] or b"yep's obfuscator" not in got[:160] or b"__OBFUSCATED__" not in got[:224]:return __ditmemay__()
  except:pass
- try:rows.extend(str(one).lower() for one in sys.modules)
+ try:
+  safe=('base64','bz2','ctypes','gc','hashlib','inspect','linecache','lzma','marshal','os','platform','socket','ssl','sys','threading','time','traceback','uuid','zlib','re','_ast','ast')
+  for one in sys.modules:
+   low=str(one).lower()
+   if low in safe:continue
+   for word in mods+decomp+debug+anlz+sbx:
+    if low==word or low.startswith(word+'.'):return __ditmemay__()
  except:pass
- try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'meta_path',()))
+ try:
+  for one in getattr(sys,'meta_path',()):
+   row=(getattr(one,'__module__','')+' '+type(one).__name__).lower()
+   if any(word in row for word in decomp+debug+anlz+sbx):return __ditmemay__()
  except:pass
- try:rows.extend((getattr(one,'__module__','')+' '+type(one).__name__).lower() for one in getattr(sys,'path_hooks',()))
+ try:
+  for one in getattr(sys,'path_hooks',()):
+   row=(getattr(one,'__module__','')+' '+type(one).__name__).lower()
+   if any(word in row for word in decomp+debug+anlz+sbx):return __ditmemay__()
  except:pass
  try:
   frame=sys._getframe();deep=0
   while frame and deep<96:
-   code=getattr(frame,'f_code',None);fname=str(getattr(code,'co_filename','')).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(fname+' '+cname)
+   code=getattr(frame,'f_code',None);fname=str(getattr(code,'co_filename','')).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(os.path.basename(fname)+' '+cname)
    for word in mods+decomp:
     if word in fname or word in cname:return __ditmemay__()
    frame=frame.f_back;deep += 1
@@ -8675,7 +8687,7 @@ def __mixifood__():
  try:
   if traceback.extract_stack()!=[] or traceback.format_stack()!=[] or traceback.format_exc()!='':return __ditmemay__()
  except:return __ditmemay__()
- text=' '.join(str(one).lower() for one in sys.argv);rows.append(text);wide=' '.join(rows)
+ text=' '.join(os.path.basename(str(one)).lower() for one in sys.argv);rows.append(text);wide=' '.join(rows)
  for word in pool:
   if word in wide:return __ditmemay__()
  for word in cmd+host:
@@ -8705,7 +8717,7 @@ def __mixifood__():
       if not ctypes.windll.kernel32.Process32Next(snap,ctypes.byref(box)):break
    try:ctypes.windll.kernel32.CloseHandle(snap)
    except:pass
-   if name and name not in ('python.exe','pythonw.exe','py.exe') and any(word in name for word in pool):return __ditmemay__()
+   if name and name not in ('python.exe','pythonw.exe','py.exe','cmd.exe','powershell.exe','pwsh.exe','conhost.exe','wt.exe','windowsterminal.exe') and any(word in name for word in tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)+tuple(proc)):return __ditmemay__()
  except:pass
  try:
   if os.name=='nt':
