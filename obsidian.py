@@ -8382,17 +8382,29 @@ __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mis
 try:
  if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
 except:pass
-try:print('\\033[96m>> Loading...\\033[0m',flush=True);time.sleep(0.15);print('\\033[2J\\033[H',end='',flush=True)
+try:print('\\033[96m>> Loading...\\033[0m',end='',flush=True);time.sleep(0.15);print('\\r\\033[2K\\033[H\\033[2J',end='',flush=True)
 except:pass
-def __concac__():print('\\033[91m>> Version mismatch! File obf at Python {sys.version_info[0]}.{sys.version_info[1]}, current '+str(sys.version_info[0])+'.'+str(sys.version_info[1])+'\\033[0m',flush=True);raise SystemExit(1)
 def __baoloi__():
- __b__=__import__('builtins');__t__='__'+hashlib.sha1(mark.encode()).hexdigest()[:12]+'__';getattr(__b__,__t__,0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(__b__,__t__,1);raise SystemExit(1)
+ __b__=__import__('builtins');__t__='__'+hashlib.sha1(mark.encode()).hexdigest()[:12]+'__';getattr(__b__,__t__,0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(__b__,__t__,1);os._exit(1)
 def __lmao__(f,*a):
  k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __baoloi__())(k[0],k[1],k[2],f,a)
 def __lmaoo__(v):
  k=(729184633,461928377,729184633^461928377);return (lambda p,q,r,x:x if (p^q)==r else __baoloi__())(k[0],k[1],k[2],v)
 def __roll__(v):
  global __runtag__;__runtag__=((__runtag__<<5)^(__runtag__>>2)^v)&0xffffffff;return __runtag__
+def __concac__():
+ try:
+  imp=getattr(sys,'implementation',None);ver=sys.version_info[:2];tag=str(getattr(imp,'cache_tag',''));name=str(getattr(imp,'name',''))
+  if name!='cpython' or (str(ver[0])+str(ver[1])) not in tag:return 0
+  api=getattr(ctypes,'pythonapi',None)
+  val=(len(tag)<<19)^(ver[0]<<11)^(ver[1]<<3)
+  for row in ('PyMarshal_ReadObjectFromString','PyEval_EvalCode'):
+   val^=(len(row)<<7) if isinstance(getattr(api,row,None),ctypes._CFuncPtr) else len(row)
+  code=(lambda:None).__code__;kind=type(code);raw=marshal.dumps(code);back=marshal.loads(raw)
+  val^=(len(raw)<<1) if isinstance(back,kind) and getattr(back,'co_code',b'')==code.co_code and len(getattr(back,'co_consts',()))==len(code.co_consts) else len(raw)
+  val^=0x1f2d3b4a if getattr(code,'replace',None) and type(code.replace(co_consts=code.co_consts)) is kind else 0x4a3b2d1f
+  return val&0xffffffff
+ except:return 0
 def __ditmemay__():
  global __iloveyou__;__iloveyou__=True;return __baoloi__()
 def __uwu__():
@@ -8603,7 +8615,7 @@ def __mixifood__():
   if not os.path.isfile(way):return __ditmemay__()
   with open(way,'rb') as row:
    got=row.read()
-   if not got or b"__OWNER__" not in got[:96] or b"'yep'" not in got[:128] or b"yep's obfuscator" not in got[:192] or b"__ENTRY__" not in got[:256]:return __ditmemay__()
+   if not got or b"__OWNER__='yep'" not in got[:96] or b"yep's obfuscator" not in got[:160] or b"__OBFUSCATED__" not in got[:224]:return __ditmemay__()
  except:pass
  try:rows.extend(str(one).lower() for one in sys.modules)
  except:pass
@@ -8693,7 +8705,7 @@ def __mixifood__():
       if not ctypes.windll.kernel32.Process32Next(snap,ctypes.byref(box)):break
    try:ctypes.windll.kernel32.CloseHandle(snap)
    except:pass
-   if name and any(word in name for word in pool):return __ditmemay__()
+   if name and name not in ('python.exe','pythonw.exe','py.exe') and any(word in name for word in pool):return __ditmemay__()
  except:pass
  try:
   if os.name=='nt':
@@ -8944,7 +8956,7 @@ def __tooldepphet__():
   return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:])
 def __depvcl__():
  __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o(),p()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__auditv__,__neko__))
- __roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
+ __roll__(__concac__());__roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
  __iloveyou__ and __baoloi__();core=__lmao__(__tooldepphet__);gate=((zlib.crc32(core)&0xffffffff)^__runtag__^len(core))&0xffffffff;__iloveyou__ and __baoloi__();code=__lmao__(__alovu__,core,gate);gate=((hashlib.sha256(code.co_code).digest()[0]<<24)^(zlib.crc32(code.co_code)&0xffffffff)^__runtag__^len(code.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,code,gate)
 (lambda f:f())(__depvcl__)
 """
@@ -8963,13 +8975,13 @@ def __depvcl__():
     wrapsrc = __show__(*__hide__(base64.b85encode(wrap).decode('ascii'), seed + b'wrapblob'), mask)
     crust = f"{shell}={wrapsrc};{glass}={shellk};{forge}={glassk};{driftf}={forgek};{emberg}={stampk};{skin}={grain};{seal}={mark!r};{storm}={word!r}"
     bit = __sigil__(seed + b'wrapflag', 1)[0]
-    cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')\ndef fail():b=__import__('builtins');getattr(b,{bit!r},0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(b,{bit!r},1);raise SystemExit(1)\ndef nope(s):print('\\033[91m>> Version mismatch! File obf at Python {mark[-1][0]}.{mark[-1][1]}, current '+str(s.version_info[0])+'.'+str(s.version_info[1])+'\\033[0m',flush=True);raise SystemExit(1)"
-    ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));thr={hand}(50);sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));mon=getattr(sys,{bone}({storm}[48]),None);flag=getattr(sys,{bone}({storm}[53]),None);blob=getattr(b,{bone}({storm}[9]))({shell});tag={guard}(blob,z,h,sys);tag[-1]!={mark[-1]!r} and nope(sys);(tag!={seal} or getattr(built[{bone}({storm}[36])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[37])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[38])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[39])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[40])],'__module__','_io') not in ('_io','io','builtins') or any(getattr(built[{bone}({storm}[slot])],'__module__','builtins')!='builtins' for slot in range(41,48)) or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or getattr(sys,{bone}({storm}[30])) is not getattr(sys,{bone}({storm}[31])) or getattr(sys,{bone}({storm}[32])) is not getattr(sys,{bone}({storm}[33])) or getattr(sys,{bone}({storm}[34])) is not getattr(sys,{bone}({storm}[35])) or getattr(thr,{bone}({storm}[51]),None) or getattr(thr,{bone}({storm}[52]),None) or (flag and (getattr(flag,{bone}({storm}[54]),0) or getattr(flag,{bone}({storm}[55]),0))) or (mon and any(getattr(mon,{bone}({storm}[49]))(slot) for slot in range(6))) or hit) and 1/0;blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});way=blob[0];(way<0 or way>2) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);blob={heart}(blob,{glass});way=blob[0];(way<0 or way>2) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);not isinstance(read,getattr(ct,'_CFuncPtr')) and 1/0;read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];size=len(blob);box=getattr(ct,{bone}({storm}[26]))(blob);blob=bytes();code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),size);run=getattr(getattr(ct,{bone}({storm}[15])),runn);not isinstance(run,getattr(ct,'_CFuncPtr')) and 1/0;run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
+    cave = f"def {bone}(row):return ''.join(chr(one^{skin}) for one in row)\ndef {hand}(slot):return __import__({bone}({storm}[slot]))\ndef {guard}(blob,z,h,s):return (len(blob),getattr(z,{bone}({storm}[12]))(blob)&0xffffffff,getattr(z,{bone}({storm}[13]))(blob)&0xffffffff,getattr(h,{bone}({storm}[11]))(blob).hexdigest(),getattr(h,{bone}({storm}[10]))(blob).hexdigest(),s.version_info[:2])\ndef {heart}(blob,key):glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19;need=len(blob);base=bytes((((glow+((slot+1)*(drift+tint))+(slot*(slot+1)//2))&255)^((tint+slot)&255)) for slot in range(512));mask=(base*((need>>9)+1))[:need];return (int.from_bytes(blob,'little')^int.from_bytes(mask,'little')).to_bytes(need,'little')\ndef fail():b=__import__('builtins');getattr(b,{bit!r},0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(b,{bit!r},1);__import__('os')._exit(1)"
+    ember = f"b={hand}(0);j={hand}(1);h={hand}(2);l={hand}(3);z={hand}(4);sys={hand}(5);os={hand}(6);ct={hand}(7);built=vars({hand}(8));thr={hand}(50);sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in {mods!r}];left={bone}({storm}[18]);right={bone}({storm}[19]);readn={bone}({storm}[16]);runn={bone}({storm}[17]);tmp=getattr(ct,{bone}({storm}[22]))(0) if os.name=='nt' else None;os.name=='nt' and getattr(ct.windll.kernel32,right)(getattr(ct.windll.kernel32,{bone}({storm}[20]))(),getattr(ct,{bone}({storm}[21]))(tmp));hit=((1 if os.name=='nt' and getattr(ct.windll.kernel32,left)() else 0) or (tmp.value if tmp else 0));mon=getattr(sys,{bone}({storm}[48]),None);flag=getattr(sys,{bone}({storm}[53]),None);blob=getattr(b,{bone}({storm}[9]))({shell});tag={guard}(blob,z,h,sys);(tag!={seal} or getattr(built[{bone}({storm}[36])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[37])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[38])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[39])],'__module__','builtins')!='builtins' or getattr(built[{bone}({storm}[40])],'__module__','_io') not in ('_io','io','builtins') or any(getattr(built[{bone}({storm}[slot])],'__module__','builtins')!='builtins' for slot in range(41,48)) or getattr(sys,{bone}({storm}[28]))() or getattr(sys,{bone}({storm}[29]))() or getattr(sys,{bone}({storm}[30])) is not getattr(sys,{bone}({storm}[31])) or getattr(sys,{bone}({storm}[32])) is not getattr(sys,{bone}({storm}[33])) or getattr(sys,{bone}({storm}[34])) is not getattr(sys,{bone}({storm}[35])) or getattr(thr,{bone}({storm}[51]),None) or getattr(thr,{bone}({storm}[52]),None) or (flag and (getattr(flag,{bone}({storm}[54]),0) or getattr(flag,{bone}({storm}[55]),0))) or (mon and any(getattr(mon,{bone}({storm}[49]))(slot) for slot in range(6))) or hit) and 1/0;blob=bytes((byte-{driftf}-((slot+1)*{emberg}))&255 for slot,byte in enumerate(blob));blob={heart}(blob,{forge});way=blob[0];(way<0 or way>2) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);blob={heart}(blob,{glass});way=blob[0];(way<0 or way>2) and 1/0;blob=(getattr(z,{bone}({storm}[14])),getattr(j,{bone}({storm}[14])),getattr(l,{bone}({storm}[14])))[way](blob[1:]);read=getattr(getattr(ct,{bone}({storm}[15])),readn);not isinstance(read,getattr(ct,'_CFuncPtr')) and 1/0;read.restype=getattr(ct,{bone}({storm}[25]));read.argtypes=[getattr(ct,{bone}({storm}[23])),getattr(ct,{bone}({storm}[24]))];size=len(blob);box=getattr(ct,{bone}({storm}[26]))(blob);blob=bytes();code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),size);run=getattr(getattr(ct,{bone}({storm}[15])),runn);not isinstance(run,getattr(ct,'_CFuncPtr')) and 1/0;run.restype=getattr(ct,{bone}({storm}[25]));run.argtypes=[getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25])),getattr(ct,{bone}({storm}[25]))];run(code,globals(),globals())"
     ember=ember.replace(f";code=read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),size);run=", ";run=").replace(f";run(code,globals(),globals())", f";run(read(getattr(ct,{bone}({storm}[27]))(box,getattr(ct,{bone}({storm}[23]))),size),globals(),globals())")
     ember=ember.replace(f"(tag!={seal} or", f"bad=(tag!={seal} or").replace("or hit) and 1/0;blob=bytes(", f"or hit);bad and 1/0;mix=((tag[0]^{seal}[0])^((tag[1]^{seal}[1])&255)^((tag[2]^{seal}[2])&255)^(97 if bad else 0));blob=bytes(")
     ember=ember.replace(f"byte-{driftf}-", f"byte-{driftf}-mix-").replace(f"blob={heart}(blob,{forge});", f"blob={heart}(blob,{forge}^mix);", 1)
     ember=ember.replace(" and 1/0"," and fail()")
-    tags=('blob','built','drift','right','readn','runn','glow','tint','need','base','mask','left','tmp','hit','byte','way','read','box','code','run','row','one','slot','key','sys','os','ct','b','j','h','l','z','s','thr','flag','fail','nope','tag','size','bad','mix')
+    tags=('blob','built','drift','right','readn','runn','glow','tint','need','base','mask','left','tmp','hit','byte','way','read','box','code','run','row','one','slot','key','sys','os','ct','b','j','h','l','z','s','thr','flag','fail','tag','size','bad','mix')
     ash=ore if isinstance(ore,bytes) else bytes.fromhex(ore);wild=__sigil__(hashlib.sha256(ash+mesh.encode()+b'wrapname').digest(),len(tags));book=dict(zip(tags,wild));rex=__import__('re');pat=rex.compile(r'(?<![A-Za-z0-9_])('+'|'.join(map(rex.escape,sorted(tags,key=len,reverse=True)))+r')(?![A-Za-z0-9_])')
     cave=pat.sub(lambda m:book[m.group(1)],cave);ember=pat.sub(lambda m:book[m.group(1)],ember)
     return __head__(__cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed))
@@ -9057,8 +9069,11 @@ def __cloak__(src, seed):
    return inner
 def __head__(code):
    mark = '__OBSIDIAN_FILE_HASH__';stamp = time.strftime('%Y-%m-%d %H:%M:%S')
-   tag = hashlib.sha256((stamp + code[:97]).encode('utf-8', 'replace')).hexdigest()[:16]
-   text = "\n".join((f"__OWNER__='yep';__ENTRY__='{tag[:8]}'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}';__BUILD__='{tag[8:]}'", code)) + "\n"
+   ver = sys.version_info[:2]
+   one,two,thr,fou,fiv,six = __sigil__(hashlib.sha256((stamp + code[:96]).encode('utf-8', 'replace')).digest(), 6)
+   msg = __show__(*__hide__(f">> Version mismatch! File obf at Python {ver[0]}.{ver[1]}, current ", stamp.encode() + b'vgate'), fou);red = __show__(*__hide__('[91m', stamp.encode() + b'vgater'), fiv);off = __show__(*__hide__('[0m', stamp.encode() + b'vgateo'), six)
+   gate = f"{one}=__import__({__scatter__('sys', stamp.encode() + b'gs')});{two}=getattr({one},{__scatter__('version_info', stamp.encode() + b'gv')});{thr}=getattr(__import__({__scatter__('builtins', stamp.encode() + b'gb')}),{__scatter__('print', stamp.encode() + b'gp')});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(_ for _ in ()).throw(SystemExit(1)));"
+   text = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'", gate + code)) + "\n"
    got = hashlib.sha256(text.encode('utf-8')).hexdigest()
    return text.replace(mark, got)
 def __flux__(code, seed):
