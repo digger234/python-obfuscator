@@ -249,7 +249,7 @@ def __purge__():
         except: pass
         try: gc.garbage.clear()
         except: pass
-        for _ in range(5): gc.collect(2)
+        gc.collect(0); gc.collect(1); gc.collect(2)
    except: pass
    try:
         ct = __import__('ctypes')
@@ -8517,18 +8517,24 @@ def {runf}():
     proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','processhacker','process hacker','ida64','ida.exe','x64dbg','x32dbg','ollydbg','cheatengine','frida-server','re.frida.server','xposedbridge')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
+    bag = {one: base64.b85encode(zlib.compress(chr(0).join(two).encode('utf-8','surrogatepass'),9)).decode('ascii') for one,two in {'hint':hint,'debug':debug,'anlz':anlz,'vm':vm,'cmd':cmd,'host':host,'key':key,'decomp':decomp,'sbx':sbx,'mac':mac,'mods':mods,'api':api,'dll':dll,'net':net,'proc':proc,'env':env,'pool':pool}.items()}
     outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,subprocess,sys,threading,time,traceback,uuid,zlib
 try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
 except:pass
-__iloveyou__=False;__runtag__=0;hint={hint!r};debug={debug!r};anlz={anlz!r};vm={vm!r};cmd={cmd!r};host={host!r};key={key!r};decomp={decomp!r};sbx={sbx!r};mac={mac!r};mods={mods!r};api={api!r};dll={dll!r};net={net!r};proc={proc!r};env={env!r};pool={pool!r}
+def __toiyeupnha__(row):return tuple(zlib.decompress(base64.b85decode(row)).decode('utf-8','surrogatepass').split(chr(0))) if row else ()
+__iloveyou__=False;__runtag__=0;hint=__toiyeupnha__({bag['hint']!r});debug=__toiyeupnha__({bag['debug']!r});anlz=__toiyeupnha__({bag['anlz']!r});vm=__toiyeupnha__({bag['vm']!r});cmd=__toiyeupnha__({bag['cmd']!r});host=__toiyeupnha__({bag['host']!r});key=__toiyeupnha__({bag['key']!r});decomp=__toiyeupnha__({bag['decomp']!r});sbx=__toiyeupnha__({bag['sbx']!r});mac=__toiyeupnha__({bag['mac']!r});mods=__toiyeupnha__({bag['mods']!r});api=__toiyeupnha__({bag['api']!r});dll=__toiyeupnha__({bag['dll']!r});net=__toiyeupnha__({bag['net']!r});proc=__toiyeupnha__({bag['proc']!r});env=__toiyeupnha__({bag['env']!r});pool=__toiyeupnha__({bag['pool']!r})
 __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__meow__=id(threading.settrace);__mlem__=id(threading.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__^__meow__^__mlem__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
-__ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};grain={graink!r};shot={flag!r};mark={stamp!r}
+__ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};__pnhaxinhvcl__={graink!r};__iloveyoupnha__={flag!r};__dmconcholeminh__={stamp!r}
 try:
- __env__='OBSIDIAN_'+hashlib.sha256((mark+shot).encode()).hexdigest()[:24];__tok__=hashlib.sha256((shot+mark).encode()).hexdigest()
- if os.environ.get(__env__)!=__tok__:
-  __run__=os.environ.copy();__run__[__env__]=__tok__;__argv__=[sys.executable,os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''))]+list(getattr(sys,'argv',())[1:])
-  os._exit(subprocess.call(__argv__,env=__run__))
+ __bundaumamtom__='OBSIDIAN_'+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__khogadetem__=hashlib.sha256(os.read(__JackBoCon__,os.path.getsize(__SonTungMTP__))+os.path.abspath(sys.executable).encode()).hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
+ if __WayWayWay__ is None:
+  __buffviewchosontung__=os.environ.copy();__buffviewchosontung__[__bundaumamtom__]=__ComeMyWay__;__concacditmemay__=[sys.executable,os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''))]+list(getattr(sys,'argv',())[1:])
+  os._exit(subprocess.call(__concacditmemay__,env=__buffviewchosontung__))
+ if __WayWayWay__!=__sexgay__:os._exit(1)
+ os.environ.pop(__bundaumamtom__,None)
+ for __nhincaidaubuoi__ in tuple(os.environ):
+  __nhincaidaubuoi__.startswith('OBSIDIAN_') and os.environ.pop(__nhincaidaubuoi__,None)
 except SystemExit:raise
 except Exception:pass
 try:
@@ -8541,18 +8547,18 @@ def __sang__():
  except:pass
  return 0
 def __baoloi__():
- __b__=__import__({__spell__('builtins', seed+b'outerbuilt')});__t__='__'+hashlib.sha1(mark.encode()).hexdigest()[:12]+'__';getattr(__b__,__t__,0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(__b__,__t__,1);os._exit(1)
+ __b__=__import__({__spell__('builtins', seed+b'outerbuilt')});__t__='__'+hashlib.sha1(__dmconcholeminh__.encode()).hexdigest()[:12]+'__';getattr(__b__,__t__,0) or print('\\033[95m>> Dung co deobf em yeu a.\\033[0m',flush=True);setattr(__b__,__t__,1);os._exit(1)
 def __fail__():
- __b__=__import__({__spell__('builtins', seed+b'outerfailbuilt')});return __iloveyou__ or getattr(__b__,'__'+hashlib.sha1(mark.encode()).hexdigest()[:12]+'__',0)
+ __b__=__import__({__spell__('builtins', seed+b'outerfailbuilt')});return __iloveyou__ or getattr(__b__,'__'+hashlib.sha1(__dmconcholeminh__.encode()).hexdigest()[:12]+'__',0)
 def __lmao__(f,*a):
  k=(917263481,318276194,917263481^318276194);return (lambda p,q,r,g,v:g(*v) if (p^q)==r else __baoloi__())(k[0],k[1],k[2],f,a)
 def __lmaoo__(v):
  k=(729184633,461928377,729184633^461928377);return (lambda p,q,r,x:x if (p^q)==r else __baoloi__())(k[0],k[1],k[2],v)
 def __roll__(v):
  global __runtag__;__runtag__=((__runtag__<<5)^(__runtag__>>2)^v)&0xffffffff;return __runtag__
-def {heart}(blob,key):
- rows=bytearray();glow=key&255;drift=((key>>8)&255) or 73;tint=((key>>16)&255) or 19
- for slot,byte in enumerate(blob):
+def {heart}(__inovar__,__RTX5090__):
+ rows=bytearray();glow=__RTX5090__&255;drift=((__RTX5090__>>8)&255) or 73;tint=((__RTX5090__>>16)&255) or 19
+ for slot,byte in enumerate(__inovar__):
   glow=(glow+drift+slot+tint)&255;rows.append(byte^glow^((tint+slot)&255))
  return bytes(rows)
 def __concac__():
@@ -8595,7 +8601,7 @@ def __uwu__():
    try:gc.garbage.clear()
    except:pass
    gc.set_threshold(256,5,5)
-   for _ in range(5):gc.collect(2)
+   gc.collect(0);gc.collect(1);gc.collect(2)
   except:pass
   try:
    if os.name=='nt':
@@ -9139,7 +9145,9 @@ def __alovu__(blob,key):
  size=len(blob);box=ctypes.create_string_buffer(blob);blob=b'';right=hold(ctypes.cast(box,ctypes.c_char_p),size)
  try:ctypes.memset(box,0,size)
  except:pass
- if getattr(right,'co_filename','')!=mark:return __ditmemay__()
+ try:__uwu__()
+ except:pass
+ if getattr(right,'co_filename','')!=__dmconcholeminh__:return __ditmemay__()
  return right
 def __nhinconcac__(code,key):
  __fail__() and __baoloi__()
@@ -9158,35 +9166,36 @@ def __nhinconcac__(code,key):
  try:
   blank=(lambda:None).__code__;kind=type(code)
   for salt in (0x13579BDF,0x2468ACE,0x55AA55AA):
-   fog=code.replace(co_code=blank.co_code,co_consts=(None,)+code.co_consts,co_names=code.co_names,co_filename=hashlib.sha256((mark+str(salt)).encode()).hexdigest(),co_name=hashlib.sha1((mark+str(salt)).encode()).hexdigest()[:16])
+   fog=code.replace(co_code=blank.co_code,co_consts=(None,)+code.co_consts,co_names=code.co_names,co_filename=hashlib.sha256((__dmconcholeminh__+str(salt)).encode()).hexdigest(),co_name=hashlib.sha1((__dmconcholeminh__+str(salt)).encode()).hexdigest()[:16])
    hold(fog,g,g)
  except Exception:pass
  __sang__()
  try:return hold(code,g,g)
  finally:
-  try:code=None;g=None;cap.clear();gc.collect(2)
+  try:code=None;g=None;cap.clear();__uwu__()
   except:pass
-def __tooldepphet__(pin):
+def __tooldepphet__(__karrik__):
+  global __ngauvcl__
   __fail__() and __baoloi__()
-  pin!=((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff) and __baoloi__()
-  shell=__lmao__(base64.b85decode,__ngauvcl__);__lmao__(hashlib.sha256,shell).hexdigest()!=shot and (_ for _ in ()).throw(SystemExit)
-  __lmao__(__cak__,shell)!=grain and (_ for _ in ()).throw(SystemExit)
-  shell=__lmao__(__skibiditoilet__,shell,__yeppro__);shell=__lmao__(__pnhamaidinh__,shell,__yepvip__);shell=__lmao__(__luvpnha__,shell,__yepngau__);shell=__lmao__(__yeupnha__,shell,__meocute__,__yepyep__);shell=__lmao__({heart},shell,__meowmeow__);way=__lmaoo__(shell[0]);shell=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:]);shell=__lmao__({heart},shell,__manhvcl__)
-  way=shell[0];(way<0 or way>2) and (_ for _ in ()).throw(SystemExit)
-  return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],shell[1:])
+  __karrik__!=((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff) and __baoloi__()
+  __sangtraan__=__lmao__(base64.b85decode,__ngauvcl__);__ngauvcl__='';__lmao__(hashlib.sha256,__sangtraan__).hexdigest()!=__iloveyoupnha__ and (_ for _ in ()).throw(SystemExit)
+  __lmao__(__cak__,__sangtraan__)!=__pnhaxinhvcl__ and (_ for _ in ()).throw(SystemExit)
+  __sangtraan__=__lmao__(__skibiditoilet__,__sangtraan__,__yeppro__);__sangtraan__=__lmao__(__pnhamaidinh__,__sangtraan__,__yepvip__);__sangtraan__=__lmao__(__luvpnha__,__sangtraan__,__yepngau__);__sangtraan__=__lmao__(__yeupnha__,__sangtraan__,__meocute__,__yepyep__);__sangtraan__=__lmao__({heart},__sangtraan__,__meowmeow__);way=__lmaoo__(__sangtraan__[0]);__sangtraan__=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:]);__sangtraan__=__lmao__({heart},__sangtraan__,__manhvcl__)
+  way=__sangtraan__[0];(way<0 or way>2) and (_ for _ in ()).throw(SystemExit)
+  return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:])
 def __depvcl__():
- core=b'';code=None
+ __sengtraan__=b'';__RTX5090__=None
  try:
   __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o(),p()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__auditv__,__neko__))
   __roll__(__concac__());__roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
-  __iloveyou__ and __baoloi__();core=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));gate=((zlib.crc32(core)&0xffffffff)^__runtag__^len(core))&0xffffffff;__iloveyou__ and __baoloi__();code=__lmao__(__alovu__,core,gate);gate=((hashlib.sha256(code.co_code).digest()[0]<<24)^(zlib.crc32(code.co_code)&0xffffffff)^__runtag__^len(code.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,code,gate)
+  __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));__seth__=((zlib.crc32(__sengtraan__)&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code)&0xffffffff)^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
  finally:
-  try:core=b'';code=None;gc.collect(2)
+  try:__sengtraan__=b'';__RTX5090__=None;__seth__=0;__uwu__()
   except:pass
 __depvcl__()
 """
     outer=outer.replace("(_ for _ in ()).throw(SystemExit)","__baoloi__()").replace("raise SystemExit","__baoloi__()").replace(" and 1/0"," and __baoloi__()")
-    row = ('__iloveyou__','__runtag__','__dmm__','__deptraivailon__','__deptraivcl__','__meow__','__mlem__','__toolvip__','__chatvcl__','__ngauvcl__','__manhvcl__','__meowmeow__','__meocute__','__yepyep__','__yepngau__','__yepvip__','__yeppro__','__sang__','__baoloi__','__fail__','__lmao__','__lmaoo__','__roll__','__concac__','__ditmemay__','__uwu__','__luvpnha__','__yeupnha__','__pnhamaidinh__','__skibiditoilet__','__cak__','__thichvarko__','__varconcac__','__varrrrr__','__checkvar__','__owo__','__OwO__','__haha__','__hihi__','__hoho__','__hahaha__','__hihihi__','__hohoho__','__anhdomixi__','__mixifood__','__neko__','__meme__','__auditv__','__alovu__','__nhinconcac__','__tooldepphet__','__depvcl__','grain','shot','mark','blob','shell','core','gate','pin')
+    row = ('__iloveyou__','__runtag__','__toiyeupnha__','__dmm__','__deptraivailon__','__deptraivcl__','__meow__','__mlem__','__toolvip__','__chatvcl__','__ngauvcl__','__manhvcl__','__meowmeow__','__meocute__','__yepyep__','__yepngau__','__yepvip__','__yeppro__','__sang__','__baoloi__','__fail__','__lmao__','__lmaoo__','__roll__','__concac__','__ditmemay__','__uwu__','__luvpnha__','__yeupnha__','__pnhamaidinh__','__skibiditoilet__','__cak__','__thichvarko__','__varconcac__','__varrrrr__','__checkvar__','__owo__','__OwO__','__haha__','__hihi__','__hoho__','__hahaha__','__hihihi__','__hohoho__','__anhdomixi__','__mixifood__','__neko__','__meme__','__auditv__','__alovu__','__nhinconcac__','__tooldepphet__','__depvcl__','__pnhaxinhvcl__','__iloveyoupnha__','__dmconcholeminh__','__SonTungMTP__','__JackBoCon__','__khogadetem__','__concacchungmay','__sexgay__','__ComeMyWay__','__WayWayWay__','__buffviewchosontung__','__concacditmemay__','__nhincaidaubuoi__','__inovar__','__RTX5090__','__sangtraan__','__sengtraan__','__seth__','__karrik__','__bundaumamtom__')
     vals = [__mint__(used, seed + b'outermask', mint) for _ in row]
     outer = __idmask__(outer, dict(zip(row, vals)))
     ore = marshal.dumps(__saltcode__(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True), seed + b'outersalt'))
@@ -9285,7 +9294,7 @@ def __cloak__(src, seed):
    span = 57344 + ((key % 11) * 4096)
    w = lambda at: f"{name[2]}({at})"
    b64, b85, zlibn, bz2n, lzman, dec, ctn, api, readn, runn, buf, castn, charp, longn, pyobj, ptr, hashn, sha, hexd, glb, built, fun, opn, rdn, rbn, filen, repn, sysn, modn, popn, lowct, cfun = w(0), w(1), w(2), w(3), w(4), w(5), w(6), w(7), w(8), w(9), w(10), w(11), w(12), w(13), w(14), w(15), w(16), w(17), w(18), w(19), w(20), w(21), w(22), w(23), w(24), w(25), w(26), w(27), w(28), w(29), w(30), w(31)
-   inner = f"{name[0]}={__aim__()};{name[1]}=lambda:bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}=lambda {name[4]}:{name[1]}()[{name[4]}];{name[22]}=lambda:((print({msgsrc},flush=True),(_ for _ in ()).throw(SystemExit(1)))[-1]);len({name[1]}())!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}=getattr({name[0]}({built}),{opn})(getattr({name[0]}({built}),{glb})().get({filen},''),{rbn});{name[25]}=getattr({name[24]},{rdn})();getattr({name[24]},'close')();{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=bytes(({name[10]}-{key}-{name[29]}-(({name[11]}*31+{key}+17)&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}()))[-1]"
+   inner = f"{name[0]}={__aim__()};{name[1]}=lambda:bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}=lambda {name[4]}:{name[1]}()[{name[4]}];{name[22]}=lambda:((print({msgsrc},flush=True),(_ for _ in ()).throw(SystemExit(1)))[-1]);len({name[1]}())!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=bytes(({name[10]}-{key}-{name[29]}-(({name[11]}*31+{key}+17)&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}()))[-1]"
    cut = f";{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}="
    put = f";{name[24]}={name[0]}({sysn});{name[25]}=getattr({name[24]},{modn});getattr({name[25]},{popn})({ctn},None);getattr({name[25]},{popn})({lowct},None);{name[13]}={name[0]}({ctn});{name[26]}=(len({name[9]})+{span}-1)//{span};{name[28]}=({name[30]}^len({name[9]})^{key})&65535;{name[9]}=tuple(sorted(tuple((({name[12]}//{span})^{name[28]},(lambda {name[5]}:getattr({name[13]},{buf})({name[5]},len({name[5]})))(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}[{name[12]}:{name[12]}+{span}],{name[12]})))) for {name[12]} in range(0,len({name[9]}),{span}))+tuple((({name[26]}+{name[12]})^{name[28]},getattr({name[13]},{buf})(bytes((({name[10]}*37+{name[12]}*19+{key})&255) for {name[10]} in range(min({span},len({name[9]})))))) for {name[12]} in range(3)),key=lambda {name[5]}:{name[5]}[0]^{name[28]}));{name[13]}="
    cut not in inner and (_ for _ in ()).throw(RuntimeError('cloak'))
@@ -9302,7 +9311,7 @@ def __head__(code):
    msg = __show__(*__hide__(f">> Version mismatch! File obf at Python {ver[0]}.{ver[1]}, current ", stamp.encode() + b'vgate'), fou);red = __show__(*__hide__('[91m', stamp.encode() + b'vgater'), fiv);off = __show__(*__hide__('[0m', stamp.encode() + b'vgateo'), six)
    la,sysx=__lily__(stamp.encode()+b'headsys','sys');lb,verx=__lily__(stamp.encode()+b'headver','version_info');lc,bix=__lily__(stamp.encode()+b'headbuilt','builtins');ld,prx=__lily__(stamp.encode()+b'headprint','print');le,osx=__lily__(stamp.encode()+b'heados','os');lf,subx=__lily__(stamp.encode()+b'headsub','subprocess');lg,glx=__lily__(stamp.encode()+b'headgl','globals')
    envn=__show__(*__hide__('OBSIDIAN_'+hashlib.sha256((stamp+code[:128]).encode('utf-8','replace')).hexdigest()[:24], stamp.encode()+b'headenv'), sev);envv=__show__(*__hide__(hashlib.sha256((stamp+code[-128:]).encode('utf-8','replace')).hexdigest(), stamp.encode()+b'headtok'), eig)
-   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(_ for _ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{ten}={envv};{sev}.environ.get({nin})!={ten} and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));"
+   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(_ for _ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}=getattr({__aim__()}('hashlib'),'sha256')({sev}.read({fiv},{sev}.path.getsize({fou}))+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);"
    text = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'", gate + code)) + "\n"
    got = hashlib.sha256(text.encode('utf-8')).hexdigest()
    return text.replace(mark, got)
@@ -9323,7 +9332,9 @@ def __flux__(code, seed):
    rawf=__rune__(set(names),seed+b'fluxraw',b'raw')
    blobsrc = __show__(*__hide__(blob, seed + b'fluxmask'), body)
    shotsrc = f"{__prism__(rawf,__opal__(seed+b'fluxshotraw',shot.encode('ascii')))}.decode()"
-   return f"{spray}{__orchid__(rawf)};{bone}=lambda {see}:''.join(map(chr,({bit}^{wkey} for {bit} in {see})));{hand}={__aim__()};{ash}={words!r};{body}={blobsrc};{code}={key};{libc}={shotsrc};{libd}={tag};{liba}={hand}({bone}({ash}[0]));{libb}={hand}({bone}({ash}[1]));{libe}={hand}({bone}({ash}[2]));{rows}={hand}({bone}({ash}[5]));{glow}={hand}({bone}({ash}[3]));{read}={hand}({bone}({ash}[33]));{left}=getattr({read},{bone}({ash}[39]));getattr({left},{bone}({ash}[40]))({bone}({ash}[23]),None);getattr({left},{bone}({ash}[40]))({bone}({ash}[37]),None);{ct}={hand}({bone}({ash}[23]));{box}={hand}({bone}({ash}[37]));{func}=getattr({read},{bone}({ash}[34]),None);({func}.__class__.__name__!={bone}({ash}[32]) or getattr({func},{bone}({ash}[31]),'')!={bone}({ash}[33])) and 1/0;{left}=getattr({read},{bone}({ash}[35]),());{right}=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'));({left} is None or any(((getattr({idx},{bone}({ash}[31]),getattr(type({idx}),{bone}({ash}[31]),'')),getattr({idx},{bone}({ash}[36]),getattr(type({idx}),{bone}({ash}[36]),''))) not in {right} for {idx} in {left}))) and 1/0;(getattr({ct},{bone}({ash}[36]),'')!={bone}({ash}[23]) or getattr(getattr({ct},{bone}({ash}[38]),None),{bone}({ash}[31]),'')!={bone}({ash}[37]) or getattr({ct},{bone}({ash}[38]),None) is not getattr({box},{bone}({ash}[41]),None)) and 1/0;{coal}=vars({hand}({bone}({ash}[12])));getattr({coal}[{bone}({ash}[10])],{bone}({ash}[31]),{bone}({ash}[12]))!={bone}({ash}[12]) and 1/0;{body}=vars({liba})[{bone}({ash}[6])]({coal}[{bone}({ash}[13])]({body},{bone}({ash}[17])));{func}=vars({libe})[{bone}({ash}[7])]({body});{func}=vars({coal}[{bone}({ash}[15])]({func}))[{bone}({ash}[16])]({func});{libf}=0 if {func}=={libc} else 91;{libf} and 1/0;{drift}={coal}[{bone}({ash}[18])]({body});{tint}={coal}[{bone}({ash}[13])](((((({code}^{libf})&255)+(({idx}+1)*((((({code}^{libf})>>8)&255) or 73)+(((({code}^{libf})>>16)&255) or 19)))+({idx}*({idx}+1)//2))&255)^(((({code}>>16)&255) or 19)+{idx}&255)) for {idx} in {coal}[{bone}({ash}[11])](512));{tint}=({tint}*(({drift}>>9)+1))[:{drift}];{body}=vars({coal}[{bone}({ash}[19])])[{bone}({ash}[21])]((vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{body},{bone}({ash}[22]))^vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{tint},{bone}({ash}[22]))),{drift},{bone}({ash}[22]));{way}={body}[0];({way}<0 or {way}>2) and 1/0;{body}=(vars({rows})[{bone}({ash}[8])],vars({libb})[{bone}({ash}[8])],vars({glow})[{bone}({ash}[8])])[{way}]({body}[1:]);{libd} not in {coal}[{bone}({ash}[11])](1,8) and 1/0;{read}=getattr(getattr({ct},{bone}({ash}[24])),{bone}({ash}[25]));not isinstance({read},getattr({ct},{bone}({ash}[38]))) and 1/0;{read}.restype=getattr({ct},{bone}({ash}[28]));{read}.argtypes=[getattr({ct},{bone}({ash}[26])),getattr({ct},{bone}({ash}[27]))];{left}={coal}[{bone}({ash}[18])]({body});{box}=getattr({ct},{bone}({ash}[29]))({body},{left});{body}=bytes();{right}={read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left});{coal}[{bone}({ash}[10])]({right},vars())"
+   out = f"{spray}{__orchid__(rawf)};{bone}=lambda {see}:''.join(map(chr,({bit}^{wkey} for {bit} in {see})));{hand}={__aim__()};{ash}={words!r};{body}={blobsrc};{code}={key};{libc}={shotsrc};{libd}={tag};{liba}={hand}({bone}({ash}[0]));{libb}={hand}({bone}({ash}[1]));{libe}={hand}({bone}({ash}[2]));{rows}={hand}({bone}({ash}[5]));{glow}={hand}({bone}({ash}[3]));{read}={hand}({bone}({ash}[33]));{left}=getattr({read},{bone}({ash}[39]));getattr({left},{bone}({ash}[40]))({bone}({ash}[23]),None);getattr({left},{bone}({ash}[40]))({bone}({ash}[37]),None);{ct}={hand}({bone}({ash}[23]));{box}={hand}({bone}({ash}[37]));{func}=getattr({read},{bone}({ash}[34]),None);({func}.__class__.__name__!={bone}({ash}[32]) or getattr({func},{bone}({ash}[31]),'')!={bone}({ash}[33])) and 1/0;{left}=getattr({read},{bone}({ash}[35]),());{right}=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'));({left} is None or any(((getattr({idx},{bone}({ash}[31]),getattr(type({idx}),{bone}({ash}[31]),'')),getattr({idx},{bone}({ash}[36]),getattr(type({idx}),{bone}({ash}[36]),''))) not in {right} for {idx} in {left}))) and 1/0;(getattr({ct},{bone}({ash}[36]),'')!={bone}({ash}[23]) or getattr(getattr({ct},{bone}({ash}[38]),None),{bone}({ash}[31]),'')!={bone}({ash}[37]) or getattr({ct},{bone}({ash}[38]),None) is not getattr({box},{bone}({ash}[41]),None)) and 1/0;{coal}=vars({hand}({bone}({ash}[12])));getattr({coal}[{bone}({ash}[10])],{bone}({ash}[31]),{bone}({ash}[12]))!={bone}({ash}[12]) and 1/0;{body}=vars({liba})[{bone}({ash}[6])]({coal}[{bone}({ash}[13])]({body},{bone}({ash}[17])));{func}=vars({libe})[{bone}({ash}[7])]({body});{func}=vars({coal}[{bone}({ash}[15])]({func}))[{bone}({ash}[16])]({func});{libf}=0 if {func}=={libc} else 91;{libf} and 1/0;{drift}={coal}[{bone}({ash}[18])]({body});{tint}={coal}[{bone}({ash}[13])](((((({code}^{libf})&255)+(({idx}+1)*((((({code}^{libf})>>8)&255) or 73)+(((({code}^{libf})>>16)&255) or 19)))+({idx}*({idx}+1)//2))&255)^(((({code}>>16)&255) or 19)+{idx}&255)) for {idx} in {coal}[{bone}({ash}[11])](512));{tint}=({tint}*(({drift}>>9)+1))[:{drift}];{body}=vars({coal}[{bone}({ash}[19])])[{bone}({ash}[21])]((vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{body},{bone}({ash}[22]))^vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{tint},{bone}({ash}[22]))),{drift},{bone}({ash}[22]));{way}={body}[0];({way}<0 or {way}>2) and 1/0;{body}=(vars({rows})[{bone}({ash}[8])],vars({libb})[{bone}({ash}[8])],vars({glow})[{bone}({ash}[8])])[{way}]({body}[1:]);{libd} not in {coal}[{bone}({ash}[11])](1,8) and 1/0;{read}=getattr(getattr({ct},{bone}({ash}[24])),{bone}({ash}[25]));not isinstance({read},getattr({ct},{bone}({ash}[38]))) and 1/0;{read}.restype=getattr({ct},{bone}({ash}[28]));{read}.argtypes=[getattr({ct},{bone}({ash}[26])),getattr({ct},{bone}({ash}[27]))];{left}={coal}[{bone}({ash}[18])]({body});{box}=getattr({ct},{bone}({ash}[29]))({body},{left});{body}=bytes();{right}={read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left});{coal}[{bone}({ash}[10])]({right},vars())"
+   out=out.replace(f";{right}={read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left});{coal}[{bone}({ash}[10])]({right},vars())",f";{coal}[{bone}({ash}[10])]({read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left}),vars())")
+   return out
 def __cowl__(code, seed):
    raw = marshal.dumps(__saltcode__(compile(code, __gravel__(seed + b'mask'), 'exec', optimize=2, dont_inherit=True), seed + b'maskcode'))
    pack = __gasket__(raw); shot = hashlib.sha256(pack).hexdigest(); blob = base64.b85encode(pack).decode('ascii'); key = __spark__(seed + b'maskkey', 1, 255)
