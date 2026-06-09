@@ -17,6 +17,7 @@ import tokenize
 import unicodedata
 import warnings
 import zlib
+import keyword
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 try:
     from pystyle import Col, Colorate, Colors
@@ -29,6 +30,8 @@ if sys.version_info < (3, 10):
     sys.exit(1)
 try: sys.setrecursionlimit(max(sys.getrecursionlimit(), 500000))
 except: pass
+__nhincaidaubuoi__ = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x1680, 0x169f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
+__sexgay__ = set(keyword.kwlist)
 def __slate__():
    if Colorate is None:
         print(); [print(row) for row in ("      ______________________________________________________________", "     /\\                                                             \\", "    /##\\      OOOOO   BBBBB    SSSSS  III  DDDDD   III   AAAA  NN  NN", "   /####\\    OO   OO  BB  BB  SS       I   DD  DD   I   AA  AA NNN NN", "  /######\\   OO   OO  BBBBB    SSSS    I   DD  DD   I   AAAAAA NN NNN", " /###/\\###\\  OO   OO  BB  BB      SS   I   DD  DD   I   AA  AA NN  NN", "/___/  \\___\\  OOOOO   BBBBB   SSSSS  III  DDDDD   III  AA  AA NN  NN", "\\   \\  /   /______________________________________________________/", " \\___\\/___/        [Obsidian] Premium Protect  |  Owner: yeppp")]; print("  >> Ready"); print(); return
@@ -103,13 +106,13 @@ def __flare__(blob):
         at += 16
    return glow
 def __mint__(used, seed, mint):
-   ring = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x1680, 0x169f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
+   ring = __nhincaidaubuoi__; rlen = len(ring)
    while True:
         fog = hashlib.sha256(seed + mint[0].to_bytes(4, 'little')).digest(); wide = 2 + (fog[0] & 3); rows = ['__']; slot = 0; at = 1
         while slot < wide:
             if at + 2 >= len(fog):
                   fog += hashlib.sha256(fog + seed + mint[0].to_bytes(4, 'little')).digest()
-            left, right = ring[fog[at] % len(ring)]; one = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1))); at += 3
+            left, right = ring[fog[at] % rlen]; one = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1))); at += 3
             if not one.isidentifier(): continue
             rows.append(one); slot += 1
         tail = chr(0x3041 + (fog[29 % len(fog)] % (0x3096 - 0x3041 + 1)))
@@ -119,27 +122,27 @@ def __mint__(used, seed, mint):
         if norm != name or name in used or norm in used: continue
         if name.isidentifier(): used.add(name); return name
 def __rune__(used, seed, mark):
-   ring = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
+   ring = __nhincaidaubuoi__; rlen = len(ring); keys = __sexgay__; norm = unicodedata.normalize
    salt = mark if isinstance(mark, bytes) else repr(mark).encode('utf-8')
    turn = 0
    while True:
-        fog = __mist__(seed + salt + turn.to_bytes(4, 'little'), 96)
+        base=seed+salt+turn.to_bytes(4,'little');fog=hashlib.sha256(base).digest();fog+=hashlib.sha256(fog+base).digest();fog+=hashlib.sha256(fog+base).digest()
         wide = 2 + (fog[0] % 5)
         rows = ['__']
         at = 1
         while len(rows) <= wide:
-             left, right = ring[fog[at % len(fog)] % len(ring)]
-             char = chr(left + (int.from_bytes(fog[(at + 1) % len(fog):(at + 3) % len(fog)] or fog[:2], 'little') % (right - left + 1)))
+             left, right = ring[fog[at] % rlen]
+             char = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1)))
              at += 3
              if char.isidentifier():
                   rows.append(char)
         rows.append('__')
         name = ''.join(rows)
         turn += 1
-        norm = unicodedata.normalize('NFKC', name)
-        if norm != name or name in used or norm in used:
+        base = norm('NFKC', name)
+        if base != name or name in used or base in used:
               continue
-        if name.isidentifier() and not __import__('keyword').iskeyword(name):
+        if name.isidentifier() and name not in keys:
              used.add(name)
              return name
 def __sigil__(seed, count):
@@ -573,7 +576,6 @@ def __clay__(seed, modules):
         bag.append((mod, key ^ len(mod)))
     return bag
 def __marl__(name, seed):
-    import unicodedata
     norm = unicodedata.normalize('NFKC', name)
     if norm != name:
         fog = __mist__(seed + b'marl' + name.encode('utf-8', 'replace'), 8)
@@ -1388,7 +1390,6 @@ def __ord__(code, seed):
     fog = __mix__(seed, tuple(rows))
     return (len(rows), fog.hex())
 def __glyph__(tree, seed):
-    import unicodedata as uni
     rows = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Name): rows.append(node.id)
@@ -1400,7 +1401,7 @@ def __glyph__(tree, seed):
     for name in rows:
         cat = []
         for ch in name[:64]:
-            try: cat.append((uni.category(ch), uni.name(ch).split()[0], ord(ch) & 0xff))
+            try: cat.append((unicodedata.category(ch), unicodedata.name(ch).split()[0], ord(ch) & 0xff))
             except: cat.append(('?', '?', ord(ch) & 0xff))
         bag.append((len(name), tuple(cat)))
     wide = sum(any(ord(ch) > 127 for ch in name) for name in rows)
@@ -3402,8 +3403,10 @@ def __lamb__(tree, code, seed):
             args = node.args
             rows.append((len(args.posonlyargs), len(args.args), len(args.kwonlyargs), int(args.vararg is not None), int(args.kwarg is not None), len(args.defaults), len(args.kw_defaults), type(node.body).__name__, getattr(node, 'lineno', 0)))
             rows.extend(('name', one.arg, len(one.arg)) for one in args.posonlyargs + args.args + args.kwonlyargs)
-            args.vararg and rows.append(('var', args.vararg.arg, len(args.vararg.arg)))
-            args.kwarg and rows.append(('kw', args.kwarg.arg, len(args.kwarg.arg)))
+            if args.vararg:
+                rows.append(('var', args.vararg.arg, len(args.vararg.arg)))
+            if args.kwarg:
+                rows.append(('kw', args.kwarg.arg, len(args.kwarg.arg)))
     fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_freevars), len(one.co_cellvars), one.co_argcount) for one in __drip__(code)[:256]), tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
 def __bee__(tree, code, seed):
@@ -9294,7 +9297,7 @@ def __cloak__(src, seed):
    span = 57344 + ((key % 11) * 4096)
    w = lambda at: f"{name[2]}({at})"
    b64, b85, zlibn, bz2n, lzman, dec, ctn, api, readn, runn, buf, castn, charp, longn, pyobj, ptr, hashn, sha, hexd, glb, built, fun, opn, rdn, rbn, filen, repn, sysn, modn, popn, lowct, cfun = w(0), w(1), w(2), w(3), w(4), w(5), w(6), w(7), w(8), w(9), w(10), w(11), w(12), w(13), w(14), w(15), w(16), w(17), w(18), w(19), w(20), w(21), w(22), w(23), w(24), w(25), w(26), w(27), w(28), w(29), w(30), w(31)
-   inner = f"{name[0]}={__aim__()};{name[1]}=lambda:bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}=lambda {name[4]}:{name[1]}()[{name[4]}];{name[22]}=lambda:((print({msgsrc},flush=True),(_ for _ in ()).throw(SystemExit(1)))[-1]);len({name[1]}())!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=bytes(({name[10]}-{key}-{name[29]}-(({name[11]}*31+{key}+17)&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}()))[-1]"
+   inner = f"{name[0]}={__aim__()};{name[1]}=bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}={name[1]}.__getitem__;{name[22]}=lambda:((print({msgsrc},flush=True),(_ for _ in ()).throw(SystemExit(1)))[-1]);len({name[1]})!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=bytes(({name[10]}-{key}-{name[29]}-(({name[11]}*31+{key}+17)&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}()))[-1]"
    cut = f";{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}="
    put = f";{name[24]}={name[0]}({sysn});{name[25]}=getattr({name[24]},{modn});getattr({name[25]},{popn})({ctn},None);getattr({name[25]},{popn})({lowct},None);{name[13]}={name[0]}({ctn});{name[26]}=(len({name[9]})+{span}-1)//{span};{name[28]}=({name[30]}^len({name[9]})^{key})&65535;{name[9]}=tuple(sorted(tuple((({name[12]}//{span})^{name[28]},(lambda {name[5]}:getattr({name[13]},{buf})({name[5]},len({name[5]})))(bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}[{name[12]}:{name[12]}+{span}],{name[12]})))) for {name[12]} in range(0,len({name[9]}),{span}))+tuple((({name[26]}+{name[12]})^{name[28]},getattr({name[13]},{buf})(bytes((({name[10]}*37+{name[12]}*19+{key})&255) for {name[10]} in range(min({span},len({name[9]})))))) for {name[12]} in range(3)),key=lambda {name[5]}:{name[5]}[0]^{name[28]}));{name[13]}="
    cut not in inner and (_ for _ in ()).throw(RuntimeError('cloak'))
@@ -9341,7 +9344,7 @@ def __cowl__(code, seed):
    words = ('base64', 'b85decode', 'zlib', 'bz2', 'lzma', 'decompress', 'marshal', 'loads', 'hashlib', 'sha256', 'builtins', 'exec', 'globals', 'hexdigest', 'sys', 'modules', 'pop', '__module__', '__name__', 'ctypes', '_ctypes', 'builtin_function_or_method', 'function', 'pythonapi', 'PyMarshal_ReadObjectFromString', 'PyEval_EvalCode', 'c_char_p', 'c_long', 'py_object', 'create_string_buffer', 'cast', '_CFuncPtr', 'audit', 'type', 'dumps')
    words = tuple(tuple(ord(char) ^ key for char in word) for word in words)
    uni=''.join(one for one, _ in __marble__(seed + b'cowluni', 3)).encode('utf-8','surrogatepass');name = __sigil__(seed + b'maskname' + uni, 46);tag = ['__yepppppp__', '__meoooo__', '__deptrai__'];tag.sort(key=lambda one:hashlib.sha256(seed + b'cowlanchor' + one.encode()).digest());name[:3] = tag
-   cuts=[];at=0;lim=80;span=max(4096,(len(blob)//lim)+1);fog=__mist__(seed+b'cowlcuts',lim+8)
+   cuts=[];at=0;lim=16;span=max(4096,(len(blob)//lim)+1);fog=__mist__(seed+b'cowlcuts',lim+8)
    while at<len(blob):
       step=span+(fog[len(cuts)%len(fog)]%1024);cuts.append(blob[at:at+step]);at+=step
    blob = '+'.join(__show__(*__hide__(part, seed + b'cowlblob' + slot.to_bytes(3,'little')), name[3]) for slot,part in enumerate(cuts))
