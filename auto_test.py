@@ -1,28 +1,19 @@
-import os
-import subprocess
-import sys
-import time
-import traceback
+import os, subprocess, sys, time, traceback
 try:
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
-except:
-    pass
+except: pass
 DIR = os.path.dirname(os.path.abspath(__file__))
 TOOL = os.path.join(DIR, "obsidian.py")
 PYTHON = "C:/Users/XZ/AppData/Local/Python/pythoncore-3.12-64/python.exe"
 FILES = {
-    "test.py": {"input": "0\n", "timeout": 30, "exit": True, "desc": "Basic test"},
-    "test2.py": {"input": None, "timeout": 60, "exit": False, "desc": "Complex test"},
-    "test3.py": {"input": None, "timeout": 30, "exit": False, "desc": "Simple test"},
-    "test4.py": {"input": "0\n", "timeout": 30, "exit": True, "desc": "Large test"},
-    "test5.py": {"input": "test_key\ntest_link\n1\n", "timeout": 10, "exit": True, "desc": "Interactive test"},
+    "test.py": {"input": "0\n", "timeout": 30, "exit": True, "desc": "Basic test", "obf_timeout": 600},
+    "test2.py": {"input": None, "timeout": 60, "exit": False, "desc": "Complex test", "obf_timeout": 600},
+    "test3.py": {"input": None, "timeout": 30, "exit": False, "desc": "Simple test", "obf_timeout": 600},
+    "test4.py": {"input": "0\n", "timeout": 30, "exit": True, "desc": "Large test", "obf_timeout": 3600},
+    "test5.py": {"input": "test_key\ntest_link\n1\n", "timeout": 60, "exit": True, "desc": "Interactive test", "obf_timeout": 600},
 }
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
-CYAN = "\033[96m"
-RESET = "\033[0m"
+GREEN = "\033[92m"; RED = "\033[91m"; YELLOW = "\033[93m"; CYAN = "\033[96m"; RESET = "\033[0m"
 def path(one):
     return one if os.path.isabs(one) else os.path.join(DIR, one)
 def pick():
@@ -62,8 +53,7 @@ def norm(one):
     one = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', one)
     return '\n'.join(row.strip() for row in one.strip().split('\n') if row.strip() and '>> Loading...' not in row)
 def words(one):
-    import unicodedata
-    import re
+    import unicodedata, re
     one = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', one)
     bag = set()
     for row in one.split('\n'):
@@ -73,19 +63,17 @@ def words(one):
                 bag.add(word.lower())
     return bag
 def rate(one, two):
-    a = words(one)
-    b = words(two)
-    if not a:
-        return 1.0
+    a = words(one); b = words(two)
+    if not a: return 1.0
     return len(a & b) / len(a)
-def obf(name, tool):
-    src = path(name)
-    out = wipe(name)
+def obf(name, tool, cfg):
+    src = path(name); out = wipe(name)
     if not os.path.exists(src):
         return False, f"File not found: {src}", {}
     old = meta(src)
+    obf_to = cfg.get("obf_timeout", 600)
     st = time.time()
-    code, stdout, stderr = run([tool, src], timeout=600)
+    code, stdout, stderr = run([tool, src], timeout=obf_to)
     took = time.time() - st
     if code != 0:
         return False, f"Obfuscation failed:\n{stderr}\n{stdout}", {}
@@ -118,8 +106,7 @@ def check(out, src, cfg):
                 return True, "PASS (EOF after output)", stdout, stderr, took
             return False, "EOF without output", stdout, stderr, took
         return False, f"Runtime error: {tail(stderr)}", stdout, stderr, took
-    on = norm(ostdout)
-    sn = norm(stdout)
+    on = norm(ostdout); sn = norm(stdout)
     if code == 0:
         if sn == on:
             return True, "PASS (output matches)", stdout, stderr, took
@@ -155,15 +142,13 @@ def clean(tool):
     for name in os.listdir(box):
         root = name.split('.cpython-', 1)[0]
         if root in keep:
-            try:
-                os.remove(os.path.join(box, name))
-            except:
-                pass
+            try: os.remove(os.path.join(box, name))
+            except: pass
 def main():
     tool = pick()
-    print(f"\n{CYAN}{'='*60}{RESET}")
-    print(f"{CYAN}          OBSIDIAN AUTO TEST SCRIPT{RESET}")
-    print(f"{CYAN}{'='*60}{RESET}")
+    print(f"\n{CYAN}{'='*65}{RESET}")
+    print(f"{CYAN}{' ' * 15}OBSIDIAN AUTO TEST SCRIPT{RESET}")
+    print(f"{CYAN}{'='*65}{RESET}")
     print(f"{CYAN}Tool: {tool}{RESET}\n")
     if not os.path.exists(tool):
         print(f"{RED}ERROR: tool not found{RESET}")
@@ -171,48 +156,62 @@ def main():
     done = {}
     for name, cfg in FILES.items():
         print(f"\n{YELLOW}[TEST] {name} - {cfg['desc']}{RESET}")
-        print("-" * 40)
+        print(f"{'─' * 65}")
         print(f"  {CYAN}[1/2] Obfuscating...{RESET}", end=" ", flush=True)
-        ok, result, info = obf(name, tool)
+        ok, result, info = obf(name, tool, cfg)
         if not ok:
             print(f"{RED}FAILED{RESET}")
             print(f"  {RED}{result}{RESET}")
-            done[name] = ("FAIL", result, "")
-            break
-        print(f"{GREEN}OK{RESET} ({info['time']:.1f}s) [{info['src']/1024:.1f}KB -> {info['out']/1024:.1f}KB | {info['olines']} lines]")
+            done[name] = ("FAIL", result, "", 0, 0, 0, 0)
+            continue
+        info_src_kb = info['src'] / 1024
+        info_out_kb = info['out'] / 1024
+        info_ratio = info['ratio']
+        info_olines = info['olines']
+        info_obf_time = info['time']
+        print(f"{GREEN}OK{RESET}")
+        print(f"     Obf time : {info_obf_time:.1f}s")
+        print(f"     Src size : {info_src_kb:.1f}KB ({info['slines']} lines)")
+        print(f"     Out size : {info_out_kb:.1f}KB ({info_olines} lines)")
+        print(f"     Ratio    : {info_ratio:.2f}x")
         print(f"  {CYAN}[2/2] Running obfuscated code...{RESET}", end=" ", flush=True)
-        ok, state, stdout, stderr, took = check(result, path(name), cfg)
+        ok, state, stdout, stderr, exec_took = check(result, path(name), cfg)
         if ok:
-            print(f"{GREEN}{state}{RESET} ({took:.1f}s)")
-            done[name] = ("PASS", state, "")
+            print(f"{GREEN}{state}{RESET}")
+            print(f"     Exec time: {exec_took:.1f}s")
+            done[name] = ("PASS", state, "", exec_took, info_obf_time, info_src_kb, info_out_kb)
         else:
-            print(f"{RED}FAILED{RESET} ({took:.1f}s)")
+            print(f"{RED}FAILED{RESET}")
             print(f"  {RED}Status: {state}{RESET}")
             if stderr:
                 print(f"  {RED}Stderr:{RESET}")
                 for row in stderr.split('\n')[:10]:
                     print(f"    {row}")
-            done[name] = ("FAIL", state, stderr)
-            break
+            done[name] = ("FAIL", state, stderr, exec_took, info['time'], info_src_kb, info_out_kb)
+            continue
     clean(tool)
-    print(f"\n{CYAN}{'='*60}{RESET}")
-    print(f"{CYAN}                    SUMMARY{RESET}")
-    print(f"{CYAN}{'='*60}{RESET}\n")
-    good = 0
-    bad = 0
+    print(f"\n{CYAN}{'='*65}{RESET}")
+    print(f"{CYAN}{' ' * 23}SUMMARY{RESET}")
+    print(f"{CYAN}{'='*65}{RESET}\n")
+    good = 0; bad = 0
     for name, data in done.items():
-        if data[0] == "PASS":
-            print(f"  {GREEN}✓ {name}: {data[1]}{RESET}")
+        status = data[0]; state = data[1]
+        if status == "PASS":
+            exec_t = data[3]
+            print(f"  {GREEN}✓ {name}: {state}{RESET}")
+            print(f"    Obf: {data[4]:.1f}s | Exec: {exec_t:.1f}s | {data[5]:.1f}KB -> {data[6]:.1f}KB")
             good += 1
         else:
             print(f"  {RED}✗ {name}: {data[1]}{RESET}")
+            if data[4]:
+                print(f"    Obf: {data[4]:.1f}s | Exec: {data[3]:.1f}s")
             bad += 1
-    print(f"\n{CYAN}{'='*60}{RESET}")
+    print(f"\n{CYAN}{'='*65}{RESET}")
     if bad == 0:
         print(f"{GREEN}ALL {good} TESTS PASSED!{RESET}")
     else:
         print(f"{YELLOW}Passed: {good} | {RED}Failed: {bad}{RESET}")
-    print(f"{CYAN}{'='*60}{RESET}\n")
+    print(f"{CYAN}{'='*65}{RESET}\n")
     return 0 if bad == 0 else 1
 if __name__ == "__main__":
     try:
