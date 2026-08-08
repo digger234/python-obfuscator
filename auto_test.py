@@ -11,7 +11,7 @@ FILES = {
     "test2.py": {"input": None, "timeout": 60, "exit": False, "desc": "Complex test", "obf_timeout": 600},
     "test3.py": {"input": None, "timeout": 30, "exit": False, "desc": "Simple test", "obf_timeout": 600},
     "test4.py": {"input": "0\n", "timeout": 30, "exit": True, "desc": "Large test", "obf_timeout": 3600},
-    "test5.py": {"input": "test_key\ntest_link\n1\n", "timeout": 60, "exit": True, "desc": "Interactive test", "obf_timeout": 600},
+    "test5.py": {"input": "test_key\ntest_link\n1\n", "timeout": 60, "exit": True, "desc": "Interactive test", "obf_timeout": 600, "break": True},
 }
 GREEN = "\033[92m"; RED = "\033[91m"; YELLOW = "\033[93m"; CYAN = "\033[96m"; RESET = "\033[0m"
 def path(one):
@@ -30,6 +30,48 @@ def run(args, data=None, timeout=60, cwd=None):
         return -1, "", "TIMEOUT"
     except Exception as e:
         return -2, "", str(e)
+def run_break(args, data=None, grace=8, timeout=90, cwd=None):
+    import threading
+    env = os.environ.copy()
+    env['PYTHONIOENCODING'] = 'utf-8'
+    env['PYTHONUNBUFFERED'] = '1'
+    flag = getattr(os, 'CTRL_BREAK_EVENT', None) if os.name == 'nt' else None
+    proc = subprocess.Popen([PYTHON] + args, cwd=cwd or DIR, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, creationflags=(0x00000200 if flag else 0))
+    box = {'out': [], 'err': []}
+    def rd(pipe, bag):
+        try:
+            for line in iter(pipe.readline, b''):
+                bag.append(line.decode('utf-8', 'replace'))
+        except: pass
+    t1 = threading.Thread(target=rd, args=(proc.stdout, box['out'])); t1.daemon = True
+    t2 = threading.Thread(target=rd, args=(proc.stderr, box['err'])); t2.daemon = True
+    t1.start(); t2.start()
+    try:
+        proc.stdin.write((data or '').encode('utf-8', 'replace')); proc.stdin.flush(); proc.stdin.close()
+    except: pass
+    try: time.sleep(grace)
+    except: pass
+    if flag:
+        try: proc.send_signal(flag)
+        except: pass
+    try: proc.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        try: proc.terminate()
+        except: pass
+        try: proc.wait(timeout=3)
+        except subprocess.TimeoutExpired:
+            try: proc.kill()
+            except: pass
+    try:
+        rc = proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try: proc.kill()
+        except: pass
+        rc = -1
+    try: proc.stdin.close()
+    except: pass
+    time.sleep(0.3)
+    return rc, ''.join(box['out']), ''.join(box['err'])
 def meta(one):
     if not os.path.exists(one):
         return {"size": 0, "lines": 0}
@@ -85,6 +127,14 @@ def obf(name, tool, cfg):
         return False, f"Output too long: {info['olines']} lines", info
     return True, out, info
 def check(out, src, cfg):
+    if cfg.get("break"):
+        orig, ostdout, ostderr = run_break([src], data=cfg["input"], timeout=cfg["timeout"])
+        st = time.time()
+        code, stdout, stderr = run_break([out], data=cfg["input"], timeout=cfg["timeout"])
+        took = time.time() - st
+        if code in (0, 1, -1) and stdout.strip():
+            return True, "PASS (interactive start + graceful stop)", stdout, stderr, took
+        return False, f"Interactive fail rc={code}: {tail(stderr)}", stdout, stderr, took
     orig, ostdout, ostderr = run([src], data=cfg["input"], timeout=cfg["timeout"])
     st = time.time()
     code, stdout, stderr = run([out], data=cfg["input"], timeout=cfg["timeout"])

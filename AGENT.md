@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 # QUY TẮC BẮT BUỘC
 
 1. **KHÔNG thêm comments**

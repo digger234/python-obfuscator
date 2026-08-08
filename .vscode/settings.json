@@ -1,4 +1,4 @@
 {
     "codium.codeCompletion.enable": true,
-    "python.languageServer": "None"
+    "python.languageServer": "Default"
 }
