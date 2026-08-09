@@ -194,6 +194,15 @@ def clean(tool):
         if root in keep:
             try: os.remove(os.path.join(box, name))
             except: pass
+def purge():
+    for name in ('.deps_checked', 'proxy_db.json'):
+        row = os.path.join(DIR, name)
+        if os.path.isfile(row):
+            try:
+                os.remove(row)
+                print(f"  {YELLOW}[cleanup] removed {name}{RESET}")
+            except Exception as e:
+                print(f"  {RED}[cleanup] failed to remove {name}: {e}{RESET}")
 def main():
     tool = pick()
     print(f"\n{CYAN}{'='*65}{RESET}")
@@ -205,6 +214,7 @@ def main():
         return 1
     done = {}
     for name, cfg in FILES.items():
+        purge()
         print(f"\n{YELLOW}[TEST] {name} - {cfg['desc']}{RESET}")
         print(f"{'─' * 65}")
         print(f"  {CYAN}[1/2] Obfuscating...{RESET}", end=" ", flush=True)
@@ -239,6 +249,7 @@ def main():
                     print(f"    {row}")
             done[name] = ("FAIL", state, stderr, exec_took, info['time'], info_src_kb, info_out_kb)
             continue
+    purge()
     clean(tool)
     print(f"\n{CYAN}{'='*65}{RESET}")
     print(f"{CYAN}{' ' * 23}SUMMARY{RESET}")

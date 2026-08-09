@@ -56,7 +56,7 @@ def __hide__(text, seed):
    mix = __grout__(seed + b'hidemix', 2)
    rot = 7 + ((__spark__(seed + b'rot', 7, 87) ^ mix[0]) % 81)
    span = 233 + ((__spark__(seed + b'span', 233, 997) ^ mix[1]) % 765)
-   tab = {ord(ch): chr(32 + ((ord(ch) - 32 + rot) % 95)) for ch in set(text)}
+   tab = {ord(ch): chr(32 + ((ord(ch) - 32 + rot) % 95)) for ch in set(text) if 32 <= ord(ch) <= 126}
    rows = tuple(part[::-1].translate(tab) for part in (text[at:at + span] for at in range(0, len(text), span)))
    return rows, rot
 def __show__(rows, rot, name=None):
@@ -6888,7 +6888,7 @@ def __vein__(code):
         for one in clss:
             if node.func.id == one or (__token__(one) and node.func.id == __pick__(one)): return True
         return False
-    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf = [__mint__(used, seed, mint) for slot in range(60)]
+    blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf, slabkeyf = [__mint__(used, seed, mint) for slot in range(61)]
     alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(9)]
     tick = [0]
     gate = [0]
@@ -7320,18 +7320,40 @@ def __vein__(code):
         if len(rows) == 1:
             return rows[0]
         if len(rows) > 2:
+            if len(rows) <= 16 and ((len(rows) + seed[24] + tick[0]) & 3) == 0:
+                return __lode__(rows, kind, b'fuselode')
             base = ast.Constant('' if kind == 's' else b'')
             return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[base, __ember__('join')], keywords=[]), args=[ast.List(elts=rows, ctx=ast.Load())], keywords=[])
+        if ((len(rows) + seed[24] + tick[0]) & 3) == 0:
+            return __lode__(rows, kind, b'fuselodepair')
         out = rows[0]
         for one in rows[1:]:
             out = ast.BinOp(left=out, op=ast.Add(), right=one)
         return out
+    def __lode__(rows, kind, tag):
+        n = len(rows)
+        perm = list(range(n))
+        fog = __mist__(seed + tag, n * 4 + 4)
+        for i in range(n - 1, 0, -1):
+            j = int.from_bytes(fog[i * 4:i * 4 + 4], 'little') % (i + 1)
+            perm[i], perm[j] = perm[j], perm[i]
+        if perm == list(range(n)):
+            perm.reverse()
+        inv = [0] * n
+        for i in range(n):
+            inv[perm[i]] = i
+        idx = __mint__(used, seed + tag + b'idx', mint)
+        itr = __mint__(used, seed + tag + b'itr', mint)
+        base = ast.Constant('' if kind == 's' else b'')
+        gen = ast.GeneratorExp(elt=ast.Subscript(value=ast.Name(id=idx, ctx=ast.Load()), slice=ast.Name(id=itr, ctx=ast.Load()), ctx=ast.Load()), generators=[ast.comprehension(target=ast.Name(id=itr, ctx=ast.Store()), iter=ast.Tuple(elts=[ast.Constant(inv[i]) for i in range(n)], ctx=ast.Load()), ifs=[], is_async=0)])
+        body = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[base, __ember__('join')], keywords=[]), args=[gen], keywords=[])
+        return __lambda__(body, [idx], [ast.List(elts=[rows[perm[i]] for i in range(n)], ctx=ast.Load())], tag)
     def __stray__(val):
         try:
             raw = val.encode('utf-8')
         except:
             raw = None
-        if val and len(val) <= 40 and max(map(ord, val), default=0) < 65536 and ((len(val) + seed[31] + tick[0]) & 255) == 6:
+        if val and len(val) <= 40 and max(map(ord, val), default=0) < 65536 and ((len(val) + seed[31] + tick[0]) & 63) == 6:
             off = (0x1f620 + ((len(val) + seed[7] + tick[0]) % 6), 0x0300 + ((len(val) + seed[8] + tick[0]) % 112), 0x3041 + ((len(val) + seed[9] + tick[0]) % 3))[(seed[6] + len(val) + tick[0]) % 3]
             k1 = 1000 + ((seed[10] + len(val) + tick[0]) % 9000); k2 = 100 + ((seed[11] + len(val) + tick[0]) % 900)
             enc = ''.join(chr(((ord(one) ^ k1) + off) ^ k2) for one in val)
@@ -7340,7 +7362,7 @@ def __vein__(code):
                 body = ast.Call(func=ast.Name(id='chr', ctx=ast.Load()), args=[ast.BinOp(left=ast.BinOp(left=ast.BinOp(left=ast.Call(func=ast.Name(id='ord', ctx=ast.Load()), args=[ast.Name(id=name, ctx=ast.Load())], keywords=[]), op=ast.BitXor(), right=__count__(k2)), op=ast.Sub(), right=__count__(off)), op=ast.BitXor(), right=__count__(k1))], keywords=[])
                 gen = ast.GeneratorExp(elt=body, generators=[ast.comprehension(target=ast.Name(id=name, ctx=ast.Store()), iter=ast.Constant(enc), ifs=[], is_async=0)])
                 return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[gen], keywords=[]), b'ustr')
-        if val and len(val) <= 8 and ((len(val) + seed[5] + tick[0]) & 255) == 9:
+        if val and len(val) <= 8 and ((len(val) + seed[5] + tick[0]) & 63) == 9:
             rows = []
             for slot, char in enumerate(val):
                 base = ord(char) + wide
@@ -7358,7 +7380,7 @@ def __vein__(code):
             data = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__('bytes')], keywords=[]), args=[arr], keywords=[])
             out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[data, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
             return out
-        if val and len(val) <= 12 and ((len(val) + seed[19] + tick[0]) & 255) == 4:
+        if val and len(val) <= 12 and ((len(val) + seed[19] + tick[0]) & 63) == 4:
             rows = ast.Tuple(elts=[__ember__(one) if one else ast.Constant('') for one in val], ctx=ast.Load())
             return __carry__(ast.BinOp(left=__ember__('%s' * len(val)), op=ast.Mod(), right=rows), b'strfmt')
         if raw and len(raw) <= 32 and ((len(raw) + seed[15] + tick[0]) & 31) == 3:
@@ -7449,7 +7471,15 @@ def __vein__(code):
         out = ast.Subscript(value=ast.Tuple(elts=[out], ctx=ast.Load()), slice=ast.BinOp(left=ast.Constant(seed[20] & 7), op=ast.BitXor(), right=ast.Constant(seed[20] & 7)), ctx=ast.Load())
         return __rim__(__carry__(out, b'dot'), (seed[20] + tick[0]) & 7)
     def __slab__():
-        raw = marshal.dumps(tuple(plain))
+        keyfog = __mist__(seed + b'slabxor', 64)
+        coded = []
+        for one in plain:
+            if isinstance(one, str):
+                body = one.encode('utf-8', 'surrogatepass')
+                coded.append((1, bytes(byte ^ keyfog[slot & 63] for slot, byte in enumerate(body))))
+            else:
+                coded.append((0, bytes(byte ^ keyfog[slot & 63] for slot, byte in enumerate(one))))
+        raw = marshal.dumps(tuple(coded))
         core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
@@ -7480,6 +7510,7 @@ def {joinf}(row):
 {typef}={evalf}({__alias__('type')})
 {intf}={evalf}({__alias__('int')})
 {bytesf}={evalf}({__alias__('bytes')})
+{slabkeyf}={bytesf}.fromhex({keyfog.hex()!r})
 {varsf}={evalf}({__alias__('vars')})
 {callf}={evalf}({__alias__('callable')})
 {listf}={evalf}({__alias__('list')})
@@ -7722,7 +7753,10 @@ def {load}(i):
  row=tuple({barkf}({keep}))
  i=((i-{crisp})^{mask})-{bend}
  (i<0 or i>=len(row)) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
- return row[i]
+ one=row[i]
+ two=one[0]
+ three={bytesf}(({slabkeyf}[slot&63]^byte) for slot,byte in enumerate(one[1]))
+ return {strf}(three,'utf-8','surrogatepass') if two else three
 {''.join(f'def {one}(i):\n return {load}(i)\n' for one in alts)}
 """
         return ast.parse(text).body
@@ -9061,6 +9095,12 @@ def __mixifood__():
  try:
   for one in ('PYTHONBREAKPOINT','PYTHONINSPECT','PYTHONTRACEMALLOC','PYTHONPROFILEIMPORTTIME'):
    if os.environ.get(one):return __ditmemay__()
+ except:pass
+ try:
+  for one in ('PYTHONDUMPREFS','PYTHONFAULTHANDLER'):
+   if os.environ.get(one):return __ditmemay__()
+  if os.environ.get('PYTHONMALLOC','').lower()=='debug':return __ditmemay__()
+  if getattr(sys.flags,'verbose',0) or getattr(sys.flags,'dev_mode',0) or getattr(sys.flags,'optimize',0):return __ditmemay__()
  except:pass
  try:
   if 'com.termux' in str(os.environ.get('HOME','')).lower():return __ditmemay__()
