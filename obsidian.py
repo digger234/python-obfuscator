@@ -7784,11 +7784,10 @@ def {load}(i):
     {wardf}()
     {chafff}()
     row={impf}({__alias__('base64')}).b85decode({proof});({impf}({__alias__('zlib')}).crc32(row)+{impf}({__alias__('zlib')}).adler32(row)!={check}) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
-    {keep}={impf}({__alias__('zlib')}).decompress({rune}(*{blob}))
- row=tuple({barkf}({keep}))
+    {keep}=tuple({barkf}({impf}({__alias__('zlib')}).decompress({rune}(*{blob}))))
  i=((i-{crisp})^{mask})-{bend}
- (i<0 or i>=len(row)) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
- one=row[i]
+ (i<0 or i>=len({keep})) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
+ one={keep}[i]
  two=one[0]
  three={bytesf}(({slabkeyf}[slot&63]^byte) for slot,byte in enumerate(one[1]))
  return {strf}(three,'utf-8','surrogatepass') if two else three
@@ -8460,17 +8459,6 @@ def {evalf}(code):
  {hand}();{huskf}(code);ct=__import__({__alias__('ctypes')});name=''.join(('PyEval_','EvalCode'));run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
  return run(code,globals(),globals())
 def {guard}(blob,mark,seal):
- glow=0
- at=0
- while at<len(blob):
-  row=blob[at:at+16]
-  for one in row:
-   glow=(glow+one)&0xffffffff
-   glow=((glow<<7)|(glow>>25))&0xffffffff
-   glow^=(one*131)&0xffffffff
-  at+=16
- if glow!=mark:
-  raise SystemExit
  shard=hashlib.sha256(blob).hexdigest()
  ember=hashlib.sha1(blob).hexdigest()
  onyx=hashlib.md5(blob).hexdigest()
@@ -8614,7 +8602,7 @@ def {stampf}(blob):
  shell=base64.b85decode({blob})
  hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
- {guard}(shell,{__flare__(base64.b85decode(rack))},{stamp!r})
+ {guard}(shell,0,{stamp!r})
  {beryl}(shell)
  {gully}(shell)
  {obsf}(shell)
@@ -9479,7 +9467,7 @@ def __cloak__(src, seed):
    b64, b85, zlibn, bz2n, lzman, dec, ctn, api, readn, runn, buf, castn, charp, longn, pyobj, ptr, hashn, sha, hexd, glb, built, fun, opn, rdn, rbn, filen, repn, sysn, modn, popn, lowct, cfun = w(0), w(1), w(2), w(3), w(4), w(5), w(6), w(7), w(8), w(9), w(10), w(11), w(12), w(13), w(14), w(15), w(16), w(17), w(18), w(19), w(20), w(21), w(22), w(23), w(24), w(25), w(26), w(27), w(28), w(29), w(30), w(31)
    inner = f"{name[0]}={__aim__()};{name[1]}=bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}={name[1]}.__getitem__;{name[22]}=lambda:((print({msgsrc},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)))[-1]);len({name[1]})!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=(lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*31+{key}+17)&255)^{key}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')^int.from_bytes(bytes([{name[29]}])*len({name[10]}),'little')).to_bytes(len({name[10]}),'little'))({name[9]});{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))(b''.join((getattr({name[12]}[1],chr(114)+chr(97)+chr(119)) for {name[12]} in {name[9]} if ({name[12]}[0]^{name[28]})<{name[26]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}())))[-1]"
    cut = f";{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}="
-   put = f";{name[24]}={name[0]}({sysn});{name[25]}=getattr({name[24]},{modn});getattr({name[25]},{popn})({ctn},None);getattr({name[25]},{popn})({lowct},None);{name[13]}={name[0]}({ctn});{name[26]}=(len({name[9]})+{span}-1)//{span};{name[28]}=({name[30]}^len({name[9]})^{key})&65535;{name[25]}=bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256));{name[9]}=tuple(sorted(tuple((({name[12]}//{span})^{name[28]},(lambda {name[5]}:getattr({name[13]},{buf})({name[5]},len({name[5]})))((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes(({name[25]}*((len({name[9]})//256)+1))[{name[12]}:{name[12]}+len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))({name[9]}[{name[12]}:{name[12]}+{span}]))) for {name[12]} in range(0,len({name[9]}),{span}))+tuple((({name[26]}+{name[12]})^{name[28]},getattr({name[13]},{buf})((bytes(((({name[10]}*37+{name[12]}*19+{key})&255) for {name[10]} in range(256)))*(({span}//256)+1))[:min({span},len({name[9]}))])) for {name[12]} in range(3)),key=lambda {name[5]}:{name[5]}[0]^{name[28]}));{name[13]}="
+   put = f";{name[24]}={name[0]}({sysn});{name[25]}=getattr({name[24]},{modn});getattr({name[25]},{popn})({ctn},None);getattr({name[25]},{popn})({lowct},None);{name[13]}={name[0]}({ctn});{name[26]}=(len({name[9]})+{span}-1)//{span};{name[28]}=({name[30]}^len({name[9]})^{key})&65535;{name[25]}=bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256))*((len({name[9]})//256)+1);{name[9]}=tuple(sorted(tuple((({name[12]}//{span})^{name[28]},(lambda {name[5]}:getattr({name[13]},{buf})({name[5]},len({name[5]})))((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes({name[25]}[{name[12]}:{name[12]}+len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))({name[9]}[{name[12]}:{name[12]}+{span}]))) for {name[12]} in range(0,len({name[9]}),{span}))+tuple((({name[26]}+{name[12]})^{name[28]},getattr({name[13]},{buf})((bytes(((({name[10]}*37+{name[12]}*19+{key})&255) for {name[10]} in range(256)))*(({span}//256)+1))[:min({span},len({name[9]}))])) for {name[12]} in range(3)),key=lambda {name[5]}:{name[5]}[0]^{name[28]}));{name[13]}="
    cut not in inner and (__meow__ for __meow__ in ()).throw(RuntimeError('cloak'))
    inner = inner.replace(cut, put)
    inner = inner.replace('False'+' or', f"({name[29]}==0) and")
