@@ -6905,7 +6905,7 @@ def __vein__(code):
             if node.func.id == one or (__token__(one) and node.func.id == __pick__(one)): return True
         return False
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf, slabkeyf = [__mint__(used, seed, mint) for slot in range(61)]
-    alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(9)]
+    alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(16)]
     tick = [0]
     gate = [0]
     lam = [0]
@@ -7515,6 +7515,7 @@ def __vein__(code):
             else:
                 coded.append((0, bytes(byte ^ keyfog[slot & 63] for slot, byte in enumerate(one))))
         raw = marshal.dumps(tuple(coded))
+        tally = len(coded)
         core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
@@ -7678,6 +7679,9 @@ def {sentryf}():
  built={impf}({__alias__('builtins')})
  if sys.gettrace() or sys.getprofile():
   raise RuntimeError('bad')
+ thr={impf}({__alias__('threading')})
+ if thr.gettrace() or thr.getprofile():
+  raise RuntimeError('bad')
  for one in ('eval','exec','compile','__import__','getattr','setattr','delattr','dir','vars','globals','locals'):
   obj=getattr(built,one,None)
   if obj is None:
@@ -7721,11 +7725,11 @@ def {snagf}():
  return 1
 def {wardf}():
  sys={impf}({__alias__('sys')})
- for one in ('pdb','bdb','trace','debugpy','pydevd','coverage'):
+ for one in ('pdb','bdb','trace','debugpy','pydevd','coverage','frida','capstone','unicorn','triton','angr','pefile','pydbg','pydasm'):
   if one in sys.modules:
    raise RuntimeError('bad')
  for one in tuple(sys.modules):
-  if one.startswith(('debugpy.','pydevd.','coverage.')):
+  if one.startswith(('debugpy.','pydevd.','coverage.','frida.','capstone.','unicorn.','triton.','angr.','pefile.','pydbg.','pydasm.')):
    raise RuntimeError('bad')
  return 1
 def {chafff}():
@@ -7785,6 +7789,7 @@ def {load}(i):
     {chafff}()
     row={impf}({__alias__('base64')}).b85decode({proof});({impf}({__alias__('zlib')}).crc32(row)+{impf}({__alias__('zlib')}).adler32(row)!={check}) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
     {keep}=tuple({barkf}({impf}({__alias__('zlib')}).decompress({rune}(*{blob}))))
+    len({keep})!={tally} and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
  i=((i-{crisp})^{mask})-{bend}
  (i<0 or i>=len({keep})) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
  one={keep}[i]
@@ -8236,13 +8241,14 @@ def {load}(i):
     tree = __gem__(tree)
     ast.fix_missing_locations(tree)
     return tree, used
-def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, veil, used):
+def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, veil, used, imark):
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
     blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, cache, scan, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef, codonf, evalf = [__mint__(used, seed, mint) for slot in range(64)]
     mask = __mint__(used, seed + b'rackmask', mint)
     rackraw = rack.decode('ascii') if isinstance(rack, (bytes, bytearray)) else str(rack)
     racksrc = __show__(*__hide__(rackraw, seed + b'onyxrack'), mask)
+    omark = (zlib.adler32(base64.b85decode(rack)) ^ zlib.crc32(base64.b85decode(rack))) & 0xffffffff
     def __alias__(word):
         bag = []
         for slot, char in enumerate(word[::-1]):
@@ -8470,6 +8476,8 @@ def {guard}(blob,mark,seal):
   raise SystemExit
  if onyx!=hashlib.md5(blob).hexdigest():
   raise SystemExit
+ if (zlib.adler32(blob)&0xffffffff)^(zlib.crc32(blob)&0xffffffff)!=mark:
+  raise SystemExit
 def {split}(blob):
  hold=[]
  slot=0
@@ -8602,7 +8610,7 @@ def {stampf}(blob):
  shell=base64.b85decode({blob})
  hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
- {guard}(shell,0,{stamp!r})
+ {guard}(shell,{omark},{stamp!r})
  {beryl}(shell)
  {gully}(shell)
  {obsf}(shell)
@@ -8637,7 +8645,7 @@ def {stampf}(blob):
  shell=shell[1:]
  return (zlib.decompress,bz2.decompress,lzma.decompress)[way](shell)
 def {prove}(blob):
- {guard}(blob,{quartz},{blaze!r})
+ {guard}(blob,{imark},{blaze!r})
  if not blob[:1]+blob[-1:]:
   raise SystemExit
  {shalef}(blob)
@@ -9581,7 +9589,8 @@ def __crystal__(tree, path, used):
    peek != stem and (__meow__ for __meow__ in ()).throw(ValueError('pack'))
    stamp = hashlib.sha256(raw).hexdigest()
    mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
-   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used)
+   imark = (zlib.adler32(stem) ^ zlib.crc32(stem)) & 0xffffffff
+   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used, imark)
 def __forge__(path, dst=None):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
