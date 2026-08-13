@@ -7677,6 +7677,8 @@ def {wave}(blob):
 def {sentryf}():
  sys={impf}({__alias__('sys')})
  built={impf}({__alias__('builtins')})
+ if getattr(built,'__name__','')!='builtins':
+  raise RuntimeError('bad')
  if sys.gettrace() or sys.getprofile():
   raise RuntimeError('bad')
  thr={impf}({__alias__('threading')})
@@ -7725,11 +7727,8 @@ def {snagf}():
  return 1
 def {wardf}():
  sys={impf}({__alias__('sys')})
- for one in ('pdb','bdb','trace','debugpy','pydevd','coverage','frida','capstone','unicorn','triton','angr','pefile','pydbg','pydasm'):
-  if one in sys.modules:
-   raise RuntimeError('bad')
  for one in tuple(sys.modules):
-  if one.startswith(('debugpy.','pydevd.','coverage.','frida.','capstone.','unicorn.','triton.','angr.','pefile.','pydbg.','pydasm.')):
+  if one in ('pdb','bdb','trace','debugpy','pydevd','coverage','frida','capstone','unicorn','triton','angr','pefile','pydbg','pydasm') or one.startswith(('debugpy.','pydevd.','coverage.','frida.','capstone.','unicorn.','triton.','angr.','pefile.','pydbg.','pydasm.')):
    raise RuntimeError('bad')
  return 1
 def {chafff}():
@@ -8241,7 +8240,7 @@ def {load}(i):
     tree = __gem__(tree)
     ast.fix_missing_locations(tree)
     return tree, used
-def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, veil, used, imark):
+def __onyx__(rack, slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore, mesh, veil, used, imark, fing):
     seed = hashlib.sha256(stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).digest()
     mint = [0]
     blob, left, right, skin, heart, bone, hand, guard, split, stampf, prove, openf, runf, coref, sink, seal, storm, shell, hold, wake, brim, shale, cove, drift, emberf, talc, shalef, quill, moss, dune, gully, shalex, beryl, gnarl, scarp, obsf, tufff, vinef, glowf, rift, cull, thorn, flake, peat, cliff, frost, shardf, veilf, basaltf, hollow, marrow, briar, cache, scan, huskf, grovef, miref, shardy, cragf, fenf, screef, drusef, codonf, evalf = [__mint__(used, seed, mint) for slot in range(64)]
@@ -8316,7 +8315,7 @@ def {hand}():
  {bone}('decompress',__import__({__alias__('zlib')}),('zlib',))
  {bone}('decompress',__import__({__alias__('bz2')}),('bz2','_bz2'))
  {bone}('decompress',__import__({__alias__('lzma')}),('lzma','_lzma'))
- sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in ('ast','dis','inspect','code','compileall','pdb','trace','bdb','linecache','_ast','uncompyle6','decompyle3','pycdc')]
+ sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in mods]
  add=getattr(sys,{__alias__('addaudithook')},None)
  if sys.gettrace() or sys.getprofile() or getattr(sys,'meta_path',None) is None or type(add).__name__!='builtin_function_or_method' or getattr(add,'__module__','')!='sys':
   raise SystemExit
@@ -8325,6 +8324,14 @@ def {hand}():
   mod=getattr(item,'__module__',getattr(type(item),'__module__',''));nam=getattr(item,'__name__',type(item).__name__)
   if (mod,nam) not in good:
    raise SystemExit
+ {scan}=getattr(__import__({__alias__('re')}),'compile',None)
+ if {scan} is None or getattr({scan},'__module__','')!='re':
+  raise SystemExit
+ for {scan} in getattr(sys,'path_hooks',()):
+  {fenf}=type({scan}).__name__
+  if any({screef} in {fenf}.lower() for {screef} in hint):
+   raise SystemExit
+ {fenf}=None
  if {shalex}.name=='nt':
   ct=__import__({__alias__('ctypes')});left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'))
   if getattr(ct,'__name__','')!='ctypes' or getattr(getattr(ct,'_CFuncPtr',None),'__module__','')!='_ctypes':
@@ -8334,6 +8341,11 @@ def {hand}():
   tmp=ct.c_int(0);getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp))
   if tmp.value:
    raise SystemExit
+  {drusef}=getattr(ct.windll.kernel32,'GetModuleHandleW')
+  {drusef}.restype=ct.c_void_p;{drusef}.argtypes=[ct.c_wchar_p]
+  for {screef} in ('frida-agent-64.dll','frida-agent-32.dll','frida-gadget-64.dll','frida-gadget-32.dll','frida-gadget.dll','frida-core.dll'):
+   if {drusef}({screef}):
+    raise SystemExit
   {cragf}=__import__({__alias__('time')})
   {fenf}={cragf}.perf_counter()
   for {screef} in range(1000000):pass
@@ -8342,7 +8354,7 @@ def {hand}():
    raise SystemExit
   {cragf}=None
   {fenf}={shalex}
-  for {screef} in ('PYDEVD_USE_CYTHON','PYCHARM_HOSTED','WINGDB_ACTIVE','COVERAGE_PROCESS_START'):
+  for {screef} in evir:
    if {fenf}.environ.get({screef}):
     raise SystemExit
   {fenf}=None
@@ -8354,10 +8366,10 @@ def {hand}():
    {cragf}={cragf}.f_back
   if {screef}>20:
    raise SystemExit
-  for {cragf} in {drusef}.meta_path:
-   {fenf}=type({cragf}).__name__
-   if any({screef} in {fenf}.lower() for {screef} in ('hook','inject','patch','spy','debug','trace','intercept')):
-    raise SystemExit
+   for {cragf} in {drusef}.meta_path:
+    {fenf}=type({cragf}).__name__
+    if any({screef} in {fenf}.lower() for {screef} in hint):
+     raise SystemExit
 def {tufff}(code):
  return (code.co_code,code.co_consts,code.co_names,code.co_varnames,code.co_freevars,code.co_cellvars)
 def {vinef}(data):
@@ -8478,24 +8490,10 @@ def {guard}(blob,mark,seal):
   raise SystemExit
  if (zlib.adler32(blob)&0xffffffff)^(zlib.crc32(blob)&0xffffffff)!=mark:
   raise SystemExit
-def {split}(blob):
- hold=[]
- slot=0
+def {split}(blob,exp):
  top=min(len(blob),4096)
- while slot < top:
-  hold.append(min(16,top-slot))
-  slot += 16
- if not hold:
-  raise SystemExit
- if max(hold)<=0:
-  raise SystemExit
- glow=0
- for slot,row in enumerate(hold):
-  glow=(glow+((slot+1)*row))&0xffffffff
-  glow=((glow<<5)|(glow>>27))&0xffffffff
- if glow==0:
-  raise SystemExit
- return glow
+ (zlib.adler32(blob[:top])&0xffffffff)^(zlib.crc32(blob[:top])&0xffffffff)!=exp and (__meow__ for __meow__ in ()).throw(SystemExit)
+ return exp
 def {sink}(blob,add,step):
  tab=[bytes((((v-add-((off+1)*step))&255)) for v in range(256)) for off in range(256)]
  out=bytearray(blob)
@@ -8552,48 +8550,48 @@ def {drusef}(blob):
   if not rows:
    return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
   return (len(blob),len(rows),rows[0],rows[-1],glow)
-def {gully}(blob):
- if not blob:
-  raise SystemExit
- head=blob[:4096];rows=(len(blob),zlib.crc32(head)&0xffffffff,min(head),max(head))
- if rows[1]==0:
-  raise SystemExit
- if rows[3]<rows[2]:
-  raise SystemExit
+def {gully}(blob,exp):
+ rows=(len(blob),min(blob[:4096]),max(blob[:4096]))
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {beryl}(blob):
+def {beryl}(blob,exp):
  rows=(len(blob),zlib.adler32(blob)&0xffffffff)
- if rows[0]<4:
-  raise SystemExit
- if rows[1]==0:
-  raise SystemExit
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {gnarl}(blob):
+def {gnarl}(blob,exp):
  rows=(blob[:2],blob[-2:],len(set(blob[:16])) if blob else 0)
- rows[0]==rows[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {scarp}(blob):
+def {scarp}(blob,exp):
  rows=blob[-16:] if len(blob)>16 else blob
  rows=(len(rows),len(set(rows)))
- rows[0] and rows[1]==0 and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {obsf}(blob):
+def {obsf}(blob,exp):
  rows=blob[:8192:2]
  rows=(len(rows),zlib.crc32(rows)&0xffffffff)
- rows[0]==0 and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {shalex}(blob):
+def {shalex}(blob,exp):
  rows=(blob[:8],blob[-8:],len(blob))
- rows[2]<16 and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
-def {shalef}(blob):
+def {shalef}(blob,exp):
  rows=(zlib.adler32(blob),zlib.crc32(blob),len(blob),blob[:4],blob[-4:])
- if rows[2]<8:
-  raise SystemExit
- if rows[0]==rows[1]:
-  raise SystemExit
- if rows[3]==rows[4]:
-  raise SystemExit
+ rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[3]!=exp[3] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[4]!=exp[4] and (__meow__ for __meow__ in ()).throw(SystemExit)
  return rows
 def {shardy}(blob):
  tab=base64.b85decode({codonf}[0]);inv=base64.b85decode({codonf}[1]);salt=base64.b85decode({codonf}[2]);add,step,twist,turn,drift,mask={codonf}[3];sig={codonf}[4]
@@ -8611,13 +8609,13 @@ def {stampf}(blob):
  hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
  {drusef}(shell)!={chaffk!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
  {guard}(shell,{omark},{stamp!r})
- {beryl}(shell)
- {gully}(shell)
- {obsf}(shell)
- {scarp}(shell)
- {gnarl}(shell)
- {shalex}(shell)
- {split}(shell)
+ {beryl}(shell,{fing[0]!r})
+ {gully}(shell,{fing[1]!r})
+ {obsf}(shell,{fing[2]!r})
+ {scarp}(shell,{fing[3]!r})
+ {gnarl}(shell,{fing[4]!r})
+ {shalex}(shell,{fing[5]!r})
+ {split}(shell,{fing[6]!r})
  shell={shardy}(shell)
  shell={dune}(shell)
  shell={screef}(shell,{thornk}+1)
@@ -8648,7 +8646,7 @@ def {prove}(blob):
  {guard}(blob,{imark},{blaze!r})
  if not blob[:1]+blob[-1:]:
   raise SystemExit
- {shalef}(blob)
+ {shalef}(blob,{fing[7]!r})
  return {miref}(blob)
 def {openf}():
  core={stampf}(0)
@@ -8677,7 +8675,7 @@ def {runf}():
     shell, glass, forge, stampf, heart, driftf, emberg = [__mint__(used, seed + b'cloak', mint) for slot in range(7)]
     mask = __mint__(used, seed + b'coremask', mint)
     coresrc = __show__(*__hide__(base64.b85encode(core).decode('ascii'), seed + b'outercore'), mask)
-    hint=('inject','hook','patch','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','chrome','msedge','firefox','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','py___obsidian__','ziploader','bytesio')
+    hint=('inject','hook','patch','intercept','debug','reverse','spy','monitor','trace','decompile','dump','scan','attach','detach','httptoolkit','http-toolkit','frida','objection','xposed','substrate','mitmproxy','burp','fiddler','charles','proxifier','interceptor','browserhook','webbrowser','browsertrace','backgroundbrowser','chrome','msedge','firefox','encodedloader','encodedfinder','ngocuyencoder','py___ngocuyencoder__','py___obsidian__','ziploader','bytesio')
     debug=('ida','ida64','idaq','idaq64','x64dbg','x32dbg','ollydbg','windbg','ntsd','kd','ghidra','frida','cheatengine','cheat engine','ce-','dnspy','dotpeek','ilspy','immunity','radare','r2','gdb','lldb','hopper','binaryninja','cutter','debugpy','ptvsd','pydevd','pdb','py-spy','py_spy','py-spy-','memray','pyinstrument','scalene','tuna','yappi','line_profiler','memory_profiler','pyflame','flamegraph','pyvmmonitor','vmprof','austin','redhpl')
     anlz=('procmon','procmon64','procexp','procexp64','wireshark','httptoolkit','fiddler','charles','mitmproxy','mitmdump','burp','burpsuite','processhacker','process hacker','apimonitor','api monitor','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','proxyman','tshark','tcpview','tcpdump','regmon','filemon','autoruns','pestudio','die','peid','exeinfope','scylla','lordpe','petools','resourcehacker','hxd','010editor')
     vm=('vmtoolsd','vmwaretray','vmwareuser','vgauthservice','vmacthlp','vboxservice','vboxtray','sandboxie','vmsrvc','vmusrvc','xenservice','qemu-ga','qemu','hyperv','virtualbox','prl_tools','prl_cc','joeboxserver','joeboxcontrol','microsoft-standard','vmci.sys','vmhgfs.sys','vmmouse.sys','vboxmouse.sys','vboxguest.sys','vboxsf.sys','vmtools','vmicheartbeat','vmickvpexchange','vmicshutdown','com.termux')
@@ -8687,19 +8685,24 @@ def {runf}():
     decomp=('uncompyle6','decompyle3','pycdc','pycdas','unpyc','pycparser','astor','uncompyle2','easy_python_decompiler','uncompyle','pyc2py','pydisasm','xdis','depyf','pylingual','pydecipher')
     sbx=('sandbox','virus','malware','sample','analysis','cuckoo','any.run','hybrid','joe','cape','triage','hatching','intezer')
     mac=('00:05:69','00:0c:29','00:1c:14','00:50:56','08:00:27','52:54:00','00:21:f6','00:14:4f','00:15:5d','00:1c:42','00:03:ff','00:0f:4b','00:16:3e','02:42:ac','02:00:17')
-    mods=('ast','dis','inspect','code','compileall','pdb','trace','linecache','_ast','pydevd','debugpy','frida','objection','xposed','substrate','urllib','urllib.request','urllib.parse','ssl','pystyle','pyinstrument','scalene','tuna','yappi','line_profiler','memory_profiler','vmprof','py-spy','austin','pylint','pyflakes','mypy','ruff','benchit','pytest','coverage') + decomp
+    mods=('ast','dis','inspect','code','compileall','pdb','bdb','trace','linecache','_ast','pydevd','debugpy','frida','objection','xposed','substrate','urllib','urllib.request','urllib.parse','ssl','pystyle','pyinstrument','scalene','tuna','yappi','line_profiler','memory_profiler','vmprof','py-spy','austin','pylint','pyflakes','mypy','ruff','benchit','pytest','coverage') + decomp
     api=('NtQueryInformationProcess','NtSetInformationThread','IsDebuggerPresent','CheckRemoteDebuggerPresent','VirtualProtect','MiniDumpWriteDump','OutputDebugString','DebugActiveProcess','DebugBreak')
     dll=('ntdll.dll','kernel32.dll','user32.dll','dbghelp.dll','advapi32.dll')
     net=('requests','httpx','aiohttp','urllib3','urllib','ssl','pystyle','requests.sessions','requests.api')
     proc=('wireshark','httptoolkit','fiddler','charles','burp','burpsuite','mitmproxy','mitmdump','proxyman','tcpdump','tshark','httpdebugger','httpdebuggerui','httpdebuggerpro','httpanalyzer','packetsender','processhacker','process hacker','ida64','ida.exe','x64dbg','x32dbg','ollydbg','cheatengine','frida-server','re.frida.server','xposedbridge','py-spy','memray','pyinstrument','scalene','vmprof','austin','pylint','flamegraph','pyflame')
+    evir=('PYTHONBREAKPOINT','PYTHONINSPECT','PYTHONTRACEMALLOC','PYTHONPROFILEIMPORTTIME','PYTHONDUMPREFS','PYTHONFAULTHANDLER','PYDEVD','PYTHONDEBUG','PYCHARM_DEBUG','PYCHARM_HOSTED','PYDEV_DEBUG','WINGDB_ACTIVE','COVERAGE_PROCESS_START','FRIDA','XPOSED','OBJECTION','PYDEVD_USE_CYTHON')
+    vague=('debug','trace','hook','patch','dump','scan','inspect','frame','dis','decomp','bytecode','pyc','marshal','memory','module','process','proc','task','net','socket','proxy','monitor')
+    apth=('debug','trace','hook','patch','dump','scan','inspect','decomp','bytecode','marshal','proxy','monitor')
+    bn=('exec','eval','compile','open','__import__','print','input','len','list','bytearray','breakpoint')
+    root=('/data/local/tmp/frida-server','/data/local/tmp/re.frida.server','/system/bin/frida','/system/xbin/frida','/system/framework/XposedBridge.jar','/system/lib/libxposed_art.so','/system/lib64/libxposed_art.so')
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
-    bag = {one: base64.b85encode(zlib.compress(chr(0).join(two).encode('utf-8','surrogatepass'),9)).decode('ascii') for one,two in {'hint':hint,'debug':debug,'anlz':anlz,'vm':vm,'cmd':cmd,'host':host,'key':key,'decomp':decomp,'sbx':sbx,'mac':mac,'mods':mods,'api':api,'dll':dll,'net':net,'proc':proc,'env':env,'pool':pool}.items()}
+    bag = {one: base64.b85encode(zlib.compress(chr(0).join(two).encode('utf-8','surrogatepass'),9)).decode('ascii') for one,two in {'hint':hint,'debug':debug,'anlz':anlz,'vm':vm,'cmd':cmd,'host':host,'key':key,'decomp':decomp,'sbx':sbx,'mac':mac,'mods':mods,'api':api,'dll':dll,'net':net,'proc':proc,'env':env,'pool':pool,'evir':evir,'vague':vague,'apth':apth,'bn':bn,'root':root}.items()}
     outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,subprocess,sys,threading,time,traceback,uuid,zlib
 try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
 except:pass
 def __toiyeupnha__(row):return tuple(zlib.decompress(base64.b85decode(row)).decode('utf-8','surrogatepass').split(chr(0))) if row else ()
-__iloveyou__=False;__runtag__=0;hint=__toiyeupnha__({bag['hint']!r});debug=__toiyeupnha__({bag['debug']!r});anlz=__toiyeupnha__({bag['anlz']!r});vm=__toiyeupnha__({bag['vm']!r});cmd=__toiyeupnha__({bag['cmd']!r});host=__toiyeupnha__({bag['host']!r});key=__toiyeupnha__({bag['key']!r});decomp=__toiyeupnha__({bag['decomp']!r});sbx=__toiyeupnha__({bag['sbx']!r});mac=__toiyeupnha__({bag['mac']!r});mods=__toiyeupnha__({bag['mods']!r});api=__toiyeupnha__({bag['api']!r});dll=__toiyeupnha__({bag['dll']!r});net=__toiyeupnha__({bag['net']!r});proc=__toiyeupnha__({bag['proc']!r});env=__toiyeupnha__({bag['env']!r});pool=__toiyeupnha__({bag['pool']!r})
+__iloveyou__=False;__runtag__=0;hint=__toiyeupnha__({bag['hint']!r});debug=__toiyeupnha__({bag['debug']!r});anlz=__toiyeupnha__({bag['anlz']!r});vm=__toiyeupnha__({bag['vm']!r});cmd=__toiyeupnha__({bag['cmd']!r});host=__toiyeupnha__({bag['host']!r});key=__toiyeupnha__({bag['key']!r});decomp=__toiyeupnha__({bag['decomp']!r});sbx=__toiyeupnha__({bag['sbx']!r});mac=__toiyeupnha__({bag['mac']!r});mods=__toiyeupnha__({bag['mods']!r});api=__toiyeupnha__({bag['api']!r});dll=__toiyeupnha__({bag['dll']!r});net=__toiyeupnha__({bag['net']!r});proc=__toiyeupnha__({bag['proc']!r});env=__toiyeupnha__({bag['env']!r});pool=__toiyeupnha__({bag['pool']!r});evir=__toiyeupnha__({bag['evir']!r});vague=__toiyeupnha__({bag['vague']!r});apth=__toiyeupnha__({bag['apth']!r});bn=__toiyeupnha__({bag['bn']!r});root=__toiyeupnha__({bag['root']!r})
 __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__deptraivcl__=id(sys.setprofile);__meow__=id(threading.settrace);__mlem__=id(threading.setprofile);__toolvip__=len(sys.meta_path) if hasattr(sys,'meta_path') else 0;__chatvcl__=len(sys.path_hooks) if hasattr(sys,'path_hooks') else 0
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__^__meow__^__mlem__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};__pnhaxinhvcl__={graink!r};__iloveyoupnha__={flag!r};__dmconcholeminh__={stamp!r}
@@ -8717,7 +8720,7 @@ except Exception:pass
 try:
  if (((lambda left:left)((0^67)^67))+((lambda left:left)((8^67)^67)))!=8:raise RuntimeError
 except:pass
-try:print('\\033[96m>> Loading...\\033[0m',end='\\r',flush=True);time.sleep(0.15)
+try:print('\\033[96m>> Loading...\\033[0m',end='\\r',flush=True);time.sleep(0.05)
 except:pass
 def __sang__():
  try:sys.stdout.write('\\r'+' '*40+'\\r');sys.stdout.flush()
@@ -8826,16 +8829,17 @@ def __cak__(blob):
    return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
   return (len(blob),len(rows),rows[0],rows[-1],glow)
 def __thichvarko__():
+ rows=tuple(sys.modules)
  for one in mods:
   try:
    sys.modules.pop(one,None)
    if one.endswith('.*'):
     head=one[:-2]
-    for row in tuple(sys.modules):
+    for row in rows:
      if str(row).lower().startswith(head+'.'):sys.modules.pop(row,None)
    elif '.' not in one:
     head=one
-    for row in tuple(sys.modules):
+    for row in rows:
      if str(row).lower().startswith(head+'.'):sys.modules.pop(row,None)
   except:pass
  keep=('sys','os','socket','platform','ctypes','threading','marshal','zlib','bz2','lzma','base64','time','math','json','random','string','re','io','gc','hashlib','uuid','struct','subprocess','warnings','datetime','collections','functools','itertools','traceback','unicodedata','_thread','_io','_collections','_functools','_ctypes','_bz2','_lzma','_json','_random','_socket','_ssl','_hashlib','_string','_struct','_uuid','_datetime','_queue')
@@ -8904,7 +8908,7 @@ def __owo__():
    except:pass
  return 0
 def __OwO__():
- built=globals().get('__builtins__');rows=('exec','eval','compile','open','__import__','print','input','len','list','bytearray','breakpoint')
+ built=globals().get('__builtins__');rows=bn
  if isinstance(built,dict):
   for one in rows:
    if one not in built or hasattr(built[one],'__wrapped__') or (hasattr(built[one],'__closure__') and built[one].__closure__):return __ditmemay__()
@@ -9122,11 +9126,7 @@ def __mixifood__():
    if word in low:return __ditmemay__()
  except:pass
  try:
-  for one in ('PYTHONBREAKPOINT','PYTHONINSPECT','PYTHONTRACEMALLOC','PYTHONPROFILEIMPORTTIME'):
-   if os.environ.get(one):return __ditmemay__()
- except:pass
- try:
-  for one in ('PYTHONDUMPREFS','PYTHONFAULTHANDLER'):
+  for one in evir:
    if os.environ.get(one):return __ditmemay__()
   if os.environ.get('PYTHONMALLOC','').lower()=='debug':return __ditmemay__()
   if getattr(sys.flags,'verbose',0) or getattr(sys.flags,'dev_mode',0) or getattr(sys.flags,'optimize',0):return __ditmemay__()
@@ -9135,9 +9135,9 @@ def __mixifood__():
   if 'com.termux' in str(os.environ.get('HOME','')).lower():return __ditmemay__()
  except:pass
  try:
-  if 'ANDROID_ROOT' in os.environ:
-   for one in ('/data/local/tmp/frida-server','/data/local/tmp/re.frida.server','/system/bin/frida','/system/xbin/frida','/system/framework/XposedBridge.jar','/system/lib/libxposed_art.so','/system/lib64/libxposed_art.so'):
-    if os.path.exists(one):return __ditmemay__()
+   if 'ANDROID_ROOT' in os.environ:
+    for one in root:
+     if os.path.exists(one):return __ditmemay__()
    for row in sys.modules:
     low=str(row).lower()
     if 'frida' in low or 'xposed' in low:return __ditmemay__()
@@ -9158,8 +9158,7 @@ def __mixifood__():
 def __neko__():
  try:
   sub=__import__('subprocess');io=__import__('io');orig=(socket.socket,socket.gethostbyname,socket.getaddrinfo,getattr(sub,'Popen',None),getattr(sub,'run',None),os.system,getattr(os,'popen',None),getattr(ctypes,'CDLL',None),getattr(ctypes,'WinDLL',None))
-  bad=tuple(pool)+tuple(host)+tuple(key)+tuple(proc)+tuple(cmd);libs=tuple(hint)+tuple(debug)+tuple(anlz)+tuple(decomp)
-  vague=('debug','trace','hook','patch','dump','scan','inspect','frame','dis','decomp','bytecode','pyc','marshal','memory','module','process','proc','task','net','socket','proxy','monitor')
+  bad=tuple(pool)+tuple(host)+tuple(key)+tuple(proc)+tuple(cmd);libs=tuple(hint)+tuple(debug)+tuple(anlz)+tuple(decomp);mark=tuple(host)+tuple(key)+tuple(proc)+tuple(cmd)+tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)
   sock,dns,addr,pop,run,sysc,popen,cdll,windll=orig
   def vibe():
    rows=[];hard=[];loose=[]
@@ -9168,7 +9167,7 @@ def __neko__():
      raw=str(one).lower();rows.append(raw);loose.append(raw)
    except:pass
    try:
-    for one in ('PYDEVD','PYTHONDEBUG','PYTHONINSPECT','PYTHONBREAKPOINT','PYCHARM_DEBUG','PYCHARM_HOSTED','PYDEV_DEBUG','WINGDB_ACTIVE','COVERAGE_PROCESS_START','FRIDA','XPOSED','OBJECTION'):
+    for one in evir:
      if os.environ.get(one):hard.append(one.lower())
     for one in os.environ:
      raw=str(one).lower()
@@ -9186,9 +9185,8 @@ def __neko__():
     while frm and deep<24:
      code=getattr(frm,'f_code',None);loose.append(str(getattr(code,'co_filename','')).lower());loose.append(str(getattr(code,'co_name','')).lower());frm=frm.f_back;deep+=1
    except:pass
-   raw=' '.join(rows);mark=tuple(host)+tuple(key)+tuple(proc)+tuple(cmd)+tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)
-   haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
-   return bool(hard) or known>0 or (odd>3 and any(one in soft for one in ('debug','trace','hook','patch','dump','scan','inspect','decomp','bytecode','marshal','proxy','monitor')))
+   raw=' '.join(rows);haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
+   return bool(hard) or known>0 or (odd>3 and any(one in soft for one in apth))
   if not vibe():return 0
   dis=__import__('dis');pdb=__import__('pdb');code=__import__('code');trace=__import__('trace');bdb=__import__('bdb')
   try:gc.get_referrers=lambda *a,**k:[];gc.get_referents=lambda *a,**k:[];gc.get_objects=lambda *a,**k:[]
@@ -9590,7 +9588,15 @@ def __crystal__(tree, path, used):
    stamp = hashlib.sha256(raw).hexdigest()
    mesh = hashlib.sha256(ore + raw + stamp.encode() + blaze.encode() + quartz.to_bytes(4, 'little')).hexdigest()
    imark = (zlib.adler32(stem) ^ zlib.crc32(stem)) & 0xffffffff
-   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used, imark)
+   fing = ((len(raw), zlib.adler32(raw) & 0xffffffff),
+            (len(raw), min(raw[:4096]), max(raw[:4096])),
+            (len(raw[:8192:2]), zlib.crc32(raw[:8192:2]) & 0xffffffff),
+            (len((raw[-16:] if len(raw) > 16 else raw)), len(set((raw[-16:] if len(raw) > 16 else raw)))),
+            (raw[:2], raw[-2:], len(set(raw[:16]))),
+            (raw[:8], raw[-8:], len(raw)),
+            (zlib.adler32(raw[:4096]) ^ zlib.crc32(raw[:4096])) & 0xffffffff,
+            (zlib.adler32(stem) & 0xffffffff, zlib.crc32(stem) & 0xffffffff, len(stem), stem[:4], stem[-4:]))
+   return __onyx__(base64.b85encode(raw), slag, smoke, stamp, blaze, quartz, ashk, gritk, lavak, crustk, emberk, cinderk, smeltk, veilk, weftk, thornk, chaffk, tuffk, bloomk, echok, magmak, soulk, wispk, ore.hex(), mesh, __seal__(plan), used, imark, fing)
 def __forge__(path, dst=None):
    if not path: raise ValueError("empty path")
    if not os.path.exists(path): raise FileNotFoundError(path)
