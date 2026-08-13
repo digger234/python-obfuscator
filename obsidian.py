@@ -8366,10 +8366,11 @@ def {hand}():
    {cragf}={cragf}.f_back
   if {screef}>20:
    raise SystemExit
-   for {cragf} in {drusef}.meta_path:
-    {fenf}=type({cragf}).__name__
-    if any({screef} in {fenf}.lower() for {screef} in hint):
-     raise SystemExit
+ {drusef}=sys
+ for {cragf} in {drusef}.meta_path:
+  {fenf}=(' '+(getattr({cragf},'__module__','')+' '+type({cragf}).__name__).lower()+' ')
+  if any((' '+{screef}+' ') in {fenf} for {screef} in hint):
+   raise SystemExit
 def {tufff}(code):
  return (code.co_code,code.co_consts,code.co_names,code.co_varnames,code.co_freevars,code.co_cellvars)
 def {vinef}(data):
@@ -9025,7 +9026,7 @@ def __mixifood__():
  try:
   frame=sys._getframe();deep=0
   while frame and deep<96:
-   code=getattr(frame,'f_code',None);fname=str(getattr(code,'co_filename','')).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(os.path.basename(fname)+' '+cname)
+   code=getattr(frame,'f_code',None);fname=os.path.basename(str(getattr(code,'co_filename',''))).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(os.path.basename(fname)+' '+cname)
    for word in mods+decomp:
     if word in fname or word in cname:return __ditmemay__()
    frame=frame.f_back;deep += 1
@@ -9183,7 +9184,7 @@ def __neko__():
    try:
     frm=sys._getframe();deep=0
     while frm and deep<24:
-     code=getattr(frm,'f_code',None);loose.append(str(getattr(code,'co_filename','')).lower());loose.append(str(getattr(code,'co_name','')).lower());frm=frm.f_back;deep+=1
+     code=getattr(frm,'f_code',None);loose.append(os.path.basename(str(getattr(code,'co_filename',''))).lower());loose.append(str(getattr(code,'co_name','')).lower());frm=frm.f_back;deep+=1
    except:pass
    raw=' '.join(rows);haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
    return bool(hard) or known>0 or (odd>3 and any(one in soft for one in apth))
