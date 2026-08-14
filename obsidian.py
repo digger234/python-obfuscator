@@ -8366,11 +8366,16 @@ def {hand}():
    {cragf}={cragf}.f_back
   if {screef}>20:
    raise SystemExit
- {drusef}=sys
- for {cragf} in {drusef}.meta_path:
-  {fenf}=(' '+(getattr({cragf},'__module__','')+' '+type({cragf}).__name__).lower()+' ')
-  if any((' '+{screef}+' ') in {fenf} for {screef} in hint):
-   raise SystemExit
+ {screef}=0
+ try:
+  {cragf}=open('/proc/self/status')
+  for {drusef} in {cragf}:
+   if {drusef}.startswith('TracerPid:'):
+    {screef}={drusef}.split()[-1]
+  {cragf}.close()
+ except:pass
+ if {screef} and {screef}!='0':
+  raise SystemExit
 def {tufff}(code):
  return (code.co_code,code.co_consts,code.co_names,code.co_varnames,code.co_freevars,code.co_cellvars)
 def {vinef}(data):
@@ -8708,6 +8713,8 @@ __dmm__=id(globals().get('__builtins__'));__deptraivailon__=id(sys.settrace);__d
 __yepppppp__=__dmm__^__deptraivailon__^__deptraivcl__^__meow__^__mlem__;__meoooo__=(__toolvip__<<8)^__chatvcl__;__deptrai__=(__yepppppp__+__meoooo__)&0xffffffffffffffff
 __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mistk};__yepyep__={dustk};__yepngau__={cloakk};__yepvip__={lanek};__yeppro__={spurk};__pnhaxinhvcl__={graink!r};__iloveyoupnha__={flag!r};__dmconcholeminh__={stamp!r}
 try:
+ if getattr(sys,'argv',['x'])[0] in ('-c','-'):os._exit(1)
+ if 'python_d' in os.path.basename(getattr(sys,'executable','') or '').lower() or 'debug build' in getattr(sys,'version','').lower():os._exit(1)
  __bundaumamtom__='OBSIDIAN_'+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__khogadetem__=hashlib.sha256(os.read(__JackBoCon__,os.path.getsize(__SonTungMTP__))+os.path.abspath(sys.executable).encode()).hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
  if __WayWayWay__ is None:
   __buffviewchosontung__=os.environ.copy();__buffviewchosontung__[__bundaumamtom__]=__ComeMyWay__;__concacditmemay__=[sys.executable,os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''))]+list(getattr(sys,'argv',())[1:])
