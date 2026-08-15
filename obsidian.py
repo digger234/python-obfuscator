@@ -68,9 +68,9 @@ def __show__(rows, rot, name=None):
    cls = __spell__('str', salt + b'showstr')
    make = __spell__('maketrans', salt + b'showmake')
    val=__rune__(set([var]),hashlib.sha256(salt+b'showv').digest(),b'v')
-   return f"(lambda {var}:''.join(map(lambda {val}:{val}.translate({var})[::-1],{rows!r})))((__builtins__ if isinstance(__builtins__,dict) else vars(__builtins__))[{cls}].__dict__[{make}]({src!r},{dst!r}))"
+   return f"(lambda {var}:''.join(map(lambda {val}:{val}.translate({var})[::-1],{rows!r})))({__cup__()}[{cls}].__dict__[{make}]({src!r},{dst!r}))"
 def __cup__():
-   return "(__builtins__ if isinstance(__builtins__,dict) else vars(__builtins__))"
+   return __totem__
 def __aim__():
    return f"{__cup__()}['__im'+'port__']"
 def __scatter__(text, seed):
@@ -96,6 +96,10 @@ def __spell__(text, seed):
    if text and len(text) <= 16:
       uni=''.join(one for one, __meow__ in __marble__(seed + text.encode('utf-8', 'replace') + b'spelluni', 2)).encode('utf-8','surrogatepass');name=__sigil__(seed + text.encode('utf-8', 'replace') + b'spell' + uni, 1)[0];out=f"(lambda {name}:{name})({out})"
    return out
+def __smelter__(n, seed):
+   fog = hashlib.sha256(seed).digest(); big = int.from_bytes(fog[0:8], 'little') + (1 << 63); off = int.from_bytes(fog[8:16], 'little'); mult = int.from_bytes(fog[16:24], 'little') | 1; key = int.from_bytes(fog[24:32], 'little')
+   core = ((n + big + off) * mult) ^ key
+   return '((((%d ^ %d) // %d) - %d) - %d)' % (core, key, mult, off, big)
 def __flare__(blob):
    glow = 0
    at = 0
@@ -121,7 +125,7 @@ def __mint__(used, seed, mint):
         tail.isidentifier() and rows.append(tail)
         rows.append('__'); name = ''.join(rows); mint[0] += 1
         norm = unicodedata.normalize('NFKC', name)
-        if norm != name or name in used or norm in used: continue
+        if norm != name or name in used or norm in used or name == __totem__: continue
         if name.isidentifier(): used.add(name); return name
 def __rune__(used, seed, mark):
    ring = __nhincaidaubuoi__; rlen = len(ring); keys = __sexgay__; norm = unicodedata.normalize
@@ -153,6 +157,8 @@ def __sigil__(seed, count):
    for slot in range(count):
         rows.append(__rune__(used, seed, slot.to_bytes(4, 'little')))
    return rows
+__totem__ = __rune__(set(), b'obsidianward', b'ward')
+__sexgay__.add(__totem__)
 def __crown__(raw):
    glow = 0
    bend = 0
@@ -400,14 +406,7 @@ def __wisp__(code):
 def __gasket__(blob):
     hit = __gaskbag__.get(blob)
     if hit is not None: return hit
-    fast = zlib.compress(blob, 9)
-    if len(fast) >= len(blob):
-        out = bytes([0]) + fast
-    else:
-        rows = ((0, fast), (1, bz2.compress(blob, 9)), (2, lzma.compress(blob, format=lzma.FORMAT_ALONE, preset=3)))
-        pick = min(rows, key=lambda row: (len(row[1]), row[0])); fast = min((row for row in rows if row[0] == 0), key=lambda row: len(row[1]))
-        if len(fast[1]) <= (len(pick[1]) * 115) // 100: pick = fast
-        out = bytes([pick[0]]) + pick[1]
+    out = bytes([0]) + zlib.compress(blob, 9)
     if len(__gaskbag__) > 65536: __gaskbag__.clear()
     __gaskbag__[blob] = out
     return out
@@ -508,7 +507,7 @@ def __nexus__(raw, seed, plan, face, loom):
     src = raw if isinstance(raw, bytes) else raw.encode('utf-8', 'replace')
     head = src[:4096]; tail = src[-4096:] if src else b''; size = len(src).to_bytes(8, 'little'); core = head + tail + size
     bag = bytearray(); bag.extend(hashlib.sha512(seed + core[:256]).digest()); bag.extend(hashlib.blake2b(core[:512] + seed, digest_size=64).digest()); bag.extend(hashlib.blake2s(seed + core[-512:], digest_size=32).digest())
-    one = zlib.compress(core, 9); two = bz2.compress(core, 9); thr = lzma.compress(core, preset=6); best = min((one, two, thr, core), key=len); bag.extend(hashlib.sha512(best + seed).digest())
+    bag.extend(hashlib.sha512(zlib.compress(core, 9) + seed).digest())
     hist = bytearray(256)
     for byte in core: hist[byte] = (hist[byte] + 1) & 255
     bag.extend(hist); bag.extend(zlib.crc32(src).to_bytes(4, 'little')); bag.extend(zlib.adler32(src).to_bytes(4, 'little'))
@@ -518,7 +517,7 @@ def __nexus__(raw, seed, plan, face, loom):
     for num in range(1, 521):
         fun = funcs[(num - 1) & 3]; win = 64 + ((num - 1) % 96); raw = cur + bag[-win:] + num.to_bytes(2, 'little')
         bit = fun(raw, digest_size=64).digest() if fun is hashlib.blake2b else fun(raw).digest(); cur = hashlib.blake2s(bit + cur + size, digest_size=32).digest(); bag.extend(cur)
-    pack = zlib.compress(bytes(bag), 9); mark = marshal.dumps((len(src), len(best), zlib.crc32(pack) & 0xffffffff, hashlib.sha256(pack).digest()))
+    pack = zlib.compress(bytes(bag), 9); mark = marshal.dumps((len(src), len(zlib.compress(core, 9)), zlib.crc32(pack) & 0xffffffff, hashlib.sha256(pack).digest()))
     return hashlib.sha512(pack + mark + cur + seed).digest()
 def __mark__(code): return __glow__(code), __bloom__(code), __echo__(code), __magma__(code), __soul__(code), __wisp__(code)
 def __keys__(seed, spec):
@@ -6911,6 +6910,7 @@ def __vein__(code):
     lam = [0]
     strn = [0]
     own = set()
+    raw = set()
     bend = 257 + int.from_bytes(seed[8:12], 'little')
     mask = int.from_bytes(seed[12:16], 'little') | 1
     crisp = 1009 + int.from_bytes(seed[16:20], 'little')
@@ -7045,15 +7045,16 @@ def __vein__(code):
     def __crash__():
         return ast.Subscript(value=ast.Tuple(elts=[], ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load())
     def __guard__(left, right, mark):
-        return ast.Compare(left=ast.BinOp(left=ast.Name(id=left, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=right, ctx=ast.Load())), ops=[ast.Eq()], comparators=[ast.Name(id=mark, ctx=ast.Load())])
+        return ast.Compare(left=ast.BinOp(left=ast.Name(id=left, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=right, ctx=ast.Load())), ops=[ast.Eq()], comparators=[mark])
     def __lambda__(body, args, vals, tag, vararg=None, kwarg=None, keys=None):
-        left, right, mark = __mint__(used, seed, mint), __mint__(used, seed, mint), __mint__(used, seed, mint)
+        left, right = __mint__(used, seed, mint), __mint__(used, seed, mint)
         a, b, c = __vault__(tag)
+        raw.add(id(a)); raw.add(id(b)); raw.add(id(c))
         rows = [ast.arg(arg=one) for one in args]
-        rows.extend((ast.arg(arg=left), ast.arg(arg=right), ast.arg(arg=mark)))
-        lock = [ast.Constant(a), ast.Constant(b), ast.Constant(c)]
+        rows.extend((ast.arg(arg=left), ast.arg(arg=right)))
+        lock = [ast.Constant(a), ast.Constant(b)]
         call = lock + list(vals) if (vararg or kwarg) and not args else list(vals) + lock
-        body = ast.IfExp(test=__guard__(left, right, mark), body=body, orelse=__crash__())
+        body = ast.IfExp(test=__guard__(left, right, ast.Constant(c)), body=body, orelse=__crash__())
         return ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=rows, vararg=ast.arg(arg=vararg) if vararg else None, kwonlyargs=[], kw_defaults=[], kwarg=ast.arg(arg=kwarg) if kwarg else None, defaults=[]), body=body), args=call, keywords=keys or [])
     def __rim__(node, raw):
         return ast.Subscript(value=ast.Tuple(elts=[node], ctx=ast.Load()), slice=ast.BinOp(left=ast.Constant(raw), op=ast.BitXor(), right=ast.Constant(raw)), ctx=ast.Load())
@@ -7324,10 +7325,8 @@ def __vein__(code):
         idx = ((seen[key] + bend) ^ mask) + crisp
         pad = 257 + ((idx ^ seed[7] ^ tick[0]) % 65519)
         num = ast.BinOp(left=ast.Constant(idx ^ pad), op=ast.BitXor(), right=ast.Constant(pad))
-        fun = __mint__(used, seed + b'emberf' + idx.to_bytes(8, 'little', signed=False), mint)
-        arg = __mint__(used, seed + b'embera' + idx.to_bytes(8, 'little', signed=False), mint)
-        row = ast.Subscript(value=ast.Tuple(elts=[ast.Name(id=fun, ctx=ast.Load()), ast.Name(id=fun, ctx=ast.Load())], ctx=ast.Load()), slice=ast.BinOp(left=ast.Constant(pad), op=ast.BitXor(), right=ast.Constant(pad)), ctx=ast.Load())
-        return __lambda__(ast.Call(func=row, args=[ast.Name(id=arg, ctx=ast.Load())], keywords=[]), [fun,arg], [ast.Name(id=alts[(idx + seed[2]) % len(alts)], ctx=ast.Load()), num], b'ember')
+        raw.add(id(num.left)); raw.add(id(num.right))
+        return __lambda__(ast.Call(func=ast.Name(id=alts[(idx + seed[2]) % len(alts)], ctx=ast.Load()), args=[num], keywords=[]), [], [], b'ember')
     def __rift__(val):
         size = len(val)
         if size < 128:
@@ -8227,6 +8226,8 @@ def {load}(i):
         if isinstance(node, ast.Constant) and isinstance(node.value, type(Ellipsis)):
             return ast.copy_location(__dot__(), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, int):
+            if id(node) in raw:
+                return node
             return ast.copy_location(__calc__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, float) and math.isfinite(node.value):
             return ast.copy_location(__float__(node.value), node)
@@ -8284,18 +8285,18 @@ def {heart}(blob,key):
 def {bone}(name,home,need):
  hold=getattr(home,name,None)
  if hold is None:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  mark=getattr(hold,'__module__',need)
  if not callable(hold):
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  if getattr(hold,'__name__',name)!=name:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  rows=need if isinstance(need,tuple) else (need,)
  if mark not in rows:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  text=str(hold)
  if 'builtins' in rows and mark=='builtins' and type(hold).__name__=='builtin_function_or_method' and 'built-in' not in text:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  return hold
 def {hand}():
  built=__import__({__alias__('builtins')});sys=__import__({__alias__('sys')});{shalex}=__import__({__alias__('os')})
@@ -8318,45 +8319,45 @@ def {hand}():
  sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in mods]
  add=getattr(sys,{__alias__('addaudithook')},None)
  if sys.gettrace() or sys.getprofile() or getattr(sys,'meta_path',None) is None or type(add).__name__!='builtin_function_or_method' or getattr(add,'__module__','')!='sys':
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  good=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'))
  for item in getattr(sys,'meta_path',()):
   mod=getattr(item,'__module__',getattr(type(item),'__module__',''));nam=getattr(item,'__name__',type(item).__name__)
   if (mod,nam) not in good:
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
  {scan}=getattr(__import__({__alias__('re')}),'compile',None)
  if {scan} is None or getattr({scan},'__module__','')!='re':
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  for {scan} in getattr(sys,'path_hooks',()):
   {fenf}=type({scan}).__name__
   if any({screef} in {fenf}.lower() for {screef} in hint):
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
  {fenf}=None
  if {shalex}.name=='nt':
   ct=__import__({__alias__('ctypes')});left=''.join(('IsDebugger','Present'));right=''.join(('CheckRemoteDebugger','Present'))
   if getattr(ct,'__name__','')!='ctypes' or getattr(getattr(ct,'_CFuncPtr',None),'__module__','')!='_ctypes':
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
   if getattr(ct.windll.kernel32,left)():
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
   tmp=ct.c_int(0);getattr(ct.windll.kernel32,right)(ct.windll.kernel32.GetCurrentProcess(),ct.byref(tmp))
   if tmp.value:
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
   {drusef}=getattr(ct.windll.kernel32,'GetModuleHandleW')
   {drusef}.restype=ct.c_void_p;{drusef}.argtypes=[ct.c_wchar_p]
   for {screef} in ('frida-agent-64.dll','frida-agent-32.dll','frida-gadget-64.dll','frida-gadget-32.dll','frida-gadget.dll','frida-core.dll'):
    if {drusef}({screef}):
-    raise SystemExit
+    __import__({__alias__('os')})._exit(1)
   {cragf}=__import__({__alias__('time')})
   {fenf}={cragf}.perf_counter()
   for {screef} in range(1000000):pass
   {drusef}={cragf}.perf_counter()
   if ({drusef}-{fenf})>2.0:
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
   {cragf}=None
   {fenf}={shalex}
   for {screef} in evir:
    if {fenf}.environ.get({screef}):
-    raise SystemExit
+    __import__({__alias__('os')})._exit(1)
   {fenf}=None
   {drusef}=sys
   {screef}=0
@@ -8365,7 +8366,7 @@ def {hand}():
    {screef}+=1
    {cragf}={cragf}.f_back
   if {screef}>20:
-   raise SystemExit
+   __import__({__alias__('os')})._exit(1)
  {screef}=0
  try:
   {cragf}=open('/proc/self/status')
@@ -8375,7 +8376,44 @@ def {hand}():
   {cragf}.close()
  except:pass
  if {screef} and {screef}!='0':
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
+ {cragf}={shalex}.environ.get('LD_PRELOAD')
+ if {cragf}:
+  __import__({__alias__('os')})._exit(1)
+ try:
+  {cragf}=__import__({__alias__('ctypes')})
+  {cragf}.CDLL('libc.so.6').prctl(4,0)
+ except:pass
+ if __import__({__alias__('threading')}).active_count()>1:
+  __import__({__alias__('os')})._exit(1)
+ {screef}=0
+ try:
+  for {cragf} in sys._current_frames().values():
+   while {cragf} is not None:
+    if {cragf}.f_trace is not None:
+     {screef}=1
+    {cragf}={cragf}.f_back
+ except:pass
+ if {screef}:
+  __import__({__alias__('os')})._exit(1)
+ {drusef}=''
+ try:
+  {cragf}=open('/proc/self/maps')
+  {drusef}={cragf}.read()
+  {cragf}.close()
+ except:pass
+ if {drusef} and 'frida' in {drusef}.lower():
+  __import__({__alias__('os')})._exit(1)
+ if globals().get('__name__')!='__main__':
+  __import__({__alias__('os')})._exit(1)
+ {fenf}=0
+ try:
+  for {screef} in range(6):
+   if sys.monitoring.get_tool({screef}):
+    {fenf}=1
+ except:pass
+ if {fenf}:
+  __import__({__alias__('os')})._exit(1)
 def {tufff}(code):
  return (code.co_code,code.co_consts,code.co_names,code.co_varnames,code.co_freevars,code.co_cellvars)
 def {vinef}(data):
@@ -8417,7 +8455,7 @@ def {cliff}(code):
   seen.add(mark);rows.append(one)
   for item in one.co_consts:
    if isinstance(item,kind): hold.append(item)
- if not rows: raise SystemExit
+ if not rows: __import__({__alias__('os')})._exit(1)
  return rows
 def {frost}(code):
  rows=[]
@@ -8436,7 +8474,7 @@ def {veilf}(code):
  rows=bytearray()
  for one in {cliff}(code):
   rows.extend(len(one.co_code).to_bytes(4,'little'));rows.extend(one.co_code);rows.extend(len(one.co_consts).to_bytes(4,'little'));rows.extend(len(one.co_names).to_bytes(4,'little'));rows.extend(len(one.co_varnames).to_bytes(4,'little'));rows.extend(len(one.co_freevars).to_bytes(4,'little'));rows.extend(len(one.co_cellvars).to_bytes(4,'little'))
- if not rows: raise SystemExit
+ if not rows: __import__({__alias__('os')})._exit(1)
  return bytes(rows)
 def {basaltf}(code):
  blob={veilf}(code)
@@ -8445,7 +8483,7 @@ def {hollow}(code):
  rows=[]
  for one in {cliff}(code):
   rows.extend((len(one.co_code),len(one.co_consts),len(one.co_names),len(one.co_varnames),len(one.co_freevars),len(one.co_cellvars),one.co_stacksize,one.co_flags))
- if not rows: raise SystemExit
+ if not rows: __import__({__alias__('os')})._exit(1)
  return (len(rows),sum(rows)&0xffffffff,min(rows),max(rows),rows[0],rows[-1])
 def {marrow}(code):
  num=0;sha=hashlib.sha256();one=hashlib.sha1()
@@ -8465,19 +8503,19 @@ def {scan}(code):
  {cache}[mark]=row
  return row
 def {huskf}(code):
- {scan}(code)!=({rift},{cull},{thorn},{flake},{peat}) and (__meow__ for __meow__ in ()).throw(SystemExit)
+ {scan}(code)!=({rift},{cull},{thorn},{flake},{peat}) and __import__({__alias__('os')})._exit(1)
  return code
 def {grovef}(ct,name,restype,argtypes):
- if getattr(ct,'__name__','')!='ctypes' or getattr(getattr(ct,'_CFuncPtr',None),'__module__','')!='_ctypes': raise SystemExit
+ if getattr(ct,'__name__','')!='ctypes' or getattr(getattr(ct,'_CFuncPtr',None),'__module__','')!='_ctypes': __import__({__alias__('os')})._exit(1)
  hold=getattr(ct.pythonapi,name,None)
- if hold is None: raise SystemExit
- if not isinstance(hold,ct._CFuncPtr): raise SystemExit
+ if hold is None: __import__({__alias__('os')})._exit(1)
+ if not isinstance(hold,ct._CFuncPtr): __import__({__alias__('os')})._exit(1)
  hold.restype=restype;hold.argtypes=argtypes
  return hold
 def {miref}(blob):
  ct=__import__({__alias__('ctypes')});name=''.join(('PyMarshal_','ReadObjectFromString'));read={grovef}(ct,name,ct.py_object,[ct.c_char_p,ct.c_long]);box=ct.create_string_buffer(blob);right=read(ct.cast(box,ct.c_char_p),len(blob))
  hold={scan}(right)
- hold!=({rift},{cull},{thorn},{flake},{peat}) and (__meow__ for __meow__ in ()).throw(SystemExit)
+ hold!=({rift},{cull},{thorn},{flake},{peat}) and __import__({__alias__('os')})._exit(1)
  return right
 def {evalf}(code):
  {hand}();{huskf}(code);ct=__import__({__alias__('ctypes')});name=''.join(('PyEval_','EvalCode'));run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
@@ -8487,18 +8525,18 @@ def {guard}(blob,mark,seal):
  ember=hashlib.sha1(blob).hexdigest()
  onyx=hashlib.md5(blob).hexdigest()
  if shard!=seal:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  if shard!=hashlib.sha256(blob).hexdigest():
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  if ember!=hashlib.sha1(blob).hexdigest():
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  if onyx!=hashlib.md5(blob).hexdigest():
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  if (zlib.adler32(blob)&0xffffffff)^(zlib.crc32(blob)&0xffffffff)!=mark:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
 def {split}(blob,exp):
  top=min(len(blob),4096)
- (zlib.adler32(blob[:top])&0xffffffff)^(zlib.crc32(blob[:top])&0xffffffff)!=exp and (__meow__ for __meow__ in ()).throw(SystemExit)
+ (zlib.adler32(blob[:top])&0xffffffff)^(zlib.crc32(blob[:top])&0xffffffff)!=exp and __import__({__alias__('os')})._exit(1)
  return exp
 def {sink}(blob,add,step):
  tab=[bytes((((v-add-((off+1)*step))&255)) for v in range(256)) for off in range(256)]
@@ -8558,50 +8596,50 @@ def {drusef}(blob):
   return (len(blob),len(rows),rows[0],rows[-1],glow)
 def {gully}(blob,exp):
  rows=(len(blob),min(blob[:4096]),max(blob[:4096]))
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
+ rows[2]!=exp[2] and __import__({__alias__('os')})._exit(1)
  return rows
 def {beryl}(blob,exp):
  rows=(len(blob),zlib.adler32(blob)&0xffffffff)
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
  return rows
 def {gnarl}(blob,exp):
  rows=(blob[:2],blob[-2:],len(set(blob[:16])) if blob else 0)
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
+ rows[2]!=exp[2] and __import__({__alias__('os')})._exit(1)
  return rows
 def {scarp}(blob,exp):
  rows=blob[-16:] if len(blob)>16 else blob
  rows=(len(rows),len(set(rows)))
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
  return rows
 def {obsf}(blob,exp):
  rows=blob[:8192:2]
  rows=(len(rows),zlib.crc32(rows)&0xffffffff)
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
  return rows
 def {shalex}(blob,exp):
  rows=(blob[:8],blob[-8:],len(blob))
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
+ rows[2]!=exp[2] and __import__({__alias__('os')})._exit(1)
  return rows
 def {shalef}(blob,exp):
  rows=(zlib.adler32(blob),zlib.crc32(blob),len(blob),blob[:4],blob[-4:])
- rows[0]!=exp[0] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[1]!=exp[1] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[2]!=exp[2] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[3]!=exp[3] and (__meow__ for __meow__ in ()).throw(SystemExit)
- rows[4]!=exp[4] and (__meow__ for __meow__ in ()).throw(SystemExit)
+ rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
+ rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
+ rows[2]!=exp[2] and __import__({__alias__('os')})._exit(1)
+ rows[3]!=exp[3] and __import__({__alias__('os')})._exit(1)
+ rows[4]!=exp[4] and __import__({__alias__('os')})._exit(1)
  return rows
 def {shardy}(blob):
  tab=base64.b85decode({codonf}[0]);inv=base64.b85decode({codonf}[1]);salt=base64.b85decode({codonf}[2]);add,step,twist,turn,drift,mask={codonf}[3];sig={codonf}[4]
- hashlib.sha256(tab+inv+salt+{vinef}((add,step,twist,turn,drift,mask))).hexdigest()!=sig and (__meow__ for __meow__ in ()).throw(SystemExit)
+ hashlib.sha256(tab+inv+salt+{vinef}((add,step,twist,turn,drift,mask))).hexdigest()!=sig and __import__({__alias__('os')})._exit(1)
  out=bytearray();glow=drift&255;ll=len(salt);ls=len(sig)
  for slot in range(len(blob)):
   key=salt[slot%ll]^tab[slot&255]^inv[glow&255]^(ord(sig[slot%ls])&255)
@@ -8612,8 +8650,8 @@ def {shardy}(blob):
 def {stampf}(blob):
  {hand}()
  shell=base64.b85decode({blob})
- hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
- {drusef}(shell)!={chaffk!r} and (__meow__ for __meow__ in ()).throw(SystemExit)
+ hashlib.sha256(bytes.fromhex({ore!r})+shell+{skin}.encode()+{storm}.encode()+{seal}.to_bytes(4,'little')).hexdigest()!={mesh!r} and __import__({__alias__('os')})._exit(1)
+ {drusef}(shell)!={chaffk!r} and __import__({__alias__('os')})._exit(1)
  {guard}(shell,{omark},{stamp!r})
  {beryl}(shell,{fing[0]!r})
  {gully}(shell,{fing[1]!r})
@@ -8631,7 +8669,7 @@ def {stampf}(blob):
  shell={talc}(shell,{cove})
  shell={heart}(shell,{right})
  if len(shell)<4:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  way=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[way](shell[1:])
  shell={dune}(shell)
  shell={screef}(shell,{thornk})
@@ -8642,16 +8680,16 @@ def {stampf}(blob):
  shell={sink}(shell,{wake},{brim})
  shell={heart}(shell,{left})
  if len(shell)<2:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  way=shell[0]
  if way<0 or way>2:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  shell=shell[1:]
  return (zlib.decompress,bz2.decompress,lzma.decompress)[way](shell)
 def {prove}(blob):
  {guard}(blob,{imark},{blaze!r})
  if not blob[:1]+blob[-1:]:
-  raise SystemExit
+  __import__({__alias__('os')})._exit(1)
  {shalef}(blob,{fing[7]!r})
  return {miref}(blob)
 def {openf}():
@@ -8661,8 +8699,8 @@ def {openf}():
 def {runf}():
  {quill}=vars(__import__({__alias__('builtins')}))
  {coref}={openf}()
- {glowf}({coref})!={tuffk} and (__meow__ for __meow__ in ()).throw(SystemExit)
- {quill}.get('exec') or (__meow__ for __meow__ in ()).throw(SystemExit)
+ {glowf}({coref})!={tuffk} and __import__({__alias__('os')})._exit(1)
+ {quill}.get('exec') or __import__({__alias__('os')})._exit(1)
  {huskf}({coref})
  try:
   return {evalf}({coref})
@@ -9406,7 +9444,7 @@ __depvcl__()
     tags=('blob','built','drift','right','readn','runn','glow','tint','need','base','mask','left','tmp','hit','byte','way','read','box','code','run','row','one','slot','key','sys','os','ct','b','j','h','l','z','s','thr','flag','fail','tag','size','bad','mix','add','path','ok','item')
     ash=ore if isinstance(ore,bytes) else bytes.fromhex(ore);wild=__sigil__(hashlib.sha256(ash+mesh.encode()+b'wrapname').digest(),len(tags));book=dict(zip(tags,wild));rex=__import__('re');pat=rex.compile(r'(?<![A-Za-z0-9_])('+'|'.join(map(rex.escape,sorted(tags,key=len,reverse=True)))+r')(?![A-Za-z0-9_])')
     cave=pat.sub(lambda m:book[m.group(1)],cave);ember=pat.sub(lambda m:book[m.group(1)],ember)
-    return __head__(__cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed))
+    return __head__(__cowl__(__sear__(__flux__("\n".join([crust, cave, ember]), seed), seed), seed), seed, stamp, flag)
 def __sear__(text, seed):
     raw = marshal.dumps(__saltcode__(compile(text, __gravel__(seed + b'sear'), 'exec', optimize=2, dont_inherit=True), seed + b'searcode'))
     crc = zlib.crc32(raw) % (1 << 32)
@@ -9488,15 +9526,84 @@ def __cloak__(src, seed):
    inner = inner.replace(f"{name[6]}={blob};{name[7]}=", f"{name[7]}=").replace(f"getattr({name[8]},{b85})({name[6]})", f"getattr({name[8]},{b85})({blob})")
    inner = inner.replace(f",{name[19]}().pop({name[16]!r},None),{name[18]}(", f",{name[19]}().__setitem__({name[9]!r},None),{name[19]}().__setitem__({name[6]!r},''),{name[19]}().__setitem__({name[7]!r},''),{name[19]}().__setitem__({name[8]!r},None),{name[19]}().__setitem__({name[13]!r},None),{name[19]}().__setitem__({name[14]!r},None),{name[19]}().__setitem__({name[15]!r},None),{name[19]}().__setitem__({name[17]!r},None),{name[19]}().__setitem__({name[24]!r},None),{name[19]}().__setitem__({name[27]!r},None),{name[19]}().__setitem__({name[28]!r},''),{name[19]}().__setitem__({name[30]!r},0),{name[19]}().pop({name[16]!r},None),{name[18]}(")
    return inner
-def __head__(code):
+def __ward__(seed):
+   return f"{__totem__}=__import__(" + __spell__('builtins', seed + b'obsidianward') + ").__dict__;" + f"{__totem__}={__totem__}.get('dict')({__totem__});"
+def __warp__(text, seed, mark):
+   __end__=__builtins__ if isinstance(__builtins__,dict) else vars(__builtins__)
+   __mob__=frozenset(one for one in __end__ if not (one.startswith('__') and one.endswith('__')))
+   __xp__=[0]
+   class __ender__(ast.NodeTransformer):
+      def visit_Attribute(self, node):
+         node.value=self.visit(node.value)
+         if isinstance(node.ctx,ast.Load):
+            __axe__=ast.Name(id='getattr',ctx=ast.Load())
+            __axe__=self.visit(__axe__)
+            __iron__=ast.Constant(node.attr)
+            __iron__=self.visit(__iron__)
+            return ast.Call(func=__axe__,args=[node.value,__iron__],keywords=[])
+         return node
+      def visit_Name(self, node):
+         if node.id in __mob__:
+            __xp__[0]+=1
+            __gem__=__spell__(node.id,seed+b'obsidianwarp'+__xp__[0].to_bytes(4,'little')+b'name')
+            return ast.Subscript(value=ast.Name(id=__totem__,ctx=ast.Load()),slice=ast.parse(__gem__,mode='eval').body,ctx=ast.Load())
+         return node
+      def visit_Constant(self, node):
+         __sword__=node.value
+         if isinstance(__sword__,str) and __sword__!=mark:
+            if 1<len(__sword__)<=95 and any('a'<=__charm__<='z' or 'A'<=__charm__<='Z' for __charm__ in __sword__):
+               __xp__[0]+=1
+               __sand__=(len(__sword__)+1)//2
+               __coal__=__spell__(__sword__[:__sand__],seed+b'obsidianwarp'+__xp__[0].to_bytes(4,'little')+b'strl')
+               __water__=__spell__(__sword__[__sand__:],seed+b'obsidianwarp'+__xp__[0].to_bytes(4,'little')+b'strr')
+               __gem__='('+__coal__+'+'+__water__+')'
+               return ast.parse(__gem__,mode='eval').body
+            if len(__sword__)==0:return node
+            __xp__[0]+=1
+            __bits__=bytes(__sword__,'utf-8')
+            if not __bits__:
+               __gem__='bytes(()).decode()'
+            elif len(__sword__)>95:
+               return ast.parse(repr(__sword__),mode='eval').body
+            else:
+               __gem__='bytes(('+','.join(map(str,__bits__))+(',' if len(__bits__)==1 else '')+')).decode()'
+            return self.visit(ast.parse(__gem__,mode='eval').body)
+         if isinstance(__sword__,int) and not isinstance(__sword__,bool) and (__sword__>255 or __sword__<-255):
+            __xp__[0]+=1
+            __gem__=__smelter__(__sword__,seed+b'obsidianwarp'+__xp__[0].to_bytes(4,'little')+b'int')
+            return ast.parse(__gem__,mode='eval').body
+         return node
+   return ast.unparse(__ender__().visit(ast.parse(text)))
+def __smooth__(text, seed):
+   __sack__=0;__pist__='';__shard__=[]
+   for __seed__ in tokenize.generate_tokens(io.StringIO(text).readline):
+      __slime__=__seed__.type
+      if __slime__ in (tokenize.ENCODING,tokenize.INDENT,tokenize.DEDENT):continue
+      if __slime__ in (tokenize.NEWLINE,tokenize.NL):
+         __shard__.append(' ' if (__sack__>0 or __pist__==':') else ';')
+         continue
+      __sprout__=__seed__.string
+      if __pist__ and __sprout__ and (__pist__[-1].isalnum() or __pist__[-1]=='_') and (__sprout__[0].isalnum() or __sprout__[0]=='_'):
+         __shard__.append(' ')
+      __shard__.append(__sprout__)
+      if __slime__==tokenize.OP and __sprout__ in '([{':__sack__+=1
+      if __slime__==tokenize.OP and __sprout__ in ')]}':__sack__=max(0,__sack__-1)
+      __pist__=__sprout__
+   text=''.join(__shard__)
+   compile(text,__gravel__(seed+b'wardflat'),'exec')
+   return text
+def __head__(code, seed, brick, clay):
+   outenv = 'OBSIDIAN_'+hashlib.sha256((brick+clay).encode()).hexdigest()[:24]
+   concac = hashlib.sha256((clay+brick).encode()).hexdigest()
    mark = '__OBSIDIAN_FILE_HASH__';stamp = time.strftime('%Y-%m-%d %H:%M:%S')
    ver = sys.version_info[:2]
    one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe = __sigil__(hashlib.sha256((stamp + code[:96]).encode('utf-8', 'replace')).digest(), 12)
    msg = __show__(*__hide__(f">> Version mismatch! File obf at Python {ver[0]}.{ver[1]}, current ", stamp.encode() + b'vgate'), fou);red = __show__(*__hide__('[91m', stamp.encode() + b'vgater'), fiv);off = __show__(*__hide__('[0m', stamp.encode() + b'vgateo'), six)
    la,sysx=__lily__(stamp.encode()+b'headsys','sys');lb,verx=__lily__(stamp.encode()+b'headver','version_info');lc,bix=__lily__(stamp.encode()+b'headbuilt','builtins');ld,prx=__lily__(stamp.encode()+b'headprint','print');le,osx=__lily__(stamp.encode()+b'heados','os');lf,subx=__lily__(stamp.encode()+b'headsub','subprocess');lg,glx=__lily__(stamp.encode()+b'headgl','globals')
    envn=__show__(*__hide__('OBSIDIAN_'+hashlib.sha256((stamp+code[:128]).encode('utf-8','replace')).hexdigest()[:24], stamp.encode()+b'headenv'), sev);envv=__show__(*__hide__(hashlib.sha256((stamp+code[-128:]).encode('utf-8','replace')).hexdigest(), stamp.encode()+b'headtok'), eig)
-   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}=getattr({__aim__()}('hashlib'),'sha256')({sev}.read({fiv},{sev}.path.getsize({fou}))+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);"
-   text = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'", gate + code)) + "\n"
+   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}=getattr({__aim__()}('hashlib'),'sha256')({sev}.read({fiv},{sev}.path.getsize({fou}))+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{ele}.__setitem__({outenv!r},{concac!r}+':'+str({sev}.getpid())+':'+{six}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);((len({six})==64 and 1) or 1/0);((len({fou})>0 and 1) or 1/0);(({one}.__name__=='sys' and 1) or 1/0);"
+   body = __smooth__(__warp__(gate + code, seed, mark), seed)
+   text = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'")) + "\n" + __ward__(seed) + body + "\n"
    got = hashlib.sha256(text.encode('utf-8')).hexdigest()
    return text.replace(mark, got)
 def __flux__(code, seed):
