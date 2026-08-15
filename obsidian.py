@@ -8217,12 +8217,12 @@ def {load}(i):
             strn[0] += 1
             if strn[0] & 3:
                 return ast.copy_location(__stray__(node.value), node)
-            return ast.copy_location(__fuse__(__rift__(node.value), 's'), node) if len(node.value) <= 160 else node
+            return ast.copy_location(__fuse__(__rift__(node.value), 's'), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bytes) and node.value:
             strn[0] += 1
             if strn[0] & 3:
                 return ast.copy_location(__haze__(node.value), node)
-            return ast.copy_location(__fuse__(__rift__(node.value), 'b'), node) if len(node.value) <= 160 else node
+            return ast.copy_location(__fuse__(__rift__(node.value), 'b'), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, type(Ellipsis)):
             return ast.copy_location(__dot__(), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, int):
