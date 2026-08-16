@@ -151,8 +151,8 @@ def __rune__(used, seed, mark):
         if name.isidentifier() and name not in keys:
              used.add(name)
              return name
-def __sigil__(seed, count):
-   used = set()
+def __sigil__(seed, count, used=None):
+   used = used if used is not None else set()
    rows = []
    for slot in range(count):
         rows.append(__rune__(used, seed, slot.to_bytes(4, 'little')))
@@ -212,8 +212,8 @@ def __lotus__(book, name):
    val=book[name];seed=hashlib.sha256((name+val).encode('utf-8','surrogatepass')).digest();one=__sigil__(seed,1)[0];mod=__spell__('zlib',seed+b'lotusmod');crc=__spell__('crc32',seed+b'lotuscrc');enc=__spell__('utf-8',seed+b'lotusenc')
    mark=(len(name),sum(map(ord,name))&0xffffffff,zlib.crc32(name.encode('utf-8','surrogatepass'))&0xffffffff)
    return f"(lambda {one}:((len({one}),sum(map(ord,{one}))&0xffffffff,getattr({__aim__()}({mod}),{crc})({one}.encode({enc},'surrogatepass'))&0xffffffff)!={mark!r} and 1/0,{one})[-1])({val})"
-def __lily__(seed, text):
-   used = set()
+def __lily__(seed, text, used=None):
+   used = used if used is not None else set()
    func = __rune__(used, seed, b'lily')
    data = __chant__(text, seed + b'text')
    return __plume__(func), __prism__(func, data)
@@ -596,13 +596,6 @@ def __marl__(name, seed):
         fog = __mist__(seed + b'marl' + name.encode('utf-8', 'replace'), 8)
         return norm, int.from_bytes(fog, 'little') & 0xFFFF
     return name, 0
-def __idmask__(text, book):
-    out = []
-    for tok in tokenize.generate_tokens(io.StringIO(text).readline):
-        if tok.type == tokenize.NAME and tok.string in book:
-            tok = tok._replace(string=book[tok.string])
-        out.append(tok)
-    return tokenize.untokenize(out)
 def __quarry__(text, seed):
     raw = text.encode('utf-8')
     fog = __mist__(seed + b'quarry', len(raw) or 1)
@@ -8742,6 +8735,7 @@ def {runf}():
     bank = __trove__({'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc})
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
     bag = {one: base64.b85encode(zlib.compress(chr(0).join(two).encode('utf-8','surrogatepass'),9)).decode('ascii') for one,two in {'hint':hint,'debug':debug,'anlz':anlz,'vm':vm,'cmd':cmd,'host':host,'key':key,'decomp':decomp,'sbx':sbx,'mac':mac,'mods':mods,'api':api,'dll':dll,'net':net,'proc':proc,'env':env,'pool':pool,'evir':evir,'vague':vague,'apth':apth,'bn':bn,'root':root}.items()}
+    pref = (hashlib.sha256(flag.encode()).hexdigest().upper(),'Z'+hashlib.sha256(flag.encode()).hexdigest().upper())[hashlib.sha256(flag.encode()).hexdigest()[:12].upper()[0].isdigit()][:12]
     outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,subprocess,sys,threading,time,traceback,uuid,zlib
 try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
 except:pass
@@ -8753,14 +8747,14 @@ __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mis
 try:
  if getattr(sys,'argv',['x'])[0] in ('-c','-'):os._exit(1)
  if 'python_d' in os.path.basename(getattr(sys,'executable','') or '').lower() or 'debug build' in getattr(sys,'version','').lower():os._exit(1)
- __bundaumamtom__='OBSIDIAN_'+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__khogadetem__=hashlib.sha256(os.read(__JackBoCon__,os.path.getsize(__SonTungMTP__))+os.path.abspath(sys.executable).encode()).hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
+ __bundaumamtom__={pref!r}+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__khogadetem__=os.read(__JackBoCon__,os.path.getsize(__SonTungMTP__));__khogadetem__=hashlib.sha256(__khogadetem__[:len(__khogadetem__)//2]).hexdigest()+hashlib.sha256(__khogadetem__[len(__khogadetem__)//2:]+os.path.abspath(sys.executable).encode()).hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
  if __WayWayWay__ is None:
   __buffviewchosontung__=os.environ.copy();__buffviewchosontung__[__bundaumamtom__]=__ComeMyWay__;__concacditmemay__=[sys.executable,os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''))]+list(getattr(sys,'argv',())[1:])
   os._exit(subprocess.call(__concacditmemay__,env=__buffviewchosontung__))
  if __WayWayWay__!=__sexgay__:os._exit(1)
  os.environ.pop(__bundaumamtom__,None)
  for __nhincaidaubuoi__ in tuple(os.environ):
-  __nhincaidaubuoi__.startswith('OBSIDIAN_') and os.environ.pop(__nhincaidaubuoi__,None)
+  __nhincaidaubuoi__.startswith({pref!r}) and os.environ.pop(__nhincaidaubuoi__,None)
 except SystemExit:raise
 except Exception:pass
 try:
@@ -9047,7 +9041,25 @@ def __mixifood__():
   if not os.path.isfile(way):return __ditmemay__()
   with open(way,'rb') as row:
    got=row.read()
-   if not got or b"__OWNER__='yep'" not in got[:96] or b"yep's obfuscator" not in got[:160] or b"__OBFUSCATED__" not in got[:224]:return __ditmemay__()
+  if not got or b"__OWNER__='yep'" not in got[:96] or b"yep's obfuscator" not in got[:160] or b"__OBFUSCATED__" not in got[:224]:return __ditmemay__()
+  try:
+    at=got.find(b'\\n',got.find(b'\\n',got.find(b'\\n')+1)+1)+1
+    two=got.find(b"=__import__(",at)
+    if two<0 or two-at>40:return __ditmemay__()
+    two=got.find(b".get('dict')(",two)
+    if two<0:return __ditmemay__()
+    two=got.find(b';',two)
+    if two<0:return __ditmemay__()
+    at=two+1;one=bytearray()
+    for slot in range(16):
+     two=got[at+slot*15+10:at+slot*15+14]
+     if len(two)!=4 or not set(two).issubset(b'0123456789abcdef'):return __ditmemay__()
+     one+=int(two,16).to_bytes(2,'little')
+    one=bytes((slot^0x5a) for slot in one)
+    two=bytearray(got[at:at+240])
+    for slot in range(16):two[slot*15+10:slot*15+14]=b'0000'
+    if hashlib.sha256(got[:at]+bytes(two)+got[at+240:]).hexdigest().encode()!=one.hex().encode():return __ditmemay__()
+  except:return __ditmemay__()
  except:pass
  try:
   shulker=frozenset(mods+decomp+debug+anlz+sbx)
@@ -9362,7 +9374,7 @@ def __auditv__():
  return 0
 def __alovu__(blob,key):
  __fail__() and __baoloi__()
- ((zlib.crc32(blob)&0xffffffff)^__runtag__^len(blob))!=key and __ditmemay__()
+ (((zlib.crc32(blob[:len(blob)//2])^zlib.crc32(blob[len(blob)//2:]))&0xffffffff)^__runtag__^len(blob))!=key and __ditmemay__()
  (getattr(ctypes,'__name__','')!='ctypes' or getattr(getattr(ctypes,'_CFuncPtr',None),'__module__','')!='_ctypes') and __ditmemay__()
  name=''.join(('PyMarshal_','ReadObjectFromString'));hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
  size=len(blob);box=ctypes.create_string_buffer(blob);blob=b'';right=hold(ctypes.cast(box,ctypes.c_char_p),size)
@@ -9374,7 +9386,7 @@ def __alovu__(blob,key):
  return right
 def __nhinconcac__(code,key):
  __fail__() and __baoloi__()
- gate=((hashlib.sha256(code.co_code).digest()[0]<<24)^(zlib.crc32(code.co_code)&0xffffffff)^__runtag__^len(code.co_consts))&0xffffffff
+ gate=((hashlib.sha256(code.co_code).digest()[0]<<24)^(zlib.crc32(code.co_code[:len(code.co_code)//2])^zlib.crc32(code.co_code[len(code.co_code)//2:]))&0xffffffff^__runtag__^len(code.co_consts))&0xffffffff
  gate!=((key^0xA5A55A5A)&0xffffffff) and __ditmemay__()
  (getattr(ctypes,'__name__','')!='ctypes' or getattr(getattr(ctypes,'_CFuncPtr',None),'__module__','')!='_ctypes') and __ditmemay__()
  name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
@@ -9401,7 +9413,7 @@ def __tooldepphet__(__karrik__):
   global __ngauvcl__
   __fail__() and __baoloi__()
   __karrik__!=((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff) and __baoloi__()
-  __sangtraan__=__lmao__(base64.b85decode,__ngauvcl__);__ngauvcl__='';__lmao__(hashlib.sha256,__sangtraan__).hexdigest()!=__iloveyoupnha__ and (__meow__ for __meow__ in ()).throw(SystemExit)
+  __sangtraan__=__lmao__(base64.b85decode,__ngauvcl__);__ngauvcl__='';__meoooooooooo__=__lmao__(hashlib.sha256,__sangtraan__).digest();(__meoooooooooo__[:8]!=__lmao__(bytes.fromhex,__iloveyoupnha__[:16])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[8:16]!=__lmao__(bytes.fromhex,__iloveyoupnha__[16:32])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[16:24]!=__lmao__(bytes.fromhex,__iloveyoupnha__[32:48])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[24:32]!=__lmao__(bytes.fromhex,__iloveyoupnha__[48:64])) and (__meow__ for __meow__ in ()).throw(SystemExit)
   __lmao__(__cak__,__sangtraan__)!=__pnhaxinhvcl__ and (__meow__ for __meow__ in ()).throw(SystemExit)
   __sangtraan__=__lmao__(__skibiditoilet__,__sangtraan__,__yeppro__);__sangtraan__=__lmao__(__pnhamaidinh__,__sangtraan__,__yepvip__);__sangtraan__=__lmao__(__luvpnha__,__sangtraan__,__yepngau__);__sangtraan__=__lmao__(__yeupnha__,__sangtraan__,__meocute__,__yepyep__);__sangtraan__=__lmao__({heart},__sangtraan__,__meowmeow__);way=__lmaoo__(__sangtraan__[0]);__sangtraan__=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:]);__sangtraan__=__lmao__({heart},__sangtraan__,__manhvcl__)
   way=__sangtraan__[0];(way<0 or way>2) and (__meow__ for __meow__ in ()).throw(SystemExit)
@@ -9411,16 +9423,13 @@ def __depvcl__():
  try:
   __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o(),p()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__auditv__,__neko__))
   __roll__(__concac__());__roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
-  __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));__seth__=((zlib.crc32(__sengtraan__)&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code)&0xffffffff)^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
+  __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));__seth__=(((zlib.crc32(__sengtraan__[:len(__sengtraan__)//2])^zlib.crc32(__sengtraan__[len(__sengtraan__)//2:]))&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code[:len(__RTX5090__.co_code)//2])^zlib.crc32(__RTX5090__.co_code[len(__RTX5090__.co_code)//2:]))&0xffffffff^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
  finally:
   try:__sengtraan__=b'';__RTX5090__=None;__seth__=0;__uwu__()
   except:pass
 __depvcl__()
 """
     outer=outer.replace("(__meow__ for __meow__ in ()).throw(SystemExit)","__baoloi__()").replace("raise SystemExit","__baoloi__()").replace(" and 1/0"," and __baoloi__()")
-    row = ('__iloveyou__','__runtag__','__toiyeupnha__','__dmm__','__deptraivailon__','__deptraivcl__','__meow__','__mlem__','__toolvip__','__chatvcl__','__ngauvcl__','__manhvcl__','__meowmeow__','__meocute__','__yepyep__','__yepngau__','__yepvip__','__yeppro__','__sang__','__baoloi__','__fail__','__lmao__','__lmaoo__','__roll__','__concac__','__ditmemay__','__uwu__','__luvpnha__','__yeupnha__','__pnhamaidinh__','__skibiditoilet__','__cak__','__thichvarko__','__varconcac__','__varrrrr__','__checkvar__','__owo__','__OwO__','__haha__','__hihi__','__hoho__','__hahaha__','__hihihi__','__hohoho__','__anhdomixi__','__mixifood__','__neko__','__meme__','__auditv__','__alovu__','__nhinconcac__','__tooldepphet__','__depvcl__','__pnhaxinhvcl__','__iloveyoupnha__','__dmconcholeminh__','__SonTungMTP__','__JackBoCon__','__khogadetem__','__concacchungmay','__sexgay__','__ComeMyWay__','__WayWayWay__','__buffviewchosontung__','__concacditmemay__','__nhincaidaubuoi__','__inovar__','__RTX5090__','__sangtraan__','__sengtraan__','__seth__','__karrik__','__bundaumamtom__')
-    vals = [__mint__(used, seed + b'outermask', mint) for __meow__ in row]
-    outer = __idmask__(outer, dict(zip(row, vals)))
     ore = marshal.dumps(__saltcode__(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True), seed + b'outersalt'))
     pack = __gasket__(ore)
     shellk, glassk, forgek, stampk = __keys__(seed, ((b'shell', 1000000, 2147483647), (b'glasswrap', 1000000, 2147483647), (b'forgewrap', 17, 251), (b'stampwrap', 3, 29)))
@@ -9517,7 +9526,7 @@ def __cloak__(src, seed):
    span = 57344 + ((key % 11) * 4096)
    w = lambda at: f"{name[2]}({at})"
    b64, b85, zlibn, bz2n, lzman, dec, ctn, api, readn, runn, buf, castn, charp, longn, pyobj, ptr, hashn, sha, hexd, glb, built, fun, opn, rdn, rbn, filen, repn, sysn, modn, popn, lowct, cfun = w(0), w(1), w(2), w(3), w(4), w(5), w(6), w(7), w(8), w(9), w(10), w(11), w(12), w(13), w(14), w(15), w(16), w(17), w(18), w(19), w(20), w(21), w(22), w(23), w(24), w(25), w(26), w(27), w(28), w(29), w(30), w(31)
-   inner = f"{name[0]}={__aim__()};{name[1]}=bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}={name[1]}.__getitem__;{name[22]}=lambda:((print({msgsrc},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)))[-1]);len({name[1]})!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__OBSIDIAN_FILE_HASH__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f4f4253494449414e5f46494c455f484153485f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=(lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*31+{key}+17)&255)^{key}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')^int.from_bytes(bytes([{name[29]}])*len({name[10]}),'little')).to_bytes(len({name[10]}),'little'))({name[9]});{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))(b''.join((getattr({name[12]}[1],chr(114)+chr(97)+chr(119)) for {name[12]} in {name[9]} if ({name[12]}[0]^{name[28]})<{name[26]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}())))[-1]"
+   inner = f"{name[0]}={__aim__()};{name[1]}=bytes(({name[5]}-{wkey}-(({name[11]}*{step})&255))&255 for {name[11]},{name[5]} in enumerate(bytes.fromhex({words}))).decode().split(chr(0));{name[2]}={name[1]}.__getitem__;{name[22]}=lambda:((print({msgsrc},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)))[-1]);len({name[1]})!=32 and {name[22]}();({name[0]}.__class__.__name__!={fun} or getattr({name[0]},'__module__','')!={built}) and {name[22]}();{name[23]}='__netherstar__';{name[24]}={name[0]}('os');{name[26]}={name[24]}.path.abspath(getattr({name[0]}({built}),{glb})().get({filen},''));{name[27]}={name[24]}.open({name[26]},{name[24]}.O_RDONLY);{name[25]}={name[24]}.read({name[27]},{name[24]}.path.getsize({name[26]}));{name[24]}.close({name[27]});{name[24]}=None;{name[31]}={name[25]}.find(b'\\n',{name[25]}.find(b'\\n',{name[25]}.find(b'\\n')+1)+1)+1;{name[31]}={name[25]}.find(b\"=__import__(\",{name[31]});{name[31]}={name[25]}.find(b\".get('dict')(\",{name[31]});{name[31]}={name[25]}.find(b';',{name[31]});{name[31]}={name[31]}+1;{name[5]}=bytes((48 if 9<({name[11]}%15)<14 else {name[25]}[{name[31]}+{name[11]}]) for {name[11]} in range(240));{name[25]}={name[25]}[:{name[31]}]+{name[5]}+{name[25]}[{name[31]}+240:];{name[28]}=getattr(getattr({name[0]}({hashn}),{sha})(getattr({name[25]},{repn})({name[23]}.encode(),bytes.fromhex('5f5f6e6574686572737461725f5f'))),{hexd})();{name[25]}=b'';{name[29]}=0 if {name[28]}=={name[23]} else 97;{name[29]} and {name[22]}();{name[6]}={blob};{name[7]}={shotsrc};{name[8]}={name[0]}({b64});{name[9]}=getattr({name[8]},{b85})({name[6]});{name[9]}=(lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*31+{key}+17)&255)^{key}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')^int.from_bytes(bytes([{name[29]}])*len({name[10]}),'little')).to_bytes(len({name[10]}),'little'))({name[9]});{name[12]}={name[9]}[0];({name[12]}<0 or {name[12]}>2) and {name[22]}();{name[9]}=(getattr({name[0]}({zlibn}),{dec}),getattr({name[0]}({bz2n}),{dec}),getattr({name[0]}({lzman}),{dec}))[{name[12]}]({name[9]}[1:]);getattr(getattr({name[0]}({hashn}),{sha})({name[9]}),{hexd})()!={name[7]} and {name[22]}();{name[30]}=len({name[9]});{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}={name[0]}({ctn});{name[24]}={name[0]}({lowct});(getattr({name[13]},{ptr},None) is not getattr({name[24]},{cfun},None)) and {name[22]}();{name[14]}=getattr({name[13]},{api});{name[15]}=getattr({name[14]},{readn});not isinstance({name[15]},getattr({name[13]},{ptr})) and {name[22]}();{name[15]}.restype=getattr({name[13]},{pyobj});{name[15]}.argtypes=[getattr({name[13]},{charp}),getattr({name[13]},{longn})];{name[18]}=getattr({name[14]},{runn});not isinstance({name[18]},getattr({name[13]},{ptr})) and {name[22]}();{name[18]}.restype=getattr({name[13]},{pyobj});{name[18]}.argtypes=[getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj}),getattr({name[13]},{pyobj})];{name[17]}=getattr({name[13]},{castn});{name[27]}=getattr({name[13]},{charp});{name[19]}=getattr({name[0]}({built}),{glb});False or (({name[16]}:=getattr({name[13]},{buf})((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes((bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256))*((len({name[10]})//256)+1))[:len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))(b''.join((getattr({name[12]}[1],chr(114)+chr(97)+chr(119)) for {name[12]} in {name[9]} if ({name[12]}[0]^{name[28]})<{name[26]})))),({name[31]}:={name[15]}({name[17]}({name[16]},{name[27]}),{name[30]})),{name[19]}().pop({name[16]!r},None),{name[18]}({name[19]}().pop({name[31]!r}),{name[19]}(),{name[19]}())))[-1]"
    cut = f";{name[9]}=bytes(({name[10]}^{key^167}^(({name[11]}*17+{key})&255))&255 for {name[11]},{name[10]} in enumerate({name[9]}));{name[13]}="
    put = f";{name[24]}={name[0]}({sysn});{name[25]}=getattr({name[24]},{modn});getattr({name[25]},{popn})({ctn},None);getattr({name[25]},{popn})({lowct},None);{name[13]}={name[0]}({ctn});{name[26]}=(len({name[9]})+{span}-1)//{span};{name[28]}=({name[30]}^len({name[9]})^{key})&65535;{name[25]}=bytes(((({name[11]}*17+{key})&255)^{key^167}) for {name[11]} in range(256))*((len({name[9]})//256)+1);{name[9]}=tuple(sorted(tuple((({name[12]}//{span})^{name[28]},(lambda {name[5]}:getattr({name[13]},{buf})({name[5]},len({name[5]})))((lambda {name[10]}:(int.from_bytes({name[10]},'little')^int.from_bytes({name[25]}[{name[12]}:{name[12]}+len({name[10]})],'little')).to_bytes(len({name[10]}),'little'))({name[9]}[{name[12]}:{name[12]}+{span}]))) for {name[12]} in range(0,len({name[9]}),{span}))+tuple((({name[26]}+{name[12]})^{name[28]},getattr({name[13]},{buf})((bytes(((({name[10]}*37+{name[12]}*19+{key})&255) for {name[10]} in range(256)))*(({span}//256)+1))[:min({span},len({name[9]}))])) for {name[12]} in range(3)),key=lambda {name[5]}:{name[5]}[0]^{name[28]}));{name[13]}="
    cut not in inner and (__meow__ for __meow__ in ()).throw(RuntimeError('cloak'))
@@ -9592,20 +9601,46 @@ def __smooth__(text, seed):
    text=''.join(__shard__)
    compile(text,__gravel__(seed+b'wardflat'),'exec')
    return text
+def __chorus__(seed, used=None):
+   used = used if used is not None else set()
+   ring = tuple(two for two in __nhincaidaubuoi__ if two[0] >= 0x0800 and two[1] <= 0xFFFF)
+   rlen = len(ring)
+   fog = hashlib.sha256(seed + b'obsidianseal').digest();at = 0
+   rows = []
+   while len(rows) < 16:
+        if at + 4 >= len(fog): fog += hashlib.sha256(fog + seed + b'obsidianseal').digest()
+        left, right = ring[fog[at] % rlen]
+        char = chr(left + (int.from_bytes(fog[at + 1:at + 3], 'little') % (right - left + 1)))
+        at += 3
+        if not char.isidentifier(): continue
+        name = '__' + char + '__'
+        if name not in used and name != __totem__ and unicodedata.normalize('NFKC', name) == name:
+            used.add(name); rows.append(name)
+   return rows
 def __head__(code, seed, brick, clay):
-   outenv = 'OBSIDIAN_'+hashlib.sha256((brick+clay).encode()).hexdigest()[:24]
+   pref = (hashlib.sha256(clay.encode()).hexdigest().upper(),'Z'+hashlib.sha256(clay.encode()).hexdigest().upper())[hashlib.sha256(clay.encode()).hexdigest()[:12].upper()[0].isdigit()][:12]
+   outenv = pref+hashlib.sha256((brick+clay).encode()).hexdigest()[:24]
    concac = hashlib.sha256((clay+brick).encode()).hexdigest()
-   mark = '__OBSIDIAN_FILE_HASH__';stamp = time.strftime('%Y-%m-%d %H:%M:%S')
+   mark = '__netherstar__';stamp = time.strftime('%Y-%m-%d %H:%M:%S')
    ver = sys.version_info[:2]
-   one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe = __sigil__(hashlib.sha256((stamp + code[:96]).encode('utf-8', 'replace')).digest(), 12)
+   one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe = __sigil__(hashlib.sha256((stamp + code[:96]).encode('utf-8', 'replace')).digest(), 12);used = set((one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe))
    msg = __show__(*__hide__(f">> Version mismatch! File obf at Python {ver[0]}.{ver[1]}, current ", stamp.encode() + b'vgate'), fou);red = __show__(*__hide__('[91m', stamp.encode() + b'vgater'), fiv);off = __show__(*__hide__('[0m', stamp.encode() + b'vgateo'), six)
-   la,sysx=__lily__(stamp.encode()+b'headsys','sys');lb,verx=__lily__(stamp.encode()+b'headver','version_info');lc,bix=__lily__(stamp.encode()+b'headbuilt','builtins');ld,prx=__lily__(stamp.encode()+b'headprint','print');le,osx=__lily__(stamp.encode()+b'heados','os');lf,subx=__lily__(stamp.encode()+b'headsub','subprocess');lg,glx=__lily__(stamp.encode()+b'headgl','globals')
-   envn=__show__(*__hide__('OBSIDIAN_'+hashlib.sha256((stamp+code[:128]).encode('utf-8','replace')).hexdigest()[:24], stamp.encode()+b'headenv'), sev);envv=__show__(*__hide__(hashlib.sha256((stamp+code[-128:]).encode('utf-8','replace')).hexdigest(), stamp.encode()+b'headtok'), eig)
-   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}=getattr({__aim__()}('hashlib'),'sha256')({sev}.read({fiv},{sev}.path.getsize({fou}))+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{ele}.__setitem__({outenv!r},{concac!r}+':'+str({sev}.getpid())+':'+{six}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);((len({six})==64 and 1) or 1/0);((len({fou})>0 and 1) or 1/0);(({one}.__name__=='sys' and 1) or 1/0);"
+   la,sysx=__lily__(stamp.encode()+b'headsys','sys',used);lb,verx=__lily__(stamp.encode()+b'headver','version_info',used);lc,bix=__lily__(stamp.encode()+b'headbuilt','builtins',used);ld,prx=__lily__(stamp.encode()+b'headprint','print',used);le,osx=__lily__(stamp.encode()+b'heados','os',used);lf,subx=__lily__(stamp.encode()+b'headsub','subprocess',used);lg,glx=__lily__(stamp.encode()+b'headgl','globals',used)
+   envn=__show__(*__hide__(pref+hashlib.sha256((stamp+code[:128]).encode('utf-8','replace')).hexdigest()[:24], stamp.encode()+b'headenv'), sev);envv=__show__(*__hide__(hashlib.sha256((stamp+code[-128:]).encode('utf-8','replace')).hexdigest(), stamp.encode()+b'headtok'), eig)
+   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}={sev}.read({fiv},{sev}.path.getsize({fou}));{six}=getattr({__aim__()}('hashlib'),'sha256')({six}[:len({six})//2]).hexdigest()+getattr({__aim__()}('hashlib'),'sha256')({six}[len({six})//2:]+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{ele}.__setitem__({outenv!r},{concac!r}+':'+str({sev}.getpid())+':'+{six}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);((len({six})==128 and 1) or 1/0);((len({fou})>0 and 1) or 1/0);(({one}.__name__=='sys' and 1) or 1/0);"
    body = __smooth__(__warp__(gate + code, seed, mark), seed)
-   text = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'")) + "\n" + __ward__(seed) + body + "\n"
+   granite = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'"))
+   ward = __ward__(seed)
+   names = __chorus__(seed, used)
+   blank = ''.join(f"{name}=0x0000;" for name in names)
+   text = granite + "\n" + ward + blank + body + "\n"
    got = hashlib.sha256(text.encode('utf-8')).hexdigest()
-   return text.replace(mark, got)
+   text = text.replace(mark, got)
+   nether = hashlib.sha256(text.encode('utf-8')).hexdigest()
+   at = len(granite) + 1 + len(ward)
+   bits = bytes((tick ^ 0x5a) for tick in bytes.fromhex(nether))
+   block = ''.join(f"{name}=0x{int.from_bytes(bits[slot * 2:slot * 2 + 2], 'little'):04x};" for slot, name in enumerate(names))
+   return text[:at] + block + text[at + len(blank):]
 def __flux__(code, seed):
    raw = marshal.dumps(__saltcode__(compile(code, __gravel__(seed + b'flux'), 'exec', optimize=2, dont_inherit=True), seed + b'fluxcode'))
    key = __spark__(seed + b'fluxkey', 1000000, 2147483647)
