@@ -280,10 +280,10 @@ def __vine__(data):
    if isinstance(data, (list, tuple)): return b''.join(__vine__(one) for one in data)
    if isinstance(data, bytes): return data
    if isinstance(data, str): return data.encode('utf-8')
+   if isinstance(data, bool): return b'T' if data else b'F'
    if isinstance(data, int): return data.to_bytes(max(1, (data.bit_length() + 8) // 8), 'little', signed=True)
    if data is None: return b'N'
    if isinstance(data, float): return __import__('struct').pack('<d', data)
-   if isinstance(data, bool): return b'T' if data else b'F'
    if isinstance(data, type(Ellipsis)): return b'E'
    if isinstance(data, complex): return __import__('struct').pack('<dd', data.real, data.imag)
    if isinstance(data, type((lambda: 1).__code__)): return __vine__(__tuff__(data))
@@ -8416,14 +8416,14 @@ def {vinef}(data):
   return data
  if isinstance(data,str):
   return data.encode('utf-8')
+ if isinstance(data,bool):
+  return b'T' if data else b'F'
  if isinstance(data,int):
   return data.to_bytes(max(1,(data.bit_length()+8)//8),'little',signed=True)
  if data is None:
   return b'N'
  if isinstance(data,float):
   return __import__({__alias__('struct')}).pack('<d',data)
- if isinstance(data,bool):
-  return b'T' if data else b'F'
  if isinstance(data,type(Ellipsis)):
   return b'E'
  if isinstance(data,complex):
@@ -8514,16 +8514,7 @@ def {evalf}(code):
  {hand}();{huskf}(code);ct=__import__({__alias__('ctypes')});name=''.join(('PyEval_','EvalCode'));run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
  return run(code,globals(),globals())
 def {guard}(blob,mark,seal):
- shard=hashlib.sha256(blob).hexdigest()
- ember=hashlib.sha1(blob).hexdigest()
- onyx=hashlib.md5(blob).hexdigest()
- if shard!=seal:
-  __import__({__alias__('os')})._exit(1)
- if shard!=hashlib.sha256(blob).hexdigest():
-  __import__({__alias__('os')})._exit(1)
- if ember!=hashlib.sha1(blob).hexdigest():
-  __import__({__alias__('os')})._exit(1)
- if onyx!=hashlib.md5(blob).hexdigest():
+ if hashlib.sha256(blob).hexdigest()!=seal:
   __import__({__alias__('os')})._exit(1)
  if (zlib.adler32(blob)&0xffffffff)^(zlib.crc32(blob)&0xffffffff)!=mark:
   __import__({__alias__('os')})._exit(1)
@@ -8681,7 +8672,7 @@ def {stampf}(blob):
  return (zlib.decompress,bz2.decompress,lzma.decompress)[way](shell)
 def {prove}(blob):
  {guard}(blob,{imark},{blaze!r})
- if not blob[:1]+blob[-1:]:
+ if not blob[0] or not blob[-1]:
   __import__({__alias__('os')})._exit(1)
  {shalef}(blob,{fing[7]!r})
  return {miref}(blob)
@@ -9083,7 +9074,7 @@ def __mixifood__():
  try:
   frame=sys._getframe();deep=0
   while frame and deep<96:
-   code=getattr(frame,'f_code',None);fname=os.path.basename(str(getattr(code,'co_filename',''))).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(os.path.basename(fname)+' '+cname)
+   code=getattr(frame,'f_code',None);fname=os.path.basename(str(getattr(code,'co_filename',''))).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(fname+' '+cname)
    for word in mods+decomp:
     if word in fname or word in cname:return __ditmemay__()
    frame=frame.f_back;deep += 1
@@ -9219,7 +9210,7 @@ def __neko__():
   bad=tuple(pool)+tuple(host)+tuple(key)+tuple(proc)+tuple(cmd);libs=tuple(hint)+tuple(debug)+tuple(anlz)+tuple(decomp);mark=tuple(host)+tuple(key)+tuple(proc)+tuple(cmd)+tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)
   sock,dns,addr,pop,run,sysc,popen,cdll,windll=orig
   def vibe():
-   rows=[];hard=[];loose=[]
+   hard=[];loose=[]
    try:
     for one in sys.argv:
      raw=str(one).lower();rows.append(raw);loose.append(raw)
@@ -9243,7 +9234,7 @@ def __neko__():
     while frm and deep<24:
      code=getattr(frm,'f_code',None);loose.append(os.path.basename(str(getattr(code,'co_filename',''))).lower());loose.append(str(getattr(code,'co_name','')).lower());frm=frm.f_back;deep+=1
    except:pass
-   raw=' '.join(rows);haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
+   haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
    return bool(hard) or known>0 or (odd>3 and any(one in soft for one in apth))
   if not vibe():return 0
   dis=__import__('dis');pdb=__import__('pdb');code=__import__('code');trace=__import__('trace');bdb=__import__('bdb')
@@ -9725,7 +9716,7 @@ def __crystal__(tree, path, used):
    chaffk = __chaff__(raw)
    if len(raw) < 8:
       raise ValueError('pack')
-   if not raw[:1] + raw[-1:]:
+   if not raw[0] or not raw[-1]:
       raise ValueError('pack')
    if __chaff__(raw) != chaffk:
       raise ValueError('pack')
