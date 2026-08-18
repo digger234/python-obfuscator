@@ -2766,13 +2766,24 @@ def __zod__(tree, code, seed):
     return (len(rows), fog.hex())
 def __kiv__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.Import, ast.ImportFrom)):
+    mods = {'os','sys','subprocess','socket','requests','httpx','urllib','urllib3','ssl','pystyle','hashlib','hmac','base64','marshal','pickle','zlib','bz2','lzma','ctypes','inspect','dis','ast','traceback','threading','asyncio','time','random','secrets'}
+    for node in __sweep__(tree, (ast.Import, ast.ImportFrom, ast.Call)):
         if isinstance(node, ast.Import):
             for one in node.names: rows.append(('i', one.name, one.asname or '', one.name.count('.'), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.ImportFrom):
             rows.append(('f', node.module or '', node.level, tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
-    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
-    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+            for one in node.names: rows.append(('alias', one.name, one.asname or '', len(node.names)))
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == '__import__': rows.append(('dyn', len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
+    names = []
+    imp_names = []
+    danger = []
+    for node in __sweep__(tree, (ast.Name,)):
+        if isinstance(node, ast.Name) and len(node.id) > 1: names.append(node.id)
+    for one in __drip__(code):
+        imp_names.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
+        found = tuple(name for name in one.co_names if name.split('.')[0] in mods)
+        danger.append((one.co_name, found, len(found)))
+    fog = __mix__(seed, (__hist__(rows), __hist__(imp_names), __hist__(names), tuple(danger[:256]), tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
 def __mav__(tree, code, seed):
     rows = []
@@ -2809,12 +2820,16 @@ def __pyr__(tree, code, seed):
     return (len(rows), fog.hex())
 def __qel__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.ExceptHandler, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try): rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
+    for node in __sweep__(tree, (ast.Assert, ast.ExceptHandler, ast.Raise, ast.Try)):
+        if isinstance(node, ast.Try):
+            rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), tuple(type(one).__name__ for one in node.body[:8]), getattr(node, 'lineno', 0)))
+            for at, handler in enumerate(node.handlers): rows.append(('handler', at, type(handler.type).__name__ if handler.type else '', handler.name or '', len(handler.body)))
         elif isinstance(node, ast.ExceptHandler): rows.append(('except', type(node.type).__name__ if node.type else '', node.name or '', len(node.body), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.Raise): rows.append(('raise', type(node.exc).__name__ if node.exc else '', type(node.cause).__name__ if node.cause else '', getattr(node, 'lineno', 0)))
-    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
-    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
+        elif isinstance(node, ast.Assert): rows.append(('assert', type(node.test).__name__, type(node.msg).__name__ if node.msg else '', getattr(node, 'lineno', 0)))
+    exc = []
+    for one in __drip__(code): exc.append((one.co_name, len(getattr(one, 'co_exceptiontable', b'')), zlib.crc32(getattr(one, 'co_exceptiontable', b'')) & 0xffffffff))
+    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(exc[:256]), len(rows)))
     return (len(rows), fog.hex())
 def __rice__(tree, code, seed):
     rows = []
@@ -2884,22 +2899,15 @@ def __yul__(tree, code, seed):
     return (len(rows), fog.hex())
 def __ziv__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.BinOp, ast.BoolOp, ast.Compare, ast.UnaryOp)):
+    for node in __sweep__(tree, (ast.BinOp, ast.BoolOp, ast.Compare, ast.UnaryOp, ast.AugAssign, ast.IfExp)):
         if isinstance(node, ast.BinOp): rows.append(('bin', type(node.op).__name__, type(node.left).__name__, type(node.right).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.BoolOp): rows.append(('bool', type(node.op).__name__, len(node.values), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.BoolOp): rows.append(('bool', type(node.op).__name__, len(node.values), tuple(type(one).__name__ for one in node.values[:16]), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.UnaryOp): rows.append(('unary', type(node.op).__name__, type(node.operand).__name__, getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.Compare): rows.append(('cmp', type(node.left).__name__, tuple(type(one).__name__ for one in node.ops), len(node.comparators), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AugAssign): rows.append(('aug', type(node.op).__name__, type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.IfExp): rows.append(('ifexp', type(node.test).__name__, type(node.body).__name__, type(node.orelse).__name__, getattr(node, 'lineno', 0)))
     mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __kro__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Match, ast.MatchAs, ast.MatchClass, ast.MatchMapping, ast.MatchOr, ast.MatchSequence, ast.MatchSingleton, ast.MatchStar, ast.MatchValue, ast.match_case)):
-        if isinstance(node, ast.Match): rows.append(('match', type(node.subject).__name__, len(node.cases), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.match_case): rows.append(('case', type(node.pattern).__name__, type(node.guard).__name__ if node.guard else '', len(node.body)))
-        elif type(node).__name__.startswith('Match'): rows.append((type(node).__name__, getattr(node, 'name', '') or '', getattr(node, 'rest', '') or ''))
-    mark = tuple((one.co_name, len(one.co_code), len(one.co_names), len(one.co_consts)) for one in __drip__(code)[:128])
-    fog = __mix__(seed, (__hist__(rows), mark, tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
 def __lum__(tree, code, seed):
     rows = []
@@ -2912,8 +2920,9 @@ def __lum__(tree, code, seed):
     return (len(rows), fog.hex())
 def __orz__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.Global, ast.Nonlocal, ast.alias, ast.arg)):
-        if isinstance(node, ast.Global): rows.append(('global', tuple(node.names), getattr(node, 'lineno', 0)))
+    for node in __sweep__(tree, (ast.Delete, ast.Global, ast.Nonlocal, ast.alias, ast.arg)):
+        if isinstance(node, ast.Delete): rows.append(('del', tuple(type(one).__name__ for one in node.targets[:16]), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Global): rows.append(('global', tuple(node.names), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.Nonlocal): rows.append(('nonlocal', tuple(node.names), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.arg): rows.append(('arg', node.arg, type(node.annotation).__name__ if node.annotation else '', getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.alias): rows.append(('alias', node.name, node.asname or ''))
@@ -3052,23 +3061,15 @@ def __zok__(tree, code, seed):
     for one in __drip__(code): names.extend(str(name).lower() for name in one.co_names)
     fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __pearl__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Assert, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try):
-            rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), tuple(type(one).__name__ for one in node.body[:8]), getattr(node, 'lineno', 0)))
-            for at, handler in enumerate(node.handlers): rows.append(('handler', at, type(handler.type).__name__ if handler.type else '', handler.name or '', len(handler.body)))
-        elif isinstance(node, ast.Raise): rows.append(('raise', type(node.exc).__name__ if node.exc else '', type(node.cause).__name__ if node.cause else '', getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Assert): rows.append(('assert', type(node.test).__name__, type(node.msg).__name__ if node.msg else '', getattr(node, 'lineno', 0)))
-    exc = []
-    for one in __drip__(code): exc.append((one.co_name, len(getattr(one, 'co_exceptiontable', b'')), zlib.crc32(getattr(one, 'co_exceptiontable', b'')) & 0xffffffff))
-    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(exc[:256]), len(rows)))
-    return (len(rows), fog.hex())
 def __lime__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncFunctionDef, ast.AsyncWith, ast.Attribute, ast.Await, ast.Call, ast.Name)):
         if isinstance(node, ast.Await): rows.append(('await', type(node.value).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, (ast.AsyncFunctionDef, ast.AsyncFor, ast.AsyncWith)): rows.append((type(node).__name__, getattr(node, 'name', ''), len(getattr(node, 'body', [])), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncFor): rows.append(('asyncfor', type(node.target).__name__, type(node.iter).__name__, len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncWith): rows.append(('asyncwith', len(node.items), len(node.body), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.AsyncFunctionDef): rows.append(('asyncfn', getattr(node, 'name', ''), len(getattr(node, 'body', [])), getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Attribute): rows.append(('attr', node.attr, type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
+        elif isinstance(node, ast.Name): rows.append(('name', node.id, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.Call):
             head = node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id if isinstance(node.func, ast.Name) else type(node.func).__name__
             if head in ('run','gather','wait','wait_for','create_task','sleep','open_connection','start_server'): rows.append(('call', head, len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
@@ -3119,26 +3120,6 @@ def __piv__(tree, code, seed):
     vars = tuple((one.co_name, one.co_nlocals, len(one.co_varnames), tuple(one.co_varnames[:64])) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), vars, tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
-def __qor__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Call, ast.Import, ast.ImportFrom, ast.Name)):
-        if isinstance(node, ast.Import): rows.append(('import', tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.ImportFrom): rows.append(('from', node.module or '', node.level, tuple((one.name, one.asname or '') for one in node.names), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == '__import__': rows.append(('dyn', len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
-    names = []
-    for one in __drip__(code): names.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
-    fog = __mix__(seed, (__hist__(rows), __hist__(names), tuple(rows[:512]), len(rows)))
-    return (len(rows), fog.hex())
-def __zinc__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.AsyncFunctionDef, ast.ClassDef, ast.FunctionDef, ast.Lambda)):
-        if isinstance(node, ast.ClassDef): rows.append(('class', node.name, tuple(type(one).__name__ for one in node.bases), len(node.keywords), len(node.body), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.FunctionDef): rows.append(('func', node.name, len(node.decorator_list), len(node.args.args), len(node.body), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.AsyncFunctionDef): rows.append(('afunc', node.name, len(node.decorator_list), len(node.args.args), len(node.body), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Lambda): rows.append(('lambda', len(node.args.args), type(node.body).__name__, getattr(node, 'lineno', 0)))
-    quals = tuple((one.co_name, one.co_qualname, one.co_firstlineno) for one in __drip__(code)[:256])
-    fog = __mix__(seed, (__hist__(rows), quals, tuple(rows[:1024]), len(rows)))
-    return (len(rows), fog.hex())
 def __topaz__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.Constant, ast.FormattedValue, ast.JoinedStr)):
@@ -3152,7 +3133,7 @@ def __tov__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.Slice, ast.Starred, ast.Subscript)):
         if isinstance(node, ast.Subscript): rows.append(('sub', type(node.value).__name__, type(node.slice).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Slice): rows.append(('slice', type(node.lower).__name__ if node.lower else '', type(node.upper).__name__ if node.upper else '', type(node.step).__name__ if node.step else ''))
+        elif isinstance(node, ast.Slice): rows.append(('slice', type(node.lower).__name__ if node.lower else '', type(node.upper).__name__ if node.upper else '', type(node.step).__name__ if node.step else '', getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.Starred): rows.append(('star', type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
     line = tuple((one.co_name, one.co_firstlineno, len(getattr(one, 'co_linetable', b''))) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), line, tuple(rows[:1024]), len(rows)))
@@ -3174,15 +3155,6 @@ def __vok__(tree, code, seed):
         elif isinstance(node, ast.withitem): rows.append(('item', type(node.context_expr).__name__, type(node.optional_vars).__name__ if node.optional_vars else ''))
     ops = tuple((one.co_name, one.co_code.count(143), one.co_code.count(53), one.co_code.count(54)) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), ops, tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __waz__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.BoolOp, ast.Compare, ast.UnaryOp)):
-        if isinstance(node, ast.BoolOp): rows.append(('bool', type(node.op).__name__, len(node.values), tuple(type(one).__name__ for one in node.values[:16]), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Compare): rows.append(('cmp', tuple(type(one).__name__ for one in node.ops), len(node.comparators), type(node.left).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.UnaryOp): rows.append(('unary', type(node.op).__name__, type(node.operand).__name__, getattr(node, 'lineno', 0)))
-    nums = tuple((one.co_name, sum(1 for val in one.co_consts if isinstance(val, (int, float, complex)) and not isinstance(val, bool))) for one in __drip__(code)[:256])
-    fog = __mix__(seed, (__hist__(rows), nums, tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
 def __xir__(tree, code, seed):
     rows = []
@@ -3256,15 +3228,6 @@ def __neo__(tree, code, seed):
     raw = tuple((one.co_name, sum(1 for name in one.co_names if name in keys)) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), raw, tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __pio__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.DictComp, ast.GeneratorExp, ast.ListComp, ast.SetComp)):
-        if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
-            gens = getattr(node, 'generators', [])
-            rows.append((type(node).__name__, len(gens), tuple((type(gen.target).__name__, type(gen.iter).__name__, len(gen.ifs), int(gen.is_async)) for gen in gens[:8]), getattr(node, 'lineno', 0)))
-    flags = tuple((one.co_name, one.co_flags, len(one.co_freevars), len(one.co_cellvars)) for one in __drip__(code)[:256])
-    fog = __mix__(seed, (__hist__(rows), flags, tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
 def __qio__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.Constant,)):
@@ -3295,14 +3258,6 @@ def __sio__(tree, code, seed):
     raw = marshal.dumps(code)
     fog = __mix__(seed, (__hist__(rows), hashlib.sha512(raw[:4096]).hexdigest(), zlib.crc32(raw) & 0xffffffff, tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __tio__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.AugAssign, ast.BinOp)):
-        if isinstance(node, ast.BinOp): rows.append(('bin', type(node.op).__name__, type(node.left).__name__, type(node.right).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.AugAssign): rows.append(('aug', type(node.op).__name__, type(node.target).__name__, type(node.value).__name__, getattr(node, 'lineno', 0)))
-    op = tuple((one.co_name, sum(one.co_code.count(byte) for byte in (45,46,47,48,49,50,51,52,122))) for one in __drip__(code)[:256])
-    fog = __mix__(seed, (__hist__(rows), op, tuple(rows[:1024]), len(rows)))
-    return (len(rows), fog.hex())
 def __uio__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.Call, ast.keyword)):
@@ -3330,20 +3285,6 @@ def __wio__(tree, code, seed):
     fog = __mix__(seed, (__hist__(rows), tuple(chain[:256]), tuple(rows[:1536]), len(rows)))
     return (len(rows), fog.hex())
 
-def __xio__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Dict, ast.Set)):
-        if isinstance(node, ast.Dict): rows.append(('dict', len(node.keys), tuple(type(one).__name__ if one else '' for one in node.keys[:32]), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Set): rows.append(('set', len(node.elts), tuple(type(one).__name__ for one in node.elts[:32]), getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_consts)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __yio__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.List, ast.Tuple)):
-        if isinstance(node, ast.List): rows.append(('list', len(node.elts), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Tuple): rows.append(('tuple', len(node.elts), type(node.ctx).__name__, getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_code[:16]) for one in __drip__(code)[:128]), tuple(rows[:1024]), len(rows)))
-    return (len(rows), fog.hex())
 def __zio__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.AnnAssign, ast.arg)):
@@ -3365,20 +3306,6 @@ def __lra__(tree, code, seed):
         elif isinstance(node, ast.While): rows.append(('while', type(node.test).__name__, len(node.body), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_stacksize) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
     return (len(rows), fog.hex())
-def __mra__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.ImportFrom, ast.alias)):
-        if isinstance(node, ast.ImportFrom): rows.append((node.module or '', node.level, len(node.names), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.alias): rows.append((node.name, node.asname or '', len(node.name)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_names)) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __nra__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.ExceptHandler, ast.TryStar)):
-        if isinstance(node, ast.TryStar): rows.append(('trystar', len(node.body), len(node.handlers), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.ExceptHandler): rows.append(('except', type(node.type).__name__ if node.type else '', len(node.body), getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, zlib.crc32(one.co_code) & 0xffffffff) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
 def __pra__(tree, code, seed):
     rows = []
     for node in __sweep__(tree, (ast.Lambda, ast.NamedExpr)):
@@ -3399,29 +3326,6 @@ def __rra__(tree, code, seed):
         if isinstance(node, ast.Module): rows.append(('module', len(node.body), tuple(type(one).__name__ for one in node.body[:32])))
         elif isinstance(node, ast.Expr): rows.append(('expr', type(node.value).__name__, getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), hashlib.blake2b(marshal.dumps(code)[:4096], digest_size=32).hexdigest(), tuple(rows[:1024]), len(rows)))
-    return (len(rows), fog.hex())
-def __grave__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Delete, ast.Global, ast.Nonlocal)):
-        if isinstance(node, ast.Delete): rows.append(('del', tuple(type(one).__name__ for one in node.targets[:16]), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Global): rows.append(('global', tuple(node.names[:32]), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Nonlocal): rows.append(('nonlocal', tuple(node.names[:32]), getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, tuple(one.co_names[:24])) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __shiver__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncWith, ast.Await)):
-        if isinstance(node, ast.Await): rows.append(('await', type(node.value).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.AsyncFor): rows.append(('asyncfor', type(node.target).__name__, type(node.iter).__name__, getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.AsyncWith): rows.append(('asyncwith', len(node.items), getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, one.co_flags, one.co_stacksize) for one in __drip__(code)[:128]), tuple(rows[:768]), len(rows)))
-    return (len(rows), fog.hex())
-def __sable__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.Slice, ast.Starred)):
-        if isinstance(node, ast.Slice): rows.append(('slice', type(node.lower).__name__ if node.lower else '', type(node.upper).__name__ if node.upper else '', type(node.step).__name__ if node.step else '', getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Starred): rows.append(('star', type(node.value).__name__, type(node.ctx).__name__, getattr(node, 'lineno', 0)))
-    fog = __mix__(seed, (__hist__(rows), tuple((one.co_name, len(one.co_consts), one.co_nlocals) for one in __drip__(code)[:128]), tuple(rows[:1024]), len(rows)))
     return (len(rows), fog.hex())
 def __mosaic__(tree, code, seed):
     rows = []
@@ -3483,7 +3387,7 @@ def __camel__(tree, code, seed):
     return (len(rows), fog.hex())
 def __warden__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.AsyncFunctionDef, ast.ClassDef, ast.FunctionDef)):
+    for node in __sweep__(tree, (ast.AsyncFunctionDef, ast.ClassDef, ast.FunctionDef, ast.Lambda)):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             args = node.args
             deco = tuple(type(one).__name__ for one in node.decorator_list)
@@ -3494,6 +3398,9 @@ def __warden__(tree, code, seed):
             rows.append(('cls', node.name, len(node.body), len(node.bases), len(node.decorator_list), getattr(node, 'lineno', 0)))
             for base in node.bases:
                 rows.append(('base', node.name, type(base).__name__))
+        if isinstance(node, ast.Lambda):
+            args = node.args
+            rows.append(('lambda', len(args.posonlyargs), len(args.args), len(args.kwonlyargs), int(args.vararg is not None), int(args.kwarg is not None), type(node.body).__name__, getattr(node, 'lineno', 0)))
     raw = []
     for one in __drip__(code)[:256]:
         raw.append((one.co_name, one.co_argcount, getattr(one, 'co_posonlyargcount', 0), one.co_kwonlyargcount, one.co_nlocals, len(one.co_varnames)))
@@ -3535,25 +3442,6 @@ def __breeze__(tree, code, seed):
             rows.append(('match', len(node.cases), type(node.subject).__name__, getattr(node, 'lineno', 0)))
     raw = tuple((one.co_name, len(one.co_exceptiontable), one.co_stacksize, one.co_flags) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), raw, len(rows)))
-    return (len(rows), fog.hex())
-def __sniffer__(tree, code, seed):
-    rows = []
-    for node in __sweep__(tree, (ast.BinOp, ast.BoolOp, ast.Compare, ast.IfExp, ast.UnaryOp)):
-        if isinstance(node, ast.BoolOp):
-            rows.append(('bool', type(node.op).__name__, len(node.values), getattr(node, 'lineno', 0)))
-        if isinstance(node, ast.BinOp):
-            rows.append(('bin', type(node.op).__name__, type(node.left).__name__, type(node.right).__name__, getattr(node, 'lineno', 0)))
-        if isinstance(node, ast.UnaryOp):
-            rows.append(('unary', type(node.op).__name__, type(node.operand).__name__, getattr(node, 'lineno', 0)))
-        if isinstance(node, ast.Compare):
-            rows.append(('cmp', tuple(type(op).__name__ for op in node.ops), len(node.comparators), getattr(node, 'lineno', 0)))
-        if isinstance(node, ast.IfExp):
-            rows.append(('ifexp', type(node.test).__name__, type(node.body).__name__, type(node.orelse).__name__, getattr(node, 'lineno', 0)))
-    ops = []
-    for one in __drip__(code)[:256]:
-        data = one.co_code
-        ops.append((one.co_name, tuple(data[:96]), len(data)))
-    fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), tuple(ops), len(rows)))
     return (len(rows), fog.hex())
 def __strider__(tree, code, seed):
     rows = []
@@ -3715,23 +3603,6 @@ def __fox__(tree, code, seed):
                 rows.append(('str', len(node.value), hit, getattr(node, 'lineno', 0)))
     raw = tuple((one.co_name, tuple(name for name in one.co_names if any(word in name.lower() for word in keys))) for one in __drip__(code)[:128])
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), raw, len(rows)))
-    return (len(rows), fog.hex())
-def __goat__(tree, code, seed):
-    rows = []
-    mods = {'os','sys','subprocess','socket','requests','httpx','urllib','urllib3','ssl','pystyle','hashlib','hmac','base64','marshal','pickle','zlib','bz2','lzma','ctypes','inspect','dis','ast','traceback','threading','asyncio','time','random','secrets'}
-    for node in __sweep__(tree, (ast.Import, ast.ImportFrom)):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                root = alias.name.split('.')[0]
-                rows.append(('imp', root, 1 if root in mods else 0, alias.asname or ''))
-        if isinstance(node, ast.ImportFrom):
-            root = (node.module or '').split('.')[0]
-            rows.append(('from', root, 1 if root in mods else 0, node.level, len(node.names)))
-    raw = []
-    for one in __drip__(code)[:128]:
-        found = tuple(name for name in one.co_names if name.split('.')[0] in mods)
-        raw.append((one.co_name, found, len(found)))
-    fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), tuple(raw), len(rows)))
     return (len(rows), fog.hex())
 def __parrot__(tree, code, seed):
     rows = []
@@ -4464,11 +4335,6 @@ def __spider2__(bag, seed):
             rows.append((tuple(stack[-6:]), 'return', getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), len(rows)))
     return ('spider2', len(rows), fog.hex())
-def __squid2__(bag, seed):
-    rows = []
-    rows.extend(bag.get('shape', ()))
-    fog = __mix__(seed, (__hist__(rows), tuple(rows), len(rows)))
-    return ('squid2', len(rows), fog.hex())
 def __vex2__(bag, seed):
     rows = []
     for one in bag['codes']:
@@ -5633,7 +5499,7 @@ def __ore__(tree, code, seed):
     full = tuple(ast.walk(tree)); codes = __drip__(code); wide = (len(full), len(codes))
     nodes = full; shape = __hist__(type(node).__name__ for node in full)
     bag = {'nodes': nodes, 'codes': codes, 'wide': wide, 'shape': shape, 'tree': tree}
-    seq = ((b'oak', __oak__), (b'spruce', __spruce__), (b'birch', __birch__), (b'jungle', __jungle__), (b'acacia', __acacia__), (b'mangrove', __mangrove__), (b'cherry', __cherry__), (b'bamboo', __bamboo__), (b'cactus', __cactus__), (b'kelp', __kelp__), (b'shell', __shell__), (b'seagrass', __seagrass__), (b'mycelium', __mycelium__), (b'shroom', __shroom__), (b'azalea', __azalea__), (b'dripstone', __dripstone__), (b'sculk', __sculk__), (b'tufa', __tufa__), (b'calcite', __calcite__), (b'amethyst', __amethyst__), (b'granite', __granite__), (b'diorite', __diorite__), (b'andesite', __andesite__), (b'crag', __crag__), (b'blackstone', __blackstone__), (b'netherrack', __netherrack__), (b'glowstone', __glowstone__), (b'endstone', __endstone__), (b'purpur', __purpur__), (b'prismarine', __prismarine__), (b'terracotta', __terracotta__), (b'concrete', __concrete__), (b'lantern', __lantern__), (b'lamp', __lamp__), (b'campfire', __campfire__), (b'hammer', __hammer__), (b'furnace', __furnace__), (b'hopper', __hopper__), (b'dropper', __dropper__), (b'observer', __observer__), (b'piston', __piston__), (b'rail', __rail__), (b'minecart', __minecart__), (b'bee2', __bee2__), (b'camel2', __camel2__), (b'warden2', __warden2__), (b'allay2', __allay2__), (b'breeze2', __breeze2__), (b'sniffer2', __sniffer2__), (b'strider2', __strider2__), (b'hoglin2', __hoglin2__), (b'panda2', __panda2__), (b'llama2', __llama2__), (b'ocelot2', __ocelot2__), (b'ravager2', __ravager2__), (b'turtle2', __turtle2__), (b'phantom2', __phantom2__), (b'dolphin2', __dolphin2__), (b'fox2', __fox2__), (b'goat2', __goat2__), (b'parrot2', __parrot2__), (b'rabbit2', __rabbit2__), (b'salmon2', __salmon2__), (b'spider2', __spider2__), (b'squid2', __squid2__), (b'vex2', __vex2__), (b'zombie2', __zombie2__), (b'creeper2', __creeper2__), (b'piglin2', __piglin2__), (b'ghast2', __ghast2__), (b'shulker2', __shulker2__), (b'ender2', __ender2__), (b'slime2', __slime2__), (b'magma2', __magma2__), (b'blaze2', __blaze2__), (b'stray2', __stray2__), (b'husk2', __husk2__), (b'drowned2', __drowned2__), (b'watch', __watch__), (b'sprite', __sprite__), (b'axolotl', __axolotl__), (b'armadillo', __armadillo__), (b'badger', __badger__), (b'bogged', __bogged__), (b'breezez', __breezez__), (b'cat', __cat__), (b'donkey', __donkey__), (b'frog', __frog__), (b'horse', __horse__), (b'metal', __metal__), (b'mooshroom', __mooshroom__), (b'mule', __mule__), (b'polar', __polar__), (b'snow', __snow__), (b'wolf', __wolf__), (b'zoglin', __zoglin__), (b'brute', __brute__), (b'silver', __silver__), (b'copper', __copper__), (b'wax', __wax__), (b'glint', __glint__), (b'echoes', __echoes__), (b'golem', __golem__), (b'ravine', __ravine__), (b'geode', __geode__), (b'spire', __spire__), (b'agate', __agate__), (b'jade', __jade__), (b'quartz', __quartz__), (b'mica', __mica__))
+    seq = ((b'oak', __oak__), (b'spruce', __spruce__), (b'birch', __birch__), (b'jungle', __jungle__), (b'acacia', __acacia__), (b'mangrove', __mangrove__), (b'cherry', __cherry__), (b'bamboo', __bamboo__), (b'cactus', __cactus__), (b'kelp', __kelp__), (b'shell', __shell__), (b'seagrass', __seagrass__), (b'mycelium', __mycelium__), (b'shroom', __shroom__), (b'azalea', __azalea__), (b'dripstone', __dripstone__), (b'sculk', __sculk__), (b'tufa', __tufa__), (b'calcite', __calcite__), (b'amethyst', __amethyst__), (b'granite', __granite__), (b'diorite', __diorite__), (b'andesite', __andesite__), (b'crag', __crag__), (b'blackstone', __blackstone__), (b'netherrack', __netherrack__), (b'glowstone', __glowstone__), (b'endstone', __endstone__), (b'purpur', __purpur__), (b'prismarine', __prismarine__), (b'terracotta', __terracotta__), (b'concrete', __concrete__), (b'lantern', __lantern__), (b'lamp', __lamp__), (b'campfire', __campfire__), (b'hammer', __hammer__), (b'furnace', __furnace__), (b'hopper', __hopper__), (b'dropper', __dropper__), (b'observer', __observer__), (b'piston', __piston__), (b'rail', __rail__), (b'minecart', __minecart__), (b'bee2', __bee2__), (b'camel2', __camel2__), (b'warden2', __warden2__), (b'allay2', __allay2__), (b'breeze2', __breeze2__), (b'sniffer2', __sniffer2__), (b'strider2', __strider2__), (b'hoglin2', __hoglin2__), (b'panda2', __panda2__), (b'llama2', __llama2__), (b'ocelot2', __ocelot2__), (b'ravager2', __ravager2__), (b'turtle2', __turtle2__), (b'phantom2', __phantom2__), (b'dolphin2', __dolphin2__), (b'fox2', __fox2__), (b'goat2', __goat2__), (b'parrot2', __parrot2__), (b'rabbit2', __rabbit2__), (b'salmon2', __salmon2__), (b'spider2', __spider2__), (b'vex2', __vex2__), (b'zombie2', __zombie2__), (b'creeper2', __creeper2__), (b'piglin2', __piglin2__), (b'ghast2', __ghast2__), (b'shulker2', __shulker2__), (b'ender2', __ender2__), (b'slime2', __slime2__), (b'magma2', __magma2__), (b'blaze2', __blaze2__), (b'stray2', __stray2__), (b'husk2', __husk2__), (b'drowned2', __drowned2__), (b'watch', __watch__), (b'sprite', __sprite__), (b'axolotl', __axolotl__), (b'armadillo', __armadillo__), (b'badger', __badger__), (b'bogged', __bogged__), (b'breezez', __breezez__), (b'cat', __cat__), (b'donkey', __donkey__), (b'frog', __frog__), (b'horse', __horse__), (b'metal', __metal__), (b'mooshroom', __mooshroom__), (b'mule', __mule__), (b'polar', __polar__), (b'snow', __snow__), (b'wolf', __wolf__), (b'zoglin', __zoglin__), (b'brute', __brute__), (b'silver', __silver__), (b'copper', __copper__), (b'wax', __wax__), (b'glint', __glint__), (b'echoes', __echoes__), (b'golem', __golem__), (b'ravine', __ravine__), (b'geode', __geode__), (b'spire', __spire__), (b'agate', __agate__), (b'jade', __jade__), (b'quartz', __quartz__), (b'mica', __mica__))
     rows = [fn(bag, seed + tag) for tag, fn in seq]
     fog = __mix__(seed, (tuple(rows), wide, len(nodes), shape, __hist__(rows)))
     return (len(rows), wide, len(nodes), fog.hex())
@@ -5651,7 +5517,7 @@ def __chart__(tree, code, stem, path, seed):
         for arg, seq in flow:
             for tag, fn in seq:
                 rows.append(fn(arg, seed + tag))
-        dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'night', __night__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rice', __rice__), (b'sorn', __sorn__), (b'tav', __tav__), (b'umber', __umber__), (b'vor', __vor__), (b'wool', __wool__), (b'yul', __yul__), (b'ziv', __ziv__), (b'kro', __kro__), (b'lum', __lum__), (b'orz', __orz__), (b'dusk', __dusk__), (b'peace', __peace__), (b'quill', __quill__), (b'rust', __rust__), (b'siv', __siv__), (b'tick', __tick__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yarn', __yarn__), (b'zok', __zok__), (b'pearl', __pearl__), (b'lime', __lime__), (b'cedar', __cedar__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'qor', __qor__), (b'zinc', __zinc__), (b'topaz', __topaz__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'waz', __waz__), (b'xir', __xir__), (b'yok', __yok__), (b'ruby', __ruby__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'pio', __pio__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'tio', __tio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'xio', __xio__), (b'yio', __yio__), (b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'mra', __mra__), (b'nra', __nra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'grave', __grave__), (b'shiver', __shiver__), (b'sable', __sable__), (b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'sniffer', __sniffer__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'goat', __goat__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'wraith', __wraith__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),))
+        dual = (((b'vex', __vex__), (b'zod', __zod__), (b'kiv', __kiv__), (b'mav', __mav__), (b'night', __night__), (b'pyr', __pyr__), (b'qel', __qel__), (b'rice', __rice__), (b'sorn', __sorn__), (b'tav', __tav__), (b'umber', __umber__), (b'vor', __vor__), (b'wool', __wool__), (b'yul', __yul__), (b'ziv', __ziv__), (b'lum', __lum__), (b'orz', __orz__), (b'dusk', __dusk__), (b'peace', __peace__), (b'quill', __quill__), (b'rust', __rust__), (b'siv', __siv__), (b'tick', __tick__), (b'uvo', __uvo__), (b'vyn', __vyn__)), ((b'wok', __wok__), (b'xul', __xul__), (b'yarn', __yarn__), (b'zok', __zok__), (b'lime', __lime__), (b'cedar', __cedar__), (b'nuv', __nuv__), (b'oxa', __oxa__), (b'piv', __piv__), (b'topaz', __topaz__), (b'tov', __tov__), (b'uzn', __uzn__), (b'vok', __vok__), (b'xir', __xir__), (b'yok', __yok__), (b'ruby', __ruby__)), ((b'kao', __kao__), (b'leo', __leo__), (b'mio', __mio__), (b'neo', __neo__), (b'qio', __qio__), (b'rio', __rio__), (b'sio', __sio__), (b'uio', __uio__), (b'vio', __vio__), (b'wio', __wio__)), ((b'zio', __zio__), (b'kra', __kra__), (b'lra', __lra__), (b'pra', __pra__), (b'qra', __qra__), (b'rra', __rra__)), ((b'mosaic', __mosaic__), (b'lamb', __lamb__)), ((b'bee', __bee__), (b'camel', __camel__), (b'warden', __warden__), (b'allay', __allay__), (b'breeze', __breeze__), (b'strider', __strider__), (b'hoglin', __hoglin__), (b'panda', __panda__), (b'llama', __llama__), (b'ocelot', __ocelot__), (b'ravager', __ravager__), (b'turtle', __turtle__), (b'phantom', __phantom__), (b'dolphin', __dolphin__), (b'fox', __fox__), (b'parrot', __parrot__), (b'rabbit', __rabbit__), (b'salmon', __salmon__), (b'spider', __spider__), (b'wraith', __wraith__), (b'zombie', __zombie__), (b'creeper', __creeper__)), ((b'piglin', __piglin__), (b'ghast', __ghast__), (b'shulker', __shulker__), (b'enderman', __enderman__), (b'villager', __villager__), (b'pillager', __pillager__), (b'guardian', __guardian__)), ((b'squid', __squid__),),)
         for seq in dual:
             for tag, fn in seq:
                 rows.append(fn(tree, code, seed + tag))
@@ -7233,7 +7099,88 @@ def __vein__(code):
         bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=names[0], ctx=ast.Store())], value=ast.Constant(str(kiln))), ast.Assign(targets=[ast.Name(id=names[1], ctx=ast.Store())], value=ast.Constant(str(batch)))], orelse=[]))
         slag5 = __mint__(used, seed, mint)
         bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.If(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(cobbled))], orelse=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(pebbles[1]))])], orelse=[]))
+        tick[0]+=1;_fa=__mint__(used,seed,mint);_fb=__mint__(used,seed,mint);_fv1=__spark__(seed+b'frost1v'+tick[0].to_bytes(4,'little'),1,9999);_fv2=__spark__(seed+b'frost1x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=_fa,ctx=ast.Store())],value=ast.Constant(_fv1)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fa,ctx=ast.Load()),op=ast.BitXor(),right=ast.Name(id=_fa,ctx=ast.Load())),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=_fb,ctx=ast.Store())],value=ast.Constant(_fv2)),ast.Assign(targets=[ast.Name(id=_fb,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=_fb,ctx=ast.Load()),op=ast.Add(),right=ast.Constant(0))),ast.AugAssign(target=ast.Name(id=_fb,ctx=ast.Store()),op=ast.Mult(),value=ast.Constant(1))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
+        tick[0]+=1;_fd=__mint__(used,seed,mint);_fe=__mint__(used,seed,mint);_fv3=__spark__(seed+b'frost2v'+tick[0].to_bytes(4,'little'),1,9999);_fv4=__spark__(seed+b'frost2x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=_fd,ctx=ast.Store())],value=ast.Constant(_fv3)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fd,ctx=ast.Load()),op=ast.Mult(),right=ast.Name(id=_fd,ctx=ast.Load())),ops=[ast.GtE()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=_fe,ctx=ast.Store())],value=ast.Constant(_fv4)),ast.AugAssign(target=ast.Name(id=_fe,ctx=ast.Store()),op=ast.BitAnd(),value=ast.Constant(0xffffffff))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
+        tick[0]+=1;_fj=__mint__(used,seed,mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=_fj,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='urandom',ctx=ast.Load()),args=[ast.Constant(64)],keywords=[])),ast.Assign(targets=[ast.Name(id=_fj,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='getpid',ctx=ast.Load()),args=[],keywords=[]))],orelse=[]))
+        tick[0]+=1;_fk=__mint__(used,seed,mint);_fl=__mint__(used,seed,mint);_fm=__mint__(used,seed,mint);_fv=__spark__(seed+b'mpath'+tick[0].to_bytes(4,'little'),0,9999);_fv2=__spark__(seed+b'mpath2'+tick[0].to_bytes(4,'little'),100,9999);_fv3=__spark__(seed+b'mpath3'+tick[0].to_bytes(4,'little'),100,9999);_mpbody1=[ast.Assign(targets=[ast.Name(id=_fl,ctx=ast.Store())],value=ast.Constant(_fv2)),ast.Assign(targets=[ast.Name(id=_fl,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='len',ctx=ast.Load()),args=[ast.Call(func=ast.Name(id='str',ctx=ast.Load()),args=[ast.Name(id=_fl,ctx=ast.Load())],keywords=[])],keywords=[]))];_mpbody2=[ast.Assign(targets=[ast.Name(id=_fm,ctx=ast.Store())],value=ast.Constant(_fv3)),ast.Assign(targets=[ast.Name(id=_fm,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='type',ctx=ast.Load()),args=[ast.Name(id=_fm,ctx=ast.Load())],keywords=[]))];bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=_fk,ctx=ast.Store())],value=ast.Constant(_fv)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fk,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=_mpbody1,orelse=[ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fk,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(1)]),body=_mpbody2,orelse=[ast.Pass()])])],orelse=[]))
+        tick[0]+=1;slag8=__mint__(used,seed,mint);coal8=__mint__(used,seed,mint);rock8=__spark__(seed+b'opaque1'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag8,ctx=ast.Store())],value=ast.Constant(rock8)),ast.Assign(targets=[ast.Name(id=coal8,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag8,ctx=ast.Load()),op=ast.Mult(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal8,ctx=ast.Load()),ops=[ast.GtE()],comparators=[ast.Constant(1)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;slag9=__mint__(used,seed,mint);coal9=__mint__(used,seed,mint);rock9=__spark__(seed+b'opaque2'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag9,ctx=ast.Store())],value=ast.Constant(rock9)),ast.Assign(targets=[ast.Name(id=coal9,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag9,ctx=ast.Load()),op=ast.BitAnd(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal9,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(rock9)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;slag10=__mint__(used,seed,mint);coal10=__mint__(used,seed,mint);rock10=__spark__(seed+b'opaque3'+tick[0].to_bytes(4,'little'),2,99);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag10,ctx=ast.Store())],value=ast.Constant(rock10)),ast.Assign(targets=[ast.Name(id=coal10,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag10,ctx=ast.Load()),op=ast.Pow(),right=ast.Constant(1))),ast.If(test=ast.Compare(left=ast.Name(id=coal10,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Name(id=slag10,ctx=ast.Load())]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;blaze2=__mint__(used,seed,mint);creeper2=__mint__(used,seed,mint);ender2=__spark__(seed+b'excp1'+tick[0].to_bytes(4,'little'),1000,9999);ghast2=__mint__(used,seed+b'excp2',mint);piston2=__mint__(used,seed+b'xinit',mint);wither2=__mint__(used,seed+b'xtrace',mint);spider2=__mint__(used,seed+b'xcode',mint);skeleton2=__mint__(used,seed+b'xts',mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.ClassDef(name=blaze2,bases=[ast.Name(id='Exception',ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=piston2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self'),ast.arg(arg=creeper2)],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Store())],value=ast.Name(id=creeper2,ctx=ast.Load())),ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=skeleton2,ctx=ast.Store())],value=ast.Constant(ender2))],decorator_list=[],returns=None)],decorator_list=[]),ast.ClassDef(name=ghast2,bases=[ast.Name(id=blaze2,ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=wither2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self')],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Return(value=ast.BinOp(left=ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Load()),op=ast.BitXor(),right=ast.Constant(ender2)))],decorator_list=[],returns=None)],decorator_list=[])],orelse=[]))
         return bag
+    def __evoker__(body):
+        if len(body)<2:
+            return body
+        for node in body:
+            if isinstance(node,(ast.Global,ast.Nonlocal,ast.Import,ast.ImportFrom,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Break,ast.Continue)):
+                return body
+        tick[0]+=1
+        ns=len(body)+1
+        states=[__spark__(seed+b'evoker'+ix.to_bytes(4,'little')+tick[0].to_bytes(4,'little'),1000000,9999999) for ix in range(ns)]
+        svar=__mint__(used,seed+b'evokervar',mint)
+        init=ast.Assign(targets=[ast.Name(id=svar,ctx=ast.Store())],value=ast.Constant(states[0]))
+        checks=[]
+        for idx in range(len(body)):
+            test=ast.Compare(left=ast.Name(id=svar,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(states[idx])])
+            nxt=ast.Constant(states[idx+1])
+            bodychunk=[body[idx],ast.Assign(targets=[ast.Name(id=svar,ctx=ast.Store())],value=nxt)]
+            checks.append(ast.If(test=test,body=bodychunk,orelse=[]))
+        lastdrop=checks[-1]
+        lastdrop.body[-1]=ast.Break()
+        return[init,ast.While(test=ast.Constant(True),body=checks,orelse=[])]
+    def __tomek__(body):
+        if len(body)<2 or len(body)>5:
+            return body
+        for node in body:
+            if isinstance(node,(ast.Global,ast.Nonlocal,ast.Import,ast.ImportFrom,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Break,ast.Continue)):
+                return body
+        tick[0]+=1
+        cobble=len(body)
+        lava=[__spark__(seed+b'tomek'+ix.to_bytes(4,'little')+tick[0].to_bytes(4,'little'),1000000,9999999) for ix in range(cobble+1)]
+        ember=__mint__(used,seed+b'tomekvar',mint)
+        soul=__mint__(used,seed+b'tomekdict',mint)
+        silk=__mint__(used,seed+b'tomekidx',mint)
+        chain=__mint__(used,seed+b'tomeknxt',mint)
+        dust=[ast.Constant(lava[idx]) for idx in range(cobble)]
+        torch=[ast.Tuple(elts=[ast.Constant(idx),ast.Constant(lava[idx+1])],ctx=ast.Load()) for idx in range(cobble)]
+        pick=ast.Assign(targets=[ast.Name(id=soul,ctx=ast.Store())],value=ast.Dict(keys=dust,values=torch))
+        ore=ast.Assign(targets=[ast.Name(id=ember,ctx=ast.Store())],value=ast.Constant(lava[0]))
+        iron=ast.Assign(targets=[ast.Tuple(elts=[ast.Name(id=silk,ctx=ast.Store()),ast.Name(id=chain,ctx=ast.Store())],ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Name(id=soul,ctx=ast.Load()),attr='get',ctx=ast.Load()),args=[ast.Name(id=ember,ctx=ast.Load()),ast.Tuple(elts=[ast.Constant(0),ast.Constant(0)],ctx=ast.Load())],keywords=[]))
+        gold=[]
+        for idx in range(cobble):
+            test=ast.Compare(left=ast.Name(id=silk,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(idx)])
+            bodychunk=[body[idx],ast.Assign(targets=[ast.Name(id=ember,ctx=ast.Store())],value=ast.Name(id=chain,ctx=ast.Load()))]
+            gold.append(ast.If(test=test,body=bodychunk,orelse=[]))
+        gold[-1].body[-1]=ast.Break()
+        return[ore,pick,ast.While(test=ast.Constant(True),body=[iron]+gold,orelse=[])]
+    def __helmet__(body):
+        if not body or len(body)>12:
+            return body
+        for node in body:
+            if isinstance(node,(ast.Global,ast.Nonlocal,ast.Import,ast.ImportFrom,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Break,ast.Continue)):
+                return body
+        tick[0]+=1
+        nether=[]
+        for one in body:
+            if not isinstance(one,(ast.Assign,ast.AugAssign,ast.Expr)):
+                nether.append(one)
+                continue
+            slag=__mint__(used,seed+b'hls'+tick[0].to_bytes(4,'little'),mint)
+            rock=__spark__(seed+b'hlv'+tick[0].to_bytes(4,'little'),10**4,10**8)
+            coal=__mint__(used,seed+b'hlc'+tick[0].to_bytes(4,'little'),mint)
+            glass=__mint__(used,seed+b'hlg'+tick[0].to_bytes(4,'little'),mint)
+            coalv=__spark__(seed+b'hlcv'+tick[0].to_bytes(4,'little'),1,9999)
+            glassv=__spark__(seed+b'hlgv'+tick[0].to_bytes(4,'little'),1,9999)
+            flint=__mint__(used,seed+b'hl'+tick[0].to_bytes(4,'little'),mint)
+            nether.append(ast.Assign(targets=[ast.Name(id=slag,ctx=ast.Store())],value=ast.Constant(rock)))
+            nether.append(ast.Assign(targets=[ast.Name(id=coal,ctx=ast.Store())],value=ast.Constant(coalv)))
+            nether.append(ast.Assign(targets=[ast.Name(id=glass,ctx=ast.Store())],value=ast.Constant(glassv)))
+            guard=ast.Compare(left=ast.Name(id=coal,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Name(id=glass,ctx=ast.Load())])
+            inner=ast.Try(body=[ast.If(test=guard,body=[ast.Pass()],orelse=[one])],handlers=[ast.ExceptHandler(type=ast.Name(id='ZeroDivisionError',ctx=ast.Load()),name=None,body=[ast.Pass()])],orelse=[],finalbody=[ast.Assign(targets=[ast.Name(id=slag,ctx=ast.Store())],value=ast.Constant(rock))])
+            loop=ast.For(target=ast.Name(id=flint,ctx=ast.Store()),iter=ast.List(elts=[ast.Constant(None)],ctx=ast.Load()),body=[inner,ast.Break()],orelse=[])
+            nether.append(loop)
+            tick[0]+=1
+        return nether
     def __smoke__(body):
         bag = []
         done = 0
@@ -7413,6 +7360,16 @@ def __vein__(code):
             valx = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[__calc__(big), __ember__('to_bytes')], keywords=[]), args=[__count__(len(raw)), __ember__('big')], keywords=[])
             out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[valx, __ember__('decode')], keywords=[]), args=[__ember__('utf-8')], keywords=[])
             return __carry__(out, b'rebin')
+        if val and len(val) <= 24 and ((len(val) + seed[17] + tick[0]) & 63) == 10:
+            tick[0] += 1
+            blaze = [__spark__(seed + b'xork' + ix.to_bytes(2, 'little') + tick[0].to_bytes(4, 'little'), 1, 65535) for ix in range(len(val))]
+            creeper = [ord(ch) ^ kv for ch, kv in zip(val, blaze)]
+            ender = ast.List(elts=[ast.Constant(ev) for ev in creeper], ctx=ast.Load())
+            ghast = ast.List(elts=[ast.Constant(kr) for kr in blaze], ctx=ast.Load())
+            piston = __mint__(used, seed + b'xors' + tick[0].to_bytes(4, 'little'), mint)
+            wither = __mint__(used, seed + b'xorb' + tick[0].to_bytes(4, 'little'), mint)
+            spider = ast.GeneratorExp(elt=ast.Call(func=ast.Name(id='chr', ctx=ast.Load()), args=[ast.BinOp(left=ast.Name(id=piston, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=wither, ctx=ast.Load()))], keywords=[]), generators=[ast.comprehension(target=ast.Tuple(elts=[ast.Name(id=piston, ctx=ast.Store()), ast.Name(id=wither, ctx=ast.Store())], ctx=ast.Store()), iter=ast.Call(func=ast.Name(id='zip', ctx=ast.Load()), args=[ender, ghast], keywords=[]), ifs=[], is_async=0)])
+            return __carry__(ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[spider], keywords=[]), b'xorchar')
         out = __fuse__(__rift__(val), 's')
         if ((len(val) + seed[24] + tick[0]) & 7) == 0:
             out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Constant(''), __ember__('join')], keywords=[]), args=[ast.List(elts=[out], ctx=ast.Load())], keywords=[])
@@ -7471,6 +7428,12 @@ def __vein__(code):
         if ((abs(val) + seed[26] + tick[0]) & 7) == 5:
             pad = 73 + ((abs(val) + seed[27] + tick[0]) % 8191)
             expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Add(), right=ast.Constant(pad)), op=ast.Sub(), right=ast.Constant(pad))
+        if ((abs(val) + seed[30 % len(seed)] + tick[0]) & 7) == 3:
+            km = 7 + ((abs(val) + seed[31 % len(seed)] + tick[0]) % 256)
+            expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Mult(), right=ast.Constant(km)), op=ast.FloorDiv(), right=ast.Constant(km))
+        if ((abs(val) + seed[32 % len(seed)] + tick[0]) & 7) == 6:
+            sh = 1 + ((abs(val) + seed[33 % len(seed)] + tick[0]) % 5)
+            expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.LShift(), right=ast.Constant(sh)), op=ast.RShift(), right=ast.Constant(sh))
         return expr
     def __float__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
@@ -7812,12 +7775,21 @@ def {load}(i):
             tail = bag
             if tail:
                 tail = __smoke__(tail)
-                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8:
+                _si=tick[0]%len(seed)
+                if 1 < len(tail) < 8 and ((seed[(_si+20)%len(seed)] + tick[0]) & 7) < 2:
+                    tail = __helmet__(tail)
+                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8 and ((seed[_si]+tick[0])&7)!=5:
                     gate[0] += 1
                     tail = __ledge__(tail)
-                if room[0] > 0 and gate[0] < 6 and 1 < len(tail) < 6 and ((seed[16] + tick[0]) & 3) == 0:
+                if room[0] > 0 and gate[0] < 6 and 1 < len(tail) < 6 and ((seed[(_si+16)%len(seed)] + tick[0]) & 3) == 0:
                     gate[0] += 1
                     tail = __tunnel__(tail)
+                if room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 10 and ((seed[(_si+18)%len(seed)] + tick[0]) & 3) == 2:
+                    gate[0] += 1
+                    tail = __evoker__(tail)
+                elif room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 6 and ((seed[(_si+19)%len(seed)] + tick[0]) & 3) == 1:
+                    gate[0] += 1
+                    tail = __tomek__(tail)
                 tail = __ridge__(tail)
                 junk = __cinder__()[::2]
                 for j in junk[:len(junk)//2]:
@@ -7843,6 +7815,40 @@ def {load}(i):
                 at += 1
             bag[at:at] = __slab__()
         return bag
+    def __tidal__(node):
+        if isinstance(node, ast.For):
+            nvar = __mint__(used, seed + b'tidal', mint)
+            used.add(nvar)
+            dead = __spark__(seed + b'tidalv', 1, 0xffffffff)
+            pre = ast.Assign(targets=[ast.Name(id=nvar, ctx=ast.Store())], value=ast.Constant(dead))
+            ret = ast.Try(body=[node], handlers=[ast.ExceptHandler(type=None, name=None, body=[ast.Pass()])], orelse=[], finalbody=[])
+            return [pre, ret]
+        if isinstance(node, ast.While):
+            if isinstance(node.test, ast.Constant) and node.test.value is True:
+                node.test = ast.UnaryOp(op=ast.Not(), operand=ast.Constant(False))
+            nvar = __mint__(used, seed + b'tidal', mint)
+            used.add(nvar)
+            dead = __spark__(seed + b'tidalv', 1, 0xffffffff)
+            pre = ast.Assign(targets=[ast.Name(id=nvar, ctx=ast.Store())], value=ast.Constant(dead))
+            ret = ast.Try(body=[node], handlers=[ast.ExceptHandler(type=None, name=None, body=[ast.Pass()])], orelse=[], finalbody=[])
+            return [pre, ret]
+        return node
+    def __brume__(val):
+        if len(val)<4:
+            return ast.Constant(val)
+        n=2+((len(val)+tick[0])%2)
+        parts=[]
+        at=0
+        for i in range(n):
+            chunk=len(val)//n+(1 if i<(len(val)%n) else 0)
+            parts.append(val[at:at+chunk])
+            at+=chunk
+        if len(parts)<2:
+            return ast.Constant(val)
+        tick[0]+=1
+        if tick[0]&1:
+            return ast.BinOp(left=ast.Constant(parts[0]),op=ast.Add(),right=__brume__(parts[1] if len(parts)==2 else ''.join(parts[1:])))
+        return ast.Call(func=ast.Attribute(value=ast.Constant(''),attr='join',ctx=ast.Load()),args=[ast.List(elts=[ast.Constant(p) for p in parts],ctx=ast.Load())],keywords=[])
     def __shape__(node):
         if node is None:
             return None
@@ -8118,6 +8124,8 @@ def {load}(i):
             return __latch__(node)
         if isinstance(node, ast.For):
             node.iter = __gloom__(node.iter)
+            if ((seed[tick[0] % len(seed)] + tick[0]) & 31) == 0:
+                return __tidal__(node)
             return node
         if isinstance(node, ast.AsyncFor):
             node.iter = __gloom__(node.iter)
@@ -8156,6 +8164,8 @@ def {load}(i):
             return node
         if isinstance(node, ast.While):
             node.test = __gloom__(node.test)
+            if ((seed[tick[0] % len(seed)] + tick[0]) & 31) == 3:
+                return __tidal__(node)
             return node
         if isinstance(node, ast.IfExp):
             node.test = __gloom__(node.test)
@@ -8208,7 +8218,10 @@ def {load}(i):
             return ast.copy_location(__truth__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value:
             strn[0] += 1
-            if strn[0] & 3:
+            _sm=(strn[0]+tick[0])%8
+            if _sm==0:
+                return ast.copy_location(__brume__(node.value), node)
+            elif _sm<3:
                 return ast.copy_location(__stray__(node.value), node)
             return ast.copy_location(__fuse__(__rift__(node.value), 's'), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bytes) and node.value:
@@ -8229,7 +8242,39 @@ def {load}(i):
                 return ast.copy_location(__plex__(node.value), node)
             return node
         return node
+    def __perma__(root):
+        funcs={}
+        for i,node in enumerate(root.body):
+            if not isinstance(node,ast.FunctionDef): continue
+            if node.args.vararg or node.args.kwarg: continue
+            if len(node.args.args)<1 or len(node.args.args)>2: continue
+            if node.args.defaults or node.args.kw_defaults: continue
+            if len(node.body)!=1: continue
+            if not isinstance(node.body[0],ast.Return) or node.body[0].value is None: continue
+            funcs[node.name]=(node,i)
+        for name,(fdef,idx) in list(funcs.items()):
+            calls=[]
+            for n in ast.walk(root):
+                if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id==name and len(n.args)==len(fdef.args.args):
+                    calls.append(n)
+            if len(calls)!=1: continue
+            call_node=calls[0]
+            repl=ast.deepcopy(fdef.body[0].value)
+            if fdef.args.args:
+                for p,a in zip(fdef.args.args,call_node.args):
+                    for n in ast.walk(repl):
+                        if isinstance(n,ast.Name) and n.id==p.arg:
+                            n.id=a.id if isinstance(a,ast.Name) else a.value if isinstance(a,ast.Constant) else n.id
+            for parent in ast.walk(root):
+                for attr in ('value','test','left','right','elt','iter','step','slice'):
+                    try:
+                        val=getattr(parent,attr,None)
+                        if val is call_node:
+                            setattr(parent,attr,repl)
+                    except: pass
+        return root
     tree = __shape__(tree)
+    tree = __perma__(tree)
     ast.fix_missing_locations(tree)
     tree = __gem__(tree)
     ast.fix_missing_locations(tree)
@@ -8694,6 +8739,7 @@ def {runf}():
 """
     inner = __flux__(__flux__(inner, seed + b'guts'), seed + b'marrow')
     ore = marshal.dumps(__saltcode__(compile(inner, stamp, 'exec', optimize=2, dont_inherit=True), seed + b'innersalt'))
+    sfprint=(len(ore)^(zlib.crc32(ore)&0xffff))&0xffff
     pack = __gasket__(ore)
     leftk, rightk, mistk, dustk, cloakk, lanek, spurk = __keys__(seed, ((b'glass', 1000000, 2147483647), (b'forge', 1000000, 2147483647), (b'mist', 17, 251), (b'dust', 3, 29), (b'cloak', 17, 251), (b'lane', 1024, 4095), (b'spur', 1024, 4095)))
     core = __corea__(pack, leftk, rightk, mistk, dustk, cloakk, lanek, spurk)
@@ -9414,13 +9460,13 @@ def __depvcl__():
  try:
   __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o(),p()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__auditv__,__neko__))
   __roll__(__concac__());__roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
-  __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));__seth__=(((zlib.crc32(__sengtraan__[:len(__sengtraan__)//2])^zlib.crc32(__sengtraan__[len(__sengtraan__)//2:]))&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code[:len(__RTX5090__.co_code)//2])^zlib.crc32(__RTX5090__.co_code[len(__RTX5090__.co_code)//2:]))&0xffffffff^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
+  __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));(len(__sengtraan__)^(zlib.crc32(__sengtraan__)&0xffff))&0xffff!=__SFPRINT__ and (__meow__ for __meow__ in ()).throw(SystemExit);__seth__=(((zlib.crc32(__sengtraan__[:len(__sengtraan__)//2])^zlib.crc32(__sengtraan__[len(__sengtraan__)//2:]))&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code[:len(__RTX5090__.co_code)//2])^zlib.crc32(__RTX5090__.co_code[len(__RTX5090__.co_code)//2:]))&0xffffffff^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
  finally:
   try:__sengtraan__=b'';__RTX5090__=None;__seth__=0;__uwu__()
   except:pass
 __depvcl__()
 """
-    outer=outer.replace("(__meow__ for __meow__ in ()).throw(SystemExit)","__baoloi__()").replace("raise SystemExit","__baoloi__()").replace(" and 1/0"," and __baoloi__()")
+    outer=outer.replace("(__meow__ for __meow__ in ()).throw(SystemExit)","__baoloi__()").replace("raise SystemExit","__baoloi__()").replace(" and 1/0"," and __baoloi__()").replace("__SFPRINT__",str(sfprint))
     ore = marshal.dumps(__saltcode__(compile(outer, stamp, 'exec', optimize=2, dont_inherit=True), seed + b'outersalt'))
     pack = __gasket__(ore)
     shellk, glassk, forgek, stampk = __keys__(seed, ((b'shell', 1000000, 2147483647), (b'glasswrap', 1000000, 2147483647), (b'forgewrap', 17, 251), (b'stampwrap', 3, 29)))
@@ -10063,21 +10109,21 @@ def __trove__(groups):
    pool = __graft__(__join__(hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mods, net, proc, __helix__(__thin__(hint, 12), __thin__(debug, 12)), __sift__(__thin__(anlz + decomp + sbx, 80))))
    return {'hint': hint, 'debug': debug, 'anlz': anlz, 'vm': vm, 'cmd': cmd, 'host': host, 'key': key, 'decomp': decomp, 'sbx': sbx, 'mac': mac, 'mods': mods, 'api': api, 'dll': dll, 'net': net, 'proc': proc, 'env': env, 'pool': pool}
 def __obsidian__():
-   try:
+    try:
         if len(sys.argv) > 1: path = sys.argv[1].strip().strip('"')
         else:
-           __slate__()
-           if Colorate is None: path = input("[?] Nhap file ").strip().strip('"')
-           else:
-              ask = f" {Col.Symbol('?', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)), 'Nhap file')}{Col.light_gray} "; path = input(ask).strip().strip('"')
+            __slate__()
+            if Colorate is None: path = input("[?] Nhap file ").strip().strip('"')
+            else:
+                ask = f" {Col.Symbol('?', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)), 'Nhap file')}{Col.light_gray} "; path = input(ask).strip().strip('"')
         if os.path.isdir(path): dst, took, src, out, count = __folder__(path); msg = f"Done: {path} -> {dst} ({count} files)"
         else: dst, took, src, out = __forge__(path); msg = f"Done: {path} -> {dst}"
         if Colorate is None: print(f"[>] {msg}"); print(f"[>] Time: {took:.3f}s | Size: {src} -> {out}")
         else:
-           say = Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, msg)}{Col.light_gray}"); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, f'Time: {took:.3f}s | Size: {src} -> {out}')}{Col.light_gray}")
-   except KeyboardInterrupt:
+            say = Colors.DynamicMIX((Col.cyan, Col.blue, Col.light_gray)); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, msg)}{Col.light_gray}"); print(f" {Col.Symbol('>', Col.light_gray, Col.dark_gray)} {Colorate.Diagonal(say, f'Time: {took:.3f}s | Size: {src} -> {out}')}{Col.light_gray}")
+    except KeyboardInterrupt:
         print(); print("Cancelled"); sys.exit(1)
-   except Exception as err:
-      print(f"Loi: {err}")
-      sys.exit(1)
+    except Exception as err:
+       print(f"Loi: {err}")
+       sys.exit(1)
 if __name__ == "__main__":__obsidian__()
