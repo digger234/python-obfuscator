@@ -167,8 +167,7 @@ def __crown__(raw):
         bend ^= ((byte + 1) * (slot + 3)) & 0xffffffff
         bend = ((bend << 5) | (bend >> 27)) & 0xffffffff
    return (len(raw), sum(raw) & 0xffffffff, raw[:1], raw[-1:], glow, bend)
-def __chant__(text, seed):
-   raw = text.encode('utf-8')
+def __chant__(raw, seed):
    mix = repr((__flint__(seed + raw + b'chantflint', 2), __grout__(seed + raw + b'chantgrout', 3))).encode('ascii')
    fog = __mist__(seed + raw + len(raw).to_bytes(4, 'little') + mix, len(raw) or 1)
    key = __spark__(seed + raw + b'chant' + mix, 1, 255)
@@ -197,7 +196,7 @@ def __ivory__(seed, used, words, func):
    book = {}
    for slot, word in enumerate(words):
         name = __rune__(used, seed, word.encode('utf-8') + slot.to_bytes(4, 'little'))
-        data = __chant__(word, seed + slot.to_bytes(4, 'little'))
+        data = __chant__(word.encode('utf-8'), seed + slot.to_bytes(4, 'little'))
         rows.append(f"{name}={__prism__(func, data)}")
         book[word] = name
    return rows, book
@@ -215,14 +214,8 @@ def __lotus__(book, name):
 def __lily__(seed, text, used=None):
    used = used if used is not None else set()
    func = __rune__(used, seed, b'lily')
-   data = __chant__(text, seed + b'text')
+   data = __chant__(text.encode('utf-8'), seed + b'text')
    return __plume__(func), __prism__(func, data)
-def __opal__(seed, raw):
-   mix = repr((__flint__(seed + raw[:32] + b'opalflint', 2), __grout__(seed + raw[:32] + b'opalgrout', 3))).encode('ascii')
-   fog = __mist__(seed + b'opal' + mix, len(raw) or 1)
-   key = __spark__(seed + b'opalkey' + mix, 1, 255)
-   rows = tuple(byte ^ fog[slot] ^ key for slot, byte in enumerate(raw))
-   return rows, key, fog.hex(), __crown__(raw)
 def __orchid__(name):
    return __iris__(name, 0)
 __dripbag__ = {}
@@ -579,7 +572,7 @@ def __loam__(seed):
         ch = chr(left + (fog[slot * 2 + 1] % (right - left + 1)))
         names.append(ch)
     return ''.join(names)
-def __silt__(seed, depth):
+def __sit__(seed, depth):
     fog = __mist__(seed + b'silt', 8)
     off = int.from_bytes(fog[:4], 'little') % 100
     return depth + off
@@ -7099,10 +7092,10 @@ def __vein__(code):
         bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=names[0], ctx=ast.Store())], value=ast.Constant(str(kiln))), ast.Assign(targets=[ast.Name(id=names[1], ctx=ast.Store())], value=ast.Constant(str(batch)))], orelse=[]))
         slag5 = __mint__(used, seed, mint)
         bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.If(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(cobbled))], orelse=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(pebbles[1]))])], orelse=[]))
-        tick[0]+=1;_fa=__mint__(used,seed,mint);_fb=__mint__(used,seed,mint);_fv1=__spark__(seed+b'frost1v'+tick[0].to_bytes(4,'little'),1,9999);_fv2=__spark__(seed+b'frost1x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=_fa,ctx=ast.Store())],value=ast.Constant(_fv1)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fa,ctx=ast.Load()),op=ast.BitXor(),right=ast.Name(id=_fa,ctx=ast.Load())),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=_fb,ctx=ast.Store())],value=ast.Constant(_fv2)),ast.Assign(targets=[ast.Name(id=_fb,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=_fb,ctx=ast.Load()),op=ast.Add(),right=ast.Constant(0))),ast.AugAssign(target=ast.Name(id=_fb,ctx=ast.Store()),op=ast.Mult(),value=ast.Constant(1))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
-        tick[0]+=1;_fd=__mint__(used,seed,mint);_fe=__mint__(used,seed,mint);_fv3=__spark__(seed+b'frost2v'+tick[0].to_bytes(4,'little'),1,9999);_fv4=__spark__(seed+b'frost2x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=_fd,ctx=ast.Store())],value=ast.Constant(_fv3)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fd,ctx=ast.Load()),op=ast.Mult(),right=ast.Name(id=_fd,ctx=ast.Load())),ops=[ast.GtE()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=_fe,ctx=ast.Store())],value=ast.Constant(_fv4)),ast.AugAssign(target=ast.Name(id=_fe,ctx=ast.Store()),op=ast.BitAnd(),value=ast.Constant(0xffffffff))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
-        tick[0]+=1;_fj=__mint__(used,seed,mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=_fj,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='urandom',ctx=ast.Load()),args=[ast.Constant(64)],keywords=[])),ast.Assign(targets=[ast.Name(id=_fj,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='getpid',ctx=ast.Load()),args=[],keywords=[]))],orelse=[]))
-        tick[0]+=1;_fk=__mint__(used,seed,mint);_fl=__mint__(used,seed,mint);_fm=__mint__(used,seed,mint);_fv=__spark__(seed+b'mpath'+tick[0].to_bytes(4,'little'),0,9999);_fv2=__spark__(seed+b'mpath2'+tick[0].to_bytes(4,'little'),100,9999);_fv3=__spark__(seed+b'mpath3'+tick[0].to_bytes(4,'little'),100,9999);_mpbody1=[ast.Assign(targets=[ast.Name(id=_fl,ctx=ast.Store())],value=ast.Constant(_fv2)),ast.Assign(targets=[ast.Name(id=_fl,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='len',ctx=ast.Load()),args=[ast.Call(func=ast.Name(id='str',ctx=ast.Load()),args=[ast.Name(id=_fl,ctx=ast.Load())],keywords=[])],keywords=[]))];_mpbody2=[ast.Assign(targets=[ast.Name(id=_fm,ctx=ast.Store())],value=ast.Constant(_fv3)),ast.Assign(targets=[ast.Name(id=_fm,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='type',ctx=ast.Load()),args=[ast.Name(id=_fm,ctx=ast.Load())],keywords=[]))];bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=_fk,ctx=ast.Store())],value=ast.Constant(_fv)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fk,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=_mpbody1,orelse=[ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=_fk,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(1)]),body=_mpbody2,orelse=[ast.Pass()])])],orelse=[]))
+        tick[0]+=1;frosta=__mint__(used,seed,mint);frostb=__mint__(used,seed,mint);frostv1=__spark__(seed+b'frost1v'+tick[0].to_bytes(4,'little'),1,9999);frostv2=__spark__(seed+b'frost1x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=frosta,ctx=ast.Store())],value=ast.Constant(frostv1)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=frosta,ctx=ast.Load()),op=ast.BitXor(),right=ast.Name(id=frosta,ctx=ast.Load())),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=frostb,ctx=ast.Store())],value=ast.Constant(frostv2)),ast.Assign(targets=[ast.Name(id=frostb,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=frostb,ctx=ast.Load()),op=ast.Add(),right=ast.Constant(0))),ast.AugAssign(target=ast.Name(id=frostb,ctx=ast.Store()),op=ast.Mult(),value=ast.Constant(1))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
+        tick[0]+=1;frostc=__mint__(used,seed,mint);frostd=__mint__(used,seed,mint);frostv3=__spark__(seed+b'frost2v'+tick[0].to_bytes(4,'little'),1,9999);frostv4=__spark__(seed+b'frost2x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=frostc,ctx=ast.Store())],value=ast.Constant(frostv3)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=frostc,ctx=ast.Load()),op=ast.Mult(),right=ast.Name(id=frostc,ctx=ast.Load())),ops=[ast.GtE()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=frostd,ctx=ast.Store())],value=ast.Constant(frostv4)),ast.AugAssign(target=ast.Name(id=frostd,ctx=ast.Store()),op=ast.BitAnd(),value=ast.Constant(0xffffffff))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
+        tick[0]+=1;junkvar=__mint__(used,seed,mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=junkvar,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='urandom',ctx=ast.Load()),args=[ast.Constant(64)],keywords=[])),ast.Assign(targets=[ast.Name(id=junkvar,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='getpid',ctx=ast.Load()),args=[],keywords=[]))],orelse=[]))
+        tick[0]+=1;mpatha=__mint__(used,seed,mint);mpathb=__mint__(used,seed,mint);mpathc=__mint__(used,seed,mint);mpathv=__spark__(seed+b'mpath'+tick[0].to_bytes(4,'little'),0,9999);mpathx=__spark__(seed+b'mpath2'+tick[0].to_bytes(4,'little'),100,9999);mpathy=__spark__(seed+b'mpath3'+tick[0].to_bytes(4,'little'),100,9999);mpbody1=[ast.Assign(targets=[ast.Name(id=mpathb,ctx=ast.Store())],value=ast.Constant(frostv2)),ast.Assign(targets=[ast.Name(id=mpathb,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='len',ctx=ast.Load()),args=[ast.Call(func=ast.Name(id='str',ctx=ast.Load()),args=[ast.Name(id=mpathb,ctx=ast.Load())],keywords=[])],keywords=[]))];mpbody2=[ast.Assign(targets=[ast.Name(id=mpathc,ctx=ast.Store())],value=ast.Constant(frostv3)),ast.Assign(targets=[ast.Name(id=mpathc,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='type',ctx=ast.Load()),args=[ast.Name(id=mpathc,ctx=ast.Load())],keywords=[]))];bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=mpatha,ctx=ast.Store())],value=ast.Constant(mpathv)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=mpatha,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=mpbody1,orelse=[ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=mpatha,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(1)]),body=mpbody2,orelse=[ast.Pass()])])],orelse=[]))
         tick[0]+=1;slag8=__mint__(used,seed,mint);coal8=__mint__(used,seed,mint);rock8=__spark__(seed+b'opaque1'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag8,ctx=ast.Store())],value=ast.Constant(rock8)),ast.Assign(targets=[ast.Name(id=coal8,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag8,ctx=ast.Load()),op=ast.Mult(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal8,ctx=ast.Load()),ops=[ast.GtE()],comparators=[ast.Constant(1)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
         tick[0]+=1;slag9=__mint__(used,seed,mint);coal9=__mint__(used,seed,mint);rock9=__spark__(seed+b'opaque2'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag9,ctx=ast.Store())],value=ast.Constant(rock9)),ast.Assign(targets=[ast.Name(id=coal9,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag9,ctx=ast.Load()),op=ast.BitAnd(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal9,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(rock9)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
         tick[0]+=1;slag10=__mint__(used,seed,mint);coal10=__mint__(used,seed,mint);rock10=__spark__(seed+b'opaque3'+tick[0].to_bytes(4,'little'),2,99);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag10,ctx=ast.Store())],value=ast.Constant(rock10)),ast.Assign(targets=[ast.Name(id=coal10,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag10,ctx=ast.Load()),op=ast.Pow(),right=ast.Constant(1))),ast.If(test=ast.Compare(left=ast.Name(id=coal10,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Name(id=slag10,ctx=ast.Load())]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
@@ -7775,19 +7768,19 @@ def {load}(i):
             tail = bag
             if tail:
                 tail = __smoke__(tail)
-                _si=tick[0]%len(seed)
-                if 1 < len(tail) < 8 and ((seed[(_si+20)%len(seed)] + tick[0]) & 7) < 2:
+                sisil=tick[0]%len(seed)
+                if 1 < len(tail) < 8 and ((seed[(sisil+20)%len(seed)] + tick[0]) & 7) < 2:
                     tail = __helmet__(tail)
-                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8 and ((seed[_si]+tick[0])&7)!=5:
+                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8 and ((seed[sisil]+tick[0])&7)!=5:
                     gate[0] += 1
                     tail = __ledge__(tail)
-                if room[0] > 0 and gate[0] < 6 and 1 < len(tail) < 6 and ((seed[(_si+16)%len(seed)] + tick[0]) & 3) == 0:
+                if room[0] > 0 and gate[0] < 6 and 1 < len(tail) < 6 and ((seed[(sisil+16)%len(seed)] + tick[0]) & 3) == 0:
                     gate[0] += 1
                     tail = __tunnel__(tail)
-                if room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 10 and ((seed[(_si+18)%len(seed)] + tick[0]) & 3) == 2:
+                if room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 10 and ((seed[(sisil+18)%len(seed)] + tick[0]) & 3) == 2:
                     gate[0] += 1
                     tail = __evoker__(tail)
-                elif room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 6 and ((seed[(_si+19)%len(seed)] + tick[0]) & 3) == 1:
+                elif room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 6 and ((seed[(sisil+19)%len(seed)] + tick[0]) & 3) == 1:
                     gate[0] += 1
                     tail = __tomek__(tail)
                 tail = __ridge__(tail)
@@ -8218,10 +8211,10 @@ def {load}(i):
             return ast.copy_location(__truth__(node.value), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value:
             strn[0] += 1
-            _sm=(strn[0]+tick[0])%8
-            if _sm==0:
+            smoke=(strn[0]+tick[0])%8
+            if smoke==0:
                 return ast.copy_location(__brume__(node.value), node)
-            elif _sm<3:
+            elif smoke<3:
                 return ast.copy_location(__stray__(node.value), node)
             return ast.copy_location(__fuse__(__rift__(node.value), 's'), node)
         if isinstance(node, ast.Constant) and isinstance(node.value, bytes) and node.value:
@@ -8258,10 +8251,10 @@ def {load}(i):
                 if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id==name and len(n.args)==len(fdef.args.args):
                     calls.append(n)
             if len(calls)!=1: continue
-            call_node=calls[0]
+            callnode=calls[0]
             repl=ast.deepcopy(fdef.body[0].value)
             if fdef.args.args:
-                for p,a in zip(fdef.args.args,call_node.args):
+                for p,a in zip(fdef.args.args,callnode.args):
                     for n in ast.walk(repl):
                         if isinstance(n,ast.Name) and n.id==p.arg:
                             n.id=a.id if isinstance(a,ast.Name) else a.value if isinstance(a,ast.Constant) else n.id
@@ -9694,7 +9687,7 @@ def __flux__(code, seed):
    body,code,liba,libb,libc,libd,libe,libf,way,func,rows,glow,drift,tint,bone,hand,coal,ash,see,bit,idx,ct,read,box,left,right=names
    rawf=__rune__(set(names),seed+b'fluxraw',b'raw')
    blobsrc = __show__(*__hide__(blob, seed + b'fluxmask'), body)
-   shotsrc = f"{__prism__(rawf,__opal__(seed+b'fluxshotraw',shot.encode('ascii')))}.decode()"
+   shotsrc = f"{__prism__(rawf,__chant__(shot.encode('ascii'),seed+b'fluxshotraw'))}.decode()"
    out = f"{spray}{__orchid__(rawf)};{bone}=lambda {see}:''.join(map(chr,({bit}^{wkey} for {bit} in {see})));{hand}={__aim__()};{ash}={words!r};{body}={blobsrc};{code}={key};{libc}={shotsrc};{libd}={tag};{liba}={hand}({bone}({ash}[0]));{libb}={hand}({bone}({ash}[1]));{libe}={hand}({bone}({ash}[2]));{rows}={hand}({bone}({ash}[5]));{glow}={hand}({bone}({ash}[3]));{read}={hand}({bone}({ash}[33]));{left}=getattr({read},{bone}({ash}[39]));getattr({left},{bone}({ash}[40]))({bone}({ash}[23]),None);getattr({left},{bone}({ash}[40]))({bone}({ash}[37]),None);{ct}={hand}({bone}({ash}[23]));{box}={hand}({bone}({ash}[37]));{func}=getattr({read},{bone}({ash}[34]),None);({func}.__class__.__name__!={bone}({ash}[32]) or getattr({func},{bone}({ash}[31]),'')!={bone}({ash}[33])) and 1/0;{left}=getattr({read},{bone}({ash}[35]),());{right}=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'));({left} is None or any(((getattr({idx},{bone}({ash}[31]),getattr(type({idx}),{bone}({ash}[31]),'')),getattr({idx},{bone}({ash}[36]),getattr(type({idx}),{bone}({ash}[36]),''))) not in {right} for {idx} in {left}))) and 1/0;(getattr({ct},{bone}({ash}[36]),'')!={bone}({ash}[23]) or getattr(getattr({ct},{bone}({ash}[38]),None),{bone}({ash}[31]),'')!={bone}({ash}[37]) or getattr({ct},{bone}({ash}[38]),None) is not getattr({box},{bone}({ash}[41]),None)) and 1/0;{coal}=vars({hand}({bone}({ash}[12])));getattr({coal}[{bone}({ash}[10])],{bone}({ash}[31]),{bone}({ash}[12]))!={bone}({ash}[12]) and 1/0;{body}=vars({liba})[{bone}({ash}[6])]({coal}[{bone}({ash}[13])]({body},{bone}({ash}[17])));{func}=vars({libe})[{bone}({ash}[7])]({body});{func}=vars({coal}[{bone}({ash}[15])]({func}))[{bone}({ash}[16])]({func});{libf}=0 if {func}=={libc} else 91;{libf} and 1/0;{drift}={coal}[{bone}({ash}[18])]({body});{tint}={coal}[{bone}({ash}[13])](((((({code}^{libf})&255)+(({idx}+1)*((((({code}^{libf})>>8)&255) or 73)+(((({code}^{libf})>>16)&255) or 19)))+({idx}*({idx}+1)//2))&255)^(((({code}>>16)&255) or 19)+{idx}&255)) for {idx} in {coal}[{bone}({ash}[11])](512));{tint}=({tint}*(({drift}>>9)+1))[:{drift}];{body}=vars({coal}[{bone}({ash}[19])])[{bone}({ash}[21])]((vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{body},{bone}({ash}[22]))^vars({coal}[{bone}({ash}[19])])[{bone}({ash}[20])]({coal}[{bone}({ash}[19])],{tint},{bone}({ash}[22]))),{drift},{bone}({ash}[22]));{way}={body}[0];({way}<0 or {way}>2) and 1/0;{body}=(vars({rows})[{bone}({ash}[8])],vars({libb})[{bone}({ash}[8])],vars({glow})[{bone}({ash}[8])])[{way}]({body}[1:]);{libd} not in {coal}[{bone}({ash}[11])](1,8) and 1/0;{read}=getattr(getattr({ct},{bone}({ash}[24])),{bone}({ash}[25]));not isinstance({read},getattr({ct},{bone}({ash}[38]))) and 1/0;{read}.restype=getattr({ct},{bone}({ash}[28]));{read}.argtypes=[getattr({ct},{bone}({ash}[26])),getattr({ct},{bone}({ash}[27]))];{left}={coal}[{bone}({ash}[18])]({body});{box}=getattr({ct},{bone}({ash}[29]))({body},{left});{body}=bytes();{right}={read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left});{coal}[{bone}({ash}[10])]({right},vars())"
    out=out.replace(f";{right}={read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left});{coal}[{bone}({ash}[10])]({right},vars())",f";{coal}[{bone}({ash}[10])]({read}(getattr({ct},{bone}({ash}[30]))({box},getattr({ct},{bone}({ash}[26]))),{left}),vars())")
    return out
@@ -9742,7 +9735,7 @@ def __crystal__(tree, path, used):
    scarp, sand = __scarp__(blaze, seed); seed = hashlib.sha256(seed + scarp + sand).digest()
    mire = __mire__(blaze, seed); seed = hashlib.sha256(seed + mire.encode('ascii')).digest()
    loam = __loam__(seed); seed = hashlib.sha256(seed + loam.encode('utf-8', 'replace')).digest()
-   silt = __silt__(seed, len(stem)); seed = hashlib.sha256(seed + silt.to_bytes(8, 'little')).digest()
+   silt = __sit__(seed, len(stem)); seed = hashlib.sha256(seed + silt.to_bytes(8, 'little')).digest()
    clay = __clay__(seed, ('base64', 'marshal', 'zlib', 'bz2', 'lzma')); seed = hashlib.sha256(seed + repr(clay).encode('ascii')).digest()
    quarry, qkey = __quarry__(blaze, seed); seed = hashlib.sha256(seed + quarry.encode('ascii') + qkey.encode('ascii')).digest()
    desert = __desert__(seed, 4); seed = hashlib.sha256(seed + repr(desert).encode('ascii')).digest()
