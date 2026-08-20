@@ -6282,7 +6282,6 @@ def __pare__(tree):
             if name in ('find','rfind','count','index','rindex') and 1<=len(args)<=3 and __spread__(args,bytes): return __ev__(getattr(obj,name),*args)
             if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],bytes) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
             if name in ('center','ljust','rjust') and 1<=len(args)<=2 and isinstance(args[0],int) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(getattr(obj,name),*args)
-            if name=='zfill' and len(args)==1 and isinstance(args[0],int): return __ev__(obj.zfill,args[0])
             if name in ('partition','rpartition') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),args[0])
             if name=='hex' and (not args or len(args)==2 and isinstance(args[0],str) and isinstance(args[1],int)): return __ev__(obj.hex,*args)
             if name=='join' and len(args)==1 and isinstance(args[0],(tuple,list,frozenset)) and all(isinstance(x,bytes) for x in args[0]): return __ev__(obj.join,args[0])
@@ -6332,7 +6331,7 @@ def __pare__(tree):
         if tail in two and 2<=len(args)<=3 and __numok__(args): return __ev__(getattr(math,tail),*args)
         if tail in ('comb','perm') and 1<=len(args)<=2 and all(isinstance(x,int) and 0<=x<=2048 for x in args): return __ev__(getattr(math,tail),*args)
         if tail in ('factorial','isqrt') and len(args)==1 and isinstance(args[0],int) and 0<=args[0]<=4096: return __ev__(getattr(math,tail),*args)
-        if tail in ('gcd','lcm') and len(args)<=16 and all(isinstance(x,int) for x in args): return __ev__(getattr(math,tail),*args)
+        if tail in ('gcd','lcm') and 1<=len(args)<=16 and all(isinstance(x,int) for x in args): return __ev__(getattr(math,tail),*args)
         if tail=='prod' and 1<=len(args)<=2 and isinstance(args[0],(tuple,list,frozenset)) and len(args[0])<=256 and all(isinstance(x,(int,float,complex)) for x in args[0]) and (len(args)==1 or isinstance(args[1],(int,float,complex))): return __ev__(math.prod,*args)
         if tail=='fsum' and len(args)==1 and isinstance(args[0],(tuple,list,frozenset)) and len(args[0])<=256 and all(isinstance(x,(int,float)) for x in args[0]): return __ev__(math.fsum,args[0])
         return False,None
@@ -7504,6 +7503,7 @@ def {joinf}(row):
 {lenf}={evalf}({__alias__('len')})
 {inputf}={evalf}({__alias__('input')})
 def {hexf}(v):
+ if v<{wide}:v=0
  v=v-{wide}
  if v<=0x7F:return {strf}({bytesf}([v]),'utf8')
  if v<=0x7FF:return {strf}({bytesf}([0xC0|(v>>6),0x80|(v&0x3F)]),'utf8')
@@ -8617,6 +8617,7 @@ def {drusef}(blob):
    return (0,0,(0,0,b'',b''),(0,0,b'',b''),0)
   return (len(blob),len(rows),rows[0],rows[-1],glow)
 def {gully}(blob,exp):
+ if not blob: __import__({__alias__('os')})._exit(1)
  rows=(len(blob),min(blob[:4096]),max(blob[:4096]))
  rows[0]!=exp[0] and __import__({__alias__('os')})._exit(1)
  rows[1]!=exp[1] and __import__({__alias__('os')})._exit(1)
@@ -8692,7 +8693,7 @@ def {stampf}(blob):
  shell={heart}(shell,{right})
  if len(shell)<4:
   __import__({__alias__('os')})._exit(1)
- way=shell[0];shell=(zlib.decompress,bz2.decompress,lzma.decompress)[way](shell[1:])
+ way=shell[0];(way<0 or way>2) and __import__({__alias__('os')})._exit(1);shell=(zlib.decompress,bz2.decompress,lzma.decompress)[way](shell[1:])
  shell={dune}(shell)
  shell={screef}(shell,{thornk})
  shell={fenf}(shell,{weftk})
@@ -9249,10 +9250,10 @@ def __neko__():
   bad=tuple(pool)+tuple(host)+tuple(key)+tuple(proc)+tuple(cmd);libs=tuple(hint)+tuple(debug)+tuple(anlz)+tuple(decomp);mark=tuple(host)+tuple(key)+tuple(proc)+tuple(cmd)+tuple(debug)+tuple(anlz)+tuple(decomp)+tuple(sbx)
   sock,dns,addr,pop,run,sysc,popen,cdll,windll=orig
   def vibe():
-   hard=[];loose=[]
+   hard=[];loose=[];raw=''
    try:
-    for one in sys.argv:
-     raw=str(one).lower();rows.append(raw);loose.append(raw)
+    for one in sys.argv[1:]:
+     raw=str(one).lower();loose.append(raw)
    except:pass
    try:
     for one in evir:
@@ -9284,7 +9285,7 @@ def __neko__():
    def connect(self,where):
     try:
      raw=str(where[0] if isinstance(where,tuple) and where else where).lower();port=where[1] if isinstance(where,tuple) and len(where)>1 else 0
-     if any(one in raw for one in host) or (vibe() and (raw.startswith(('127.','10.','172.16.','172.17.','172.18.','172.19.','172.20.','192.168.','0.0.0.0')) or raw=='localhost' or port in (80,443,1080,3128,8080,8118,8888,9090,27042,27043))):self._no=True;where=('127.0.0.1',port or 80)
+     if any(one in raw for one in host) or (vibe() and (raw.startswith(('127.','10.','192.168.','0.0.0.0')) or (raw.startswith('172.') and 16<=int(raw.split('.')[1])<=31) or raw=='localhost' or port in (80,443,1080,3128,8080,8118,8888,9090,27042,27043))):self._no=True;where=('127.0.0.1',port or 80)
     except:pass
     return self._raw.connect(where)
    def send(self,data,flag=0):
@@ -9445,7 +9446,7 @@ def __tooldepphet__(__karrik__):
   __karrik__!=((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff) and __baoloi__()
   __sangtraan__=__lmao__(base64.b85decode,__ngauvcl__);__ngauvcl__='';__meoooooooooo__=__lmao__(hashlib.sha256,__sangtraan__).digest();(__meoooooooooo__[:8]!=__lmao__(bytes.fromhex,__iloveyoupnha__[:16])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[8:16]!=__lmao__(bytes.fromhex,__iloveyoupnha__[16:32])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[16:24]!=__lmao__(bytes.fromhex,__iloveyoupnha__[32:48])) and (__meow__ for __meow__ in ()).throw(SystemExit);(__meoooooooooo__[24:32]!=__lmao__(bytes.fromhex,__iloveyoupnha__[48:64])) and (__meow__ for __meow__ in ()).throw(SystemExit)
   __lmao__(__cak__,__sangtraan__)!=__pnhaxinhvcl__ and (__meow__ for __meow__ in ()).throw(SystemExit)
-  __sangtraan__=__lmao__(__skibiditoilet__,__sangtraan__,__yeppro__);__sangtraan__=__lmao__(__pnhamaidinh__,__sangtraan__,__yepvip__);__sangtraan__=__lmao__(__luvpnha__,__sangtraan__,__yepngau__);__sangtraan__=__lmao__(__yeupnha__,__sangtraan__,__meocute__,__yepyep__);__sangtraan__=__lmao__({heart},__sangtraan__,__meowmeow__);way=__lmaoo__(__sangtraan__[0]);__sangtraan__=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:]);__sangtraan__=__lmao__({heart},__sangtraan__,__manhvcl__)
+  __sangtraan__=__lmao__(__skibiditoilet__,__sangtraan__,__yeppro__);__sangtraan__=__lmao__(__pnhamaidinh__,__sangtraan__,__yepvip__);__sangtraan__=__lmao__(__luvpnha__,__sangtraan__,__yepngau__);__sangtraan__=__lmao__(__yeupnha__,__sangtraan__,__meocute__,__yepyep__);__sangtraan__=__lmao__({heart},__sangtraan__,__meowmeow__);way=__lmaoo__(__sangtraan__[0]);(way<0 or way>2) and (__meow__ for __meow__ in ()).throw(SystemExit);__sangtraan__=__lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:]);__sangtraan__=__lmao__({heart},__sangtraan__,__manhvcl__)
   way=__sangtraan__[0];(way<0 or way>2) and (__meow__ for __meow__ in ()).throw(SystemExit)
   return __lmao__((zlib.decompress,bz2.decompress,lzma.decompress)[way],__sangtraan__[1:])
 def __depvcl__():
