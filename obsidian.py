@@ -562,7 +562,7 @@ def __gravel__(seed):
         ch = chr(left + (int.from_bytes(fog[1:3], 'little') % (right - left + 1)))
         if ch.isidentifier():
             bag.append(ch)
-    return ''.join(bag) if len(bag) >= 4 else 'ãªã«ã“ã‚Œ'
+    return ''.join(bag) if len(bag) >= 4 else 'なにこれ'
 def __loam__(seed):
     fog = __mist__(seed + b'loam', 32)
     names = []
@@ -6927,7 +6927,7 @@ def __vein__(code):
         tick[0] += 1
         pick = __spark__(seed + b'ridge' + tick[0].to_bytes(4, 'little'), 0, len(body) - 1)
         node = body[pick]
-        if isinstance(node, (ast.Global, ast.Nonlocal, ast.Import, ast.ImportFrom, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        if isinstance(node, (ast.Global, ast.Nonlocal, ast.Import, ast.ImportFrom, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Break, ast.Continue)):
             return body
         flag = __mint__(used, seed, mint)
         init = ast.Assign(targets=[ast.Name(id=flag, ctx=ast.Store())], value=ast.Constant(True))
@@ -7163,6 +7163,8 @@ def __vein__(code):
             glass=__mint__(used,seed+b'hlg'+tick[0].to_bytes(4,'little'),mint)
             coalv=__spark__(seed+b'hlcv'+tick[0].to_bytes(4,'little'),1,9999)
             glassv=__spark__(seed+b'hlgv'+tick[0].to_bytes(4,'little'),1,9999)
+            while glassv==coalv:
+                glassv=(glassv*31+7)%9999+1
             flint=__mint__(used,seed+b'hl'+tick[0].to_bytes(4,'little'),mint)
             nether.append(ast.Assign(targets=[ast.Name(id=slag,ctx=ast.Store())],value=ast.Constant(rock)))
             nether.append(ast.Assign(targets=[ast.Name(id=coal,ctx=ast.Store())],value=ast.Constant(coalv)))
@@ -7739,10 +7741,15 @@ def {load}(i):
     len({keep})!={tally} and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
  i=((i-{crisp})^{mask})-{bend}
  (i<0 or i>=len({keep})) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
+ got={tint}.get(i)
+ if got is not None:
+  return got
  one={keep}[i]
  two=one[0]
  three={bytesf}(({slabkeyf}[slot&63]^byte) for slot,byte in enumerate(one[1]))
- return {strf}(three,'utf-8','surrogatepass') if two else three
+ out={strf}(three,'utf-8','surrogatepass') if two else three
+ {tint}[i]=out
+ return out
 {''.join(f'def {one}(i):\n return {load}(i)\n' for one in alts)}
 """
         return ast.parse(text).body
@@ -8254,17 +8261,43 @@ def {load}(i):
             callnode=calls[0]
             repl=ast.deepcopy(fdef.body[0].value)
             if fdef.args.args:
+                tab={}
+                skip=False
                 for p,a in zip(fdef.args.args,callnode.args):
-                    for n in ast.walk(repl):
-                        if isinstance(n,ast.Name) and n.id==p.arg:
-                            n.id=a.id if isinstance(a,ast.Name) else a.value if isinstance(a,ast.Constant) else n.id
-            for parent in ast.walk(root):
-                for attr in ('value','test','left','right','elt','iter','step','slice'):
-                    try:
-                        val=getattr(parent,attr,None)
-                        if val is call_node:
-                            setattr(parent,attr,repl)
-                    except: pass
+                    if not isinstance(a,(ast.Name,ast.Constant)):
+                        skip=True;break
+                    tab[p.arg]=a
+                if skip: continue
+                def sub(n):
+                    if isinstance(n,ast.Name) and n.id in tab:
+                        return copy.deepcopy(tab[n.id])
+                    for f,v in list(ast.iter_fields(n)):
+                        if isinstance(v,list):
+                            bag=[]
+                            for x in v:
+                                y=sub(x) if isinstance(x,ast.AST) else x
+                                bag.extend(y) if isinstance(y,list) else bag.append(y)
+                            setattr(n,f,bag)
+                        elif isinstance(v,ast.AST):
+                            setattr(n,f,sub(v))
+                    return n
+                repl=sub(ast.deepcopy(repl))
+            def rep(parent):
+                for f,v in list(ast.iter_fields(parent)):
+                    if isinstance(v,list):
+                        done=False
+                        for i,x in enumerate(v):
+                            if x is callnode:
+                                v[i]=repl;done=True
+                            elif isinstance(x,ast.AST) and rep(x):
+                                done=True
+                        if done: return True
+                    elif isinstance(v,ast.AST):
+                        if v is callnode:
+                            setattr(parent,f,repl);return True
+                        if rep(v): return True
+                return False
+            rep(root)
         return root
     tree = __shape__(tree)
     tree = __perma__(tree)
@@ -8382,7 +8415,7 @@ def {hand}():
   {fenf}={cragf}.perf_counter()
   for {screef} in range(1000000):pass
   {drusef}={cragf}.perf_counter()
-  if ({drusef}-{fenf})>2.0:
+  if ({drusef}-{fenf})>8.0:
    __import__({__alias__('os')})._exit(1)
   {cragf}=None
   {fenf}={shalex}
@@ -9033,7 +9066,7 @@ def __hahaha__():
  except:pass
  try:
   t=time.perf_counter();ctypes.windll.kernel32.OutputDebugStringA(b'obsidian')
-  if time.perf_counter()-t>0.25:return __ditmemay__()
+  if time.perf_counter()-t>1.5:return __ditmemay__()
  except:pass
  return 0
 def __hihihi__():
@@ -9055,12 +9088,16 @@ class __hohoho__(ctypes.Structure):_fields_=[('ContextFlags',ctypes.c_ulong),('D
 def __anhdomixi__():
  if os.name!='nt':return 0
  try:
-  box=__hohoho__();box.ContextFlags=0x10;ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
-  if ok and (box.Dr0 or box.Dr1 or box.Dr2 or box.Dr3):
-   try:
-    box.Dr0=box.Dr1=box.Dr2=box.Dr3=box.Dr6=box.Dr7=0;ctypes.windll.kernel32.SetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),ctypes.byref(box))
-   except:pass
-   return __ditmemay__()
+  buf=ctypes.create_string_buffer(256);ctypes.c_uint.from_buffer(buf,0x30).value=0x00100010
+  ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),buf)
+  if ok:
+   drs=[int.from_bytes(buf[o:o+8],'little') for o in (0x48,0x50,0x58,0x60)]
+   if any(drs):
+    try:
+     for o in (0x48,0x50,0x58,0x60,0x68,0x70):buf[o:o+8]=bytes(8)
+     ctypes.windll.kernel32.SetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),buf)
+    except:pass
+    return __ditmemay__()
  except:pass
  return 0
 def __mixifood__():
@@ -9189,7 +9226,7 @@ def __mixifood__():
  except:pass
  try:
   if os.name=='nt':
-   home=os.path.join(os.environ.get('SYSTEMROOT','C:\\Windows'),'System32','drivers')
+   home=os.path.join(os.environ.get('SYSTEMROOT','C:\\\\Windows'),'System32','drivers')
    for one in vm:
     if one.endswith('.sys') and os.path.exists(os.path.join(home,one)):return __ditmemay__()
  except:pass
@@ -9652,13 +9689,15 @@ def __head__(code, seed, brick, clay):
    pref = (hashlib.sha256(clay.encode()).hexdigest().upper(),'Z'+hashlib.sha256(clay.encode()).hexdigest().upper())[hashlib.sha256(clay.encode()).hexdigest()[:12].upper()[0].isdigit()][:12]
    outenv = pref+hashlib.sha256((brick+clay).encode()).hexdigest()[:24]
    concac = hashlib.sha256((clay+brick).encode()).hexdigest()
+   okey = outenv
+   oval = concac
    mark = '__netherstar__';stamp = time.strftime('%Y-%m-%d %H:%M:%S')
    ver = sys.version_info[:2]
    one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe = __sigil__(hashlib.sha256((stamp + code[:96]).encode('utf-8', 'replace')).digest(), 12);used = set((one,two,thr,fou,fiv,six,sev,eig,nin,ten,ele,twe))
    msg = __show__(*__hide__(f">> Version mismatch! File obf at Python {ver[0]}.{ver[1]}, current ", stamp.encode() + b'vgate'), fou);red = __show__(*__hide__('[91m', stamp.encode() + b'vgater'), fiv);off = __show__(*__hide__('[0m', stamp.encode() + b'vgateo'), six)
    la,sysx=__lily__(stamp.encode()+b'headsys','sys',used);lb,verx=__lily__(stamp.encode()+b'headver','version_info',used);lc,bix=__lily__(stamp.encode()+b'headbuilt','builtins',used);ld,prx=__lily__(stamp.encode()+b'headprint','print',used);le,osx=__lily__(stamp.encode()+b'heados','os',used);lf,subx=__lily__(stamp.encode()+b'headsub','subprocess',used);lg,glx=__lily__(stamp.encode()+b'headgl','globals',used)
    envn=__show__(*__hide__(pref+hashlib.sha256((stamp+code[:128]).encode('utf-8','replace')).hexdigest()[:24], stamp.encode()+b'headenv'), sev);envv=__show__(*__hide__(hashlib.sha256((stamp+code[-128:]).encode('utf-8','replace')).hexdigest(), stamp.encode()+b'headtok'), eig)
-   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}={sev}.read({fiv},{sev}.path.getsize({fou}));{six}=getattr({__aim__()}('hashlib'),'sha256')({six}[:len({six})//2]).hexdigest()+getattr({__aim__()}('hashlib'),'sha256')({six}[len({six})//2:]+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({nin});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({nin},{ten}),{ele}.__setitem__({outenv!r},{concac!r}+':'+str({sev}.getpid())+':'+{six}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({nin})!={ten} and {sev}._exit(1);((len({six})==128 and 1) or 1/0);((len({fou})>0 and 1) or 1/0);(({one}.__name__=='sys' and 1) or 1/0);"
+   gate = f"{la};{lb};{lc};{ld};{le};{lf};{lg};{one}={__aim__()}({sysx});{two}=getattr({one},{verx});{thr}=getattr({__aim__()}({bix}),{prx});{two}[:2]!={ver!r} and ({thr}(chr(27)+{red}+{msg}+str({two}[0])+'.'+str({two}[1])+chr(27)+{off},flush=True),(__meow__ for __meow__ in ()).throw(SystemExit(1)));{sev}={__aim__()}({osx});{eig}={__aim__()}({subx});{nin}={envn};{fou}={sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0]);{fiv}={sev}.open({fou},{sev}.O_RDONLY);{six}={sev}.read({fiv},{sev}.path.getsize({fou}));{six}=getattr({__aim__()}('hashlib'),'sha256')({six}[:len({six})//2]).hexdigest()+getattr({__aim__()}('hashlib'),'sha256')({six}[len({six})//2:]+{sev}.path.abspath({one}.executable).encode()).hexdigest();{sev}.close({fiv});{ten}={envv}+':'+{six};{ele}={sev}.environ.get({okey!r});{ele} is None and (({ele}:={sev}.environ.copy()),{ele}.__setitem__({okey!r},{oval!r}+':'+str({sev}.getpid())+':'+{six}),{sev}._exit({eig}.call([{one}.executable,{sev}.path.abspath(getattr({__aim__()}({bix}),{glx})().get('__file__') or {one}.argv[0])]+list({one}.argv[1:]),env={ele})));{sev}.environ.get({okey!r})!=({oval!r}+':'+str({sev}.getppid())+':'+{six}) and {sev}._exit(1);((len({six})==128 and 1) or 1/0);((len({fou})>0 and 1) or 1/0);(({one}.__name__=='sys' and 1) or 1/0);"
    body = __smooth__(__warp__(gate + code, seed, mark), seed)
    granite = "\n".join((f"__OWNER__='yep'", "__PROTECTOR__=\"yep's obfuscator\"", f"__OBFUSCATED__='{stamp}'"))
    ward = __ward__(seed)
