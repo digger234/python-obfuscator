@@ -33,6 +33,13 @@ try: sys.setrecursionlimit(max(sys.getrecursionlimit(), 500000))
 except: pass
 __nhincaidaubuoi__ = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x1680, 0x169f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
 __sexgay__ = set(keyword.kwlist)
+__mpath__=(('_distutils_hack','DistutilsMetaFinder'),('_distutils_hack','_inject'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'),('_virtualenv','__init__'),('_pytest','__init__'),('pytest','__init__'))
+__warped__=('startswith','endswith')
+__andesite2__=('bz2','_bz2')
+__basalt2__=('lzma','_lzma')
+__cobwebs__=('builtins','io','_io')
+__emerald__=('PyMarshal_','ReadObjectFromString')
+__quartz2__=('PyEval_','EvalCode')
 def __slate__():
    if Colorate is None:
         print(); [print(row) for row in ("      ______________________________________________________________", "     /\\                                                             \\", "    /##\\      OOOOO   BBBBB    SSSSS  III  DDDDD   III   AAAA  NN  NN", "   /####\\    OO   OO  BB  BB  SS       I   DD  DD   I   AA  AA NNN NN", "  /######\\   OO   OO  BBBBB    SSSS    I   DD  DD   I   AAAAAA NN NNN", " /###/\\###\\  OO   OO  BB  BB      SS   I   DD  DD   I   AA  AA NN  NN", "/___/  \\___\\  OOOOO   BBBBB   SSSSS  III  DDDDD   III  AA  AA NN  NN", "\\   \\  /   /______________________________________________________/", " \\___\\/___/        [Obsidian] Premium Protect  |  Owner: yeppp")]; print("  >> Ready"); print(); return
@@ -5869,12 +5876,12 @@ def __pare__(tree):
         if name=='swapcase' and not args: return __ev__(obj.swapcase)
         if name=='expandtabs' and len(args)<=1 and (not args or isinstance(args[0],int)): return __ev__(obj.expandtabs,*args)
         if name=='translate' and 1<=len(args)<=2 and isinstance(args[0],(bytes,bytearray)) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(obj.translate,*args)
-        return __ev__(getattr(obj,name)) if name in ('lower','upper','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,bytes) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and isinstance(args[0],(bytes,tuple)) and all(isinstance(x,int) for x in args[1:]) else __ev__(obj.hex,*args) if name=='hex' and (not args or __argu__(args,str)) else (False,None)
+        return __ev__(getattr(obj,name)) if name in ('lower','upper','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,bytes) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in __warped__ and 1<=len(args)<=3 and isinstance(args[0],(bytes,tuple)) and all(isinstance(x,int) for x in args[1:]) else __ev__(obj.hex,*args) if name=='hex' and (not args or __argu__(args,str)) else (False,None)
     def __text__(obj,name,args):
         if name=='format' and len(args)<=16: return __ev__(obj.format,*args)
         if name=='format_map' and len(args)==1 and isinstance(args[0],dict): return __ev__(obj.format_map,args[0])
         if name=='maketrans' and 1<=len(args)<=3 and all(isinstance(x,(str,dict)) for x in args): return __ev__(str.maketrans,*args)
-        return __ev__(getattr(obj,name)) if name in ('lower','upper','casefold','capitalize','title','swapcase','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,str) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]) else (False,None)
+        return __ev__(getattr(obj,name)) if name in ('lower','upper','casefold','capitalize','title','swapcase','strip','lstrip','rstrip') and not args else __ev__(obj.replace,*args) if name=='replace' and 2<=len(args)<=3 and all(isinstance(x,str) for x in args[:2]) and (len(args)==2 or isinstance(args[2],int)) else __ev__(getattr(obj,name),*args) if name in __warped__ and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]) else (False,None)
     def __kwarg__(node):
         bag={}
         for x in node.keywords:
@@ -5905,7 +5912,7 @@ def __pare__(tree):
             if name=='replace' and not args and {'old','new'}<=set(kw) and set(kw)<= {'old','new','count'} and isinstance(kw.get('old'),str) and isinstance(kw.get('new'),str) and (not 'count' in kw or isinstance(kw.get('count'),int)): return __ev__(obj.replace,**kw)
             if name=='encode' and not args and set(kw)<= {'encoding','errors'} and (not 'encoding' in kw or isinstance(kw.get('encoding'),str)) and (not 'errors' in kw or isinstance(kw.get('errors'),str)): return __ev__(obj.encode,**kw)
             if name in ('center','ljust','rjust') and len(args)==1 and set(kw)<= {'fillchar'} and isinstance(args[0],int) and (not kw or isinstance(kw.get('fillchar'),str)): return __ev__(getattr(obj,name),*args,**kw)
-            if name in ('startswith','endswith') and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),str) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
+            if name in __warped__ and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),str) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
             if name in ('find','rfind','index','rindex','count') and not args and {'sub'}<=set(kw) and set(kw)<= {'sub','start','end'} and isinstance(kw.get('sub'),str) and all(isinstance(v,int) for k,v in kw.items() if k!='sub'): return __ev__(getattr(obj,name),**kw)
         if isinstance(obj,bytes):
             if name in ('split','rsplit') and not args and set(kw)<= {'sep','maxsplit'} and (not 'sep' in kw or isinstance(kw.get('sep'),bytes) or kw.get('sep') is None) and (not 'maxsplit' in kw or isinstance(kw.get('maxsplit'),int)): return __ev__(getattr(obj,name),**kw)
@@ -5914,7 +5921,7 @@ def __pare__(tree):
             if name=='decode' and not args and set(kw)<= {'encoding','errors'} and (not 'encoding' in kw or isinstance(kw.get('encoding'),str)) and (not 'errors' in kw or isinstance(kw.get('errors'),str)): return __ev__(obj.decode,**kw)
             if name in ('center','ljust','rjust') and len(args)==1 and set(kw)<= {'fillbyte'} and isinstance(args[0],int) and (not kw or isinstance(kw.get('fillbyte'),bytes)): return __ev__(getattr(obj,name),*args,**kw)
             if name=='hex' and not args and set(kw)<= {'sep','bytes_per_sep'} and (not 'sep' in kw or isinstance(kw.get('sep'),str)) and (not 'bytes_per_sep' in kw or isinstance(kw.get('bytes_per_sep'),int)): return __ev__(obj.hex,**kw)
-            if name in ('startswith','endswith') and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),bytes) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
+            if name in __warped__ and not args and {'prefix'}<=set(kw) and set(kw)<= {'prefix','start','end'} and __pref__(kw.get('prefix'),bytes) and all(isinstance(v,int) for k,v in kw.items() if k!='prefix'): return __ev__(getattr(obj,name),**kw)
             if name in ('find','rfind','index','rindex','count') and not args and {'sub'}<=set(kw) and set(kw)<= {'sub','start','end'} and isinstance(kw.get('sub'),bytes) and all(isinstance(v,int) for k,v in kw.items() if k!='sub'): return __ev__(getattr(obj,name),**kw)
         if isinstance(obj,int):
             if name=='to_bytes' and not args and {'length','byteorder'}<=set(kw) and set(kw)<= {'length','byteorder','signed'} and isinstance(kw.get('length'),int) and 0<=kw.get('length')<=lim and isinstance(kw.get('byteorder'),str) and (not 'signed' in kw or isinstance(kw.get('signed'),bool)): return __ev__(obj.to_bytes,**kw)
@@ -6261,7 +6268,7 @@ def __pare__(tree):
             if name in ('removeprefix','removesuffix') and len(args)==1 and isinstance(args[0],str): return __ev__(getattr(obj,name),*args)
             if name=='replace' and 2<=len(args)<=3 and isinstance(args[0],str) and isinstance(args[1],str) and (len(args)==2 or isinstance(args[2],int)): return __ev__(obj.replace,*args)
             if name in ('find','rfind','count','index','rindex') and 1<=len(args)<=3 and __spread__(args,str): return __ev__(getattr(obj,name),*args)
-            if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
+            if name in __warped__ and 1<=len(args)<=3 and __pref__(args[0],str) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
             if name in ('center','ljust','rjust') and 1<=len(args)<=2 and isinstance(args[0],int) and (len(args)==1 or isinstance(args[1],str)): return __ev__(getattr(obj,name),*args)
             if name=='zfill' and len(args)==1 and isinstance(args[0],int): return __ev__(obj.zfill,args[0])
             if name in ('partition','rpartition') and len(args)==1 and isinstance(args[0],str): return __ev__(getattr(obj,name),args[0])
@@ -6280,7 +6287,7 @@ def __pare__(tree):
             if name in ('removeprefix','removesuffix') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),*args)
             if name=='replace' and 2<=len(args)<=3 and isinstance(args[0],bytes) and isinstance(args[1],bytes) and (len(args)==2 or isinstance(args[2],int)): return __ev__(obj.replace,*args)
             if name in ('find','rfind','count','index','rindex') and 1<=len(args)<=3 and __spread__(args,bytes): return __ev__(getattr(obj,name),*args)
-            if name in ('startswith','endswith') and 1<=len(args)<=3 and __pref__(args[0],bytes) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
+            if name in __warped__ and 1<=len(args)<=3 and __pref__(args[0],bytes) and all(isinstance(x,int) for x in args[1:]): return __ev__(getattr(obj,name),*args)
             if name in ('center','ljust','rjust') and 1<=len(args)<=2 and isinstance(args[0],int) and (len(args)==1 or isinstance(args[1],bytes)): return __ev__(getattr(obj,name),*args)
             if name in ('partition','rpartition') and len(args)==1 and isinstance(args[0],bytes): return __ev__(getattr(obj,name),args[0])
             if name=='hex' and (not args or len(args)==2 and isinstance(args[0],str) and isinstance(args[1],int)): return __ev__(obj.hex,*args)
@@ -7553,7 +7560,7 @@ def {huskf}(left,right):
  left!=right and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
  return left
 def {barkf}(blob):
- ct={impf}({__alias__('ctypes')});name=''.join(('PyMarshal_','ReadObjectFromString'));read=getattr(ct.pythonapi,name);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob)
+ ct={impf}({__alias__('ctypes')});name=''.join({__emerald__!r});read=getattr(ct.pythonapi,name);read.restype=ct.py_object;read.argtypes=[ct.c_char_p,ct.c_long];box=ct.create_string_buffer(blob)
  return read(ct.cast(box,ct.c_char_p),len(blob))
 def {pearlf}(v,a,n):
  veil=bytes.fromhex(n)
@@ -8367,7 +8374,7 @@ def {hand}():
  {bone}('exec',built,('builtins',))
  {bone}('eval',built,('builtins',))
  {bone}('compile',built,('builtins',))
- {bone}('open',built,('builtins','io','_io'))
+ {bone}('open',built,{__cobwebs__!r})
  {bone}('__import__',built,('builtins',))
  {bone}('globals',built,('builtins',))
  {bone}('locals',built,('builtins',))
@@ -8378,13 +8385,13 @@ def {hand}():
  {bone}('bytes',built,('builtins',))
  {bone}('loads',__import__({__alias__('marshal')}),('marshal',))
  {bone}('decompress',__import__({__alias__('zlib')}),('zlib',))
- {bone}('decompress',__import__({__alias__('bz2')}),('bz2','_bz2'))
- {bone}('decompress',__import__({__alias__('lzma')}),('lzma','_lzma'))
+ {bone}('decompress',__import__({__alias__('bz2')}),{__andesite2__!r})
+ {bone}('decompress',__import__({__alias__('lzma')}),{__basalt2__!r})
  sys.tracebacklimit=0;[sys.modules.pop(one,None) for one in mods]
  add=getattr(sys,{__alias__('addaudithook')},None)
  if sys.gettrace() or sys.getprofile() or getattr(sys,'meta_path',None) is None or type(add).__name__!='builtin_function_or_method' or getattr(add,'__module__','')!='sys':
   __import__({__alias__('os')})._exit(1)
- good=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'))
+ good={__mpath__!r}
  for item in getattr(sys,'meta_path',()):
   mod=getattr(item,'__module__',getattr(type(item),'__module__',''));nam=getattr(item,'__name__',type(item).__name__)
   if (mod,nam) not in good:
@@ -8577,12 +8584,12 @@ def {grovef}(ct,name,restype,argtypes):
  hold.restype=restype;hold.argtypes=argtypes
  return hold
 def {miref}(blob):
- ct=__import__({__alias__('ctypes')});name=''.join(('PyMarshal_','ReadObjectFromString'));read={grovef}(ct,name,ct.py_object,[ct.c_char_p,ct.c_long]);box=ct.create_string_buffer(blob);right=read(ct.cast(box,ct.c_char_p),len(blob))
+ ct=__import__({__alias__('ctypes')});name=''.join({__emerald__!r});read={grovef}(ct,name,ct.py_object,[ct.c_char_p,ct.c_long]);box=ct.create_string_buffer(blob);right=read(ct.cast(box,ct.c_char_p),len(blob))
  hold={scan}(right)
  hold!=({rift},{cull},{thorn},{flake},{peat}) and __import__({__alias__('os')})._exit(1)
  return right
 def {evalf}(code):
- {hand}();{huskf}(code);ct=__import__({__alias__('ctypes')});name=''.join(('PyEval_','EvalCode'));run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
+ {hand}();{huskf}(code);ct=__import__({__alias__('ctypes')});name=''.join({__quartz2__!r});run={grovef}(ct,name,ct.py_object,[ct.py_object,ct.py_object,ct.py_object])
  return run(code,globals(),globals())
 def {guard}(blob,mark,seal):
  if hashlib.sha256(blob).hexdigest()!=seal:
@@ -8852,7 +8859,7 @@ def __concac__():
   if name!='cpython' or (str(ver[0])+str(ver[1])) not in tag:return 0
   add=getattr(sys,'addaudithook',None)
   if type(add).__name__!='builtin_function_or_method' or getattr(add,'__module__','')!='sys':return __ditmemay__()
-  good=(('_distutils_hack','DistutilsMetaFinder'),('_frozen_importlib','BuiltinImporter'),('_frozen_importlib','FrozenImporter'),('_frozen_importlib_external','PathFinder'))
+  good={__mpath__!r}
   for item in getattr(sys,'meta_path',()):
    mod=getattr(item,'__module__',getattr(type(item),'__module__',''));nam=getattr(item,'__name__',type(item).__name__)
    if (mod,nam) not in good:return __ditmemay__()
@@ -8990,7 +8997,7 @@ def __varrrrr__(name,home,need):
  return hold
 def __checkvar__():
  built=__import__('builtins')
- __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,('builtins','io','_io'));__varrrrr__('print',built,('builtins',));__varrrrr__('breakpoint',built,('builtins',));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('breakpointhook',sys,('sys',));__varrrrr__('excepthook',sys,('sys',));__varrrrr__('displayhook',sys,('sys',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,('bz2','_bz2'));__varrrrr__('decompress',lzma,('lzma','_lzma'))
+ __varrrrr__('exec',built,('builtins',));__varrrrr__('eval',built,('builtins',));__varrrrr__('compile',built,('builtins',));__varrrrr__('open',built,{__cobwebs__!r});__varrrrr__('print',built,('builtins',));__varrrrr__('breakpoint',built,('builtins',));__varrrrr__('__import__',built,('builtins',));__varrrrr__('globals',built,('builtins',));__varrrrr__('locals',built,('builtins',));__varrrrr__('vars',built,('builtins',));__varrrrr__('dir',built,('builtins',));__varrrrr__('breakpointhook',sys,('sys',));__varrrrr__('excepthook',sys,('sys',));__varrrrr__('displayhook',sys,('sys',));__varrrrr__('loads',marshal,('marshal',));__varrrrr__('decompress',zlib,('zlib',));__varrrrr__('decompress',bz2,{__andesite2__!r});__varrrrr__('decompress',lzma,{__basalt2__!r})
  for home,name in ((sys,'sys'),(os,'os'),(socket,'socket'),(platform,'platform'),(ctypes,'ctypes'),(threading,'threading'),(marshal,'marshal'),(zlib,'zlib'),(bz2,'bz2'),(lzma,'lzma'),(base64,'base64')):
   if sys.modules.get(name) is not home:return __ditmemay__()
  for one in (eval,exec,compile,__import__,open,print,globals,locals,vars,dir,type,getattr,setattr):
@@ -9444,7 +9451,7 @@ def __alovu__(blob,key):
  __fail__() and __baoloi__()
  (((zlib.crc32(blob[:len(blob)//2])^zlib.crc32(blob[len(blob)//2:]))&0xffffffff)^__runtag__^len(blob))!=key and __ditmemay__()
  (getattr(ctypes,'__name__','')!='ctypes' or getattr(getattr(ctypes,'_CFuncPtr',None),'__module__','')!='_ctypes') and __ditmemay__()
- name=''.join(('PyMarshal_','ReadObjectFromString'));hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
+ name=''.join({__emerald__!r});hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.c_char_p,ctypes.c_long]
  size=len(blob);box=ctypes.create_string_buffer(blob);blob=b'';right=hold(ctypes.cast(box,ctypes.c_char_p),size)
  try:ctypes.memset(box,0,size)
  except:pass
@@ -9457,7 +9464,7 @@ def __nhinconcac__(code,key):
  gate=((hashlib.sha256(code.co_code).digest()[0]<<24)^(zlib.crc32(code.co_code[:len(code.co_code)//2])^zlib.crc32(code.co_code[len(code.co_code)//2:]))&0xffffffff^__runtag__^len(code.co_consts))&0xffffffff
  gate!=((key^0xA5A55A5A)&0xffffffff) and __ditmemay__()
  (getattr(ctypes,'__name__','')!='ctypes' or getattr(getattr(ctypes,'_CFuncPtr',None),'__module__','')!='_ctypes') and __ditmemay__()
- name=''.join(('PyEval_','EvalCode'));hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
+ name=''.join({__quartz2__!r});hold=getattr(ctypes.pythonapi,name);not isinstance(hold,ctypes._CFuncPtr) and __ditmemay__();hold.restype=ctypes.py_object;hold.argtypes=[ctypes.py_object,ctypes.py_object,ctypes.py_object]
  built=globals().get('__builtins__');box=built if isinstance(built,dict) else vars(built)
  cap={{'Obsidian':box.get('eval'),'Ender_Pearl':box.get('str'),'Crystal':box.get('bytes'),'Bedrock':box.get('dict'),'Gapple':box.get('zip')}}
  cap['Trident']=cap['Bedrock'](cap['Gapple'](('exec','__import__','marshal','lzma','zlib','bz2','base64'),(box.get('exec'),box.get('__import__'),marshal,lzma,zlib,bz2,base64)))
