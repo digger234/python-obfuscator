@@ -40,6 +40,7 @@ __basalt2__=('lzma','_lzma')
 __cobwebs__=('builtins','io','_io')
 __emerald__=('PyMarshal_','ReadObjectFromString')
 __quartz2__=('PyEval_','EvalCode')
+__deepslate__ = []
 def __slate__():
    if Colorate is None:
         print(); [print(row) for row in ("      ______________________________________________________________", "     /\\                                                             \\", "    /##\\      OOOOO   BBBBB    SSSSS  III  DDDDD   III   AAAA  NN  NN", "   /####\\    OO   OO  BB  BB  SS       I   DD  DD   I   AA  AA NNN NN", "  /######\\   OO   OO  BBBBB    SSSS    I   DD  DD   I   AAAAAA NN NNN", " /###/\\###\\  OO   OO  BB  BB      SS   I   DD  DD   I   AA  AA NN  NN", "/___/  \\___\\  OOOOO   BBBBB   SSSSS  III  DDDDD   III  AA  AA NN  NN", "\\   \\  /   /______________________________________________________/", " \\___\\/___/        [Obsidian] Premium Protect  |  Owner: yeppp")]; print("  >> Ready"); print(); return
@@ -6457,9 +6458,12 @@ def __pare__(tree):
             if isinstance(v,list):
                 bag=[]
                 for x in v:
-                    y=__go__(x) if isinstance(x,ast.AST) else x
-                    if y is None: continue
-                    bag.extend(y) if isinstance(y,list) else bag.append(y)
+                    if isinstance(x, ast.AST):
+                        y=__go__(x)
+                        if y is None: continue
+                        bag.extend(y) if isinstance(y,list) else bag.append(y)
+                    else:
+                        bag.append(x)
                 setattr(n,f,bag)
             elif isinstance(v,ast.AST):
                 y=__go__(v)
@@ -6470,7 +6474,12 @@ def __pare__(tree):
         if isinstance(n,(ast.Module,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)): n.body=__bod__(n.body);return n
         if isinstance(n,ast.ExceptHandler): n.body=__bod__(n.body);return n
         if hasattr(ast,'match_case') and isinstance(n,ast.match_case): n.body=__bod__(n.body);return n
-        if isinstance(n,(ast.Assert,)): return None
+        if isinstance(n, ast.Assert):
+            if __pure__(n.test) and (n.msg is None or __pure__(n.msg)):
+                return None
+            n.test=__go__(n.test)
+            if n.msg is not None: n.msg=__go__(n.msg)
+            return n
         if isinstance(n,ast.If):
             ok,v=__tru__(n.test)
             if ok: return n.body if v else n.orelse
@@ -6649,6 +6658,7 @@ def __pare__(tree):
         return n
     tree=__typec__(__go__(tree));ast.fix_missing_locations(tree);return tree
 def __vein__(code):
+    global __deepslate__
     tree = ast.parse(code)
     tree = __pare__(tree)
     seed = hashlib.sha256(code.encode('utf-8')).digest()
@@ -6700,17 +6710,45 @@ def __vein__(code):
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     name = alias.asname or alias.name.split('.')[0]
-                    seen.add(name); bind.add(name)
+                    seen.add(name); bind.add(name); mark.add(name)
                     if not alias.asname and '.' in alias.name: frost.add(name)
             elif isinstance(node, ast.ImportFrom):
                 for alias in node.names:
                     if alias.name == '*':
                         continue
                     name = alias.asname or alias.name
-                    seen.add(name); bind.add(name)
+                    seen.add(name); bind.add(name); mark.add(name)
             elif isinstance(node, ast.ExceptHandler) and node.name:
                 seen.add(node.name)
                 bind.add(node.name)
+            elif hasattr(ast, 'TypeAlias') and isinstance(node, ast.TypeAlias):
+                if isinstance(getattr(node, 'name', None), ast.Name):
+                    seen.add(node.name.id); bind.add(node.name.id); made.add(node.name.id); mark.add(node.name.id)
+                for tp in getattr(node, 'type_params', []) or []:
+                    n = getattr(tp, 'name', None)
+                    if isinstance(n, str):
+                        seen.add(n); bind.add(n); para.add(n)
+                    elif isinstance(n, ast.Name):
+                        seen.add(n.id); bind.add(n.id); para.add(n.id)
+            elif hasattr(ast, 'TypeVar') and isinstance(node, ast.TypeVar):
+                n = getattr(node, 'name', None)
+                if isinstance(n, str):
+                    seen.add(n); bind.add(n); para.add(n)
+            elif hasattr(ast, 'ParamSpec') and isinstance(node, ast.ParamSpec):
+                n = getattr(node, 'name', None)
+                if isinstance(n, str):
+                    seen.add(n); bind.add(n); para.add(n)
+            elif hasattr(ast, 'TypeVarTuple') and isinstance(node, ast.TypeVarTuple):
+                n = getattr(node, 'name', None)
+                if isinstance(n, str):
+                    seen.add(n); bind.add(n); para.add(n)
+            if hasattr(node, 'type_params') and getattr(node, 'type_params'):
+                for tp in node.type_params or []:
+                    n = getattr(tp, 'name', None)
+                    if isinstance(n, str):
+                        seen.add(n); bind.add(n); para.add(n)
+                    elif isinstance(n, ast.Name):
+                        seen.add(n.id); bind.add(n.id); para.add(n.id)
         return seen, bind, frost, mark, para, made, clss
     used, bind, frost, mark, para, made, clss = __gather__(tree)
     mint = [0]
@@ -6757,9 +6795,23 @@ def __vein__(code):
         keys = [ast.keyword(arg='fromlist', value=ast.Tuple(elts=[__tiny__(one) for one in vals], ctx=ast.Load()))] if vals else []
         return ast.Call(func=ast.Name(id='__import__', ctx=ast.Load()), args=[__tiny__(mod)], keywords=keys)
     def __owncall__(node):
-        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Name): return False
-        for one in clss:
-            if node.func.id == one or (__token__(one) and node.func.id == __pick__(one)): return True
+        if not isinstance(node, ast.Call): return False
+        def __clsname__(base):
+            if isinstance(base, ast.Name):
+                return base.id
+            return None
+        def __iscls__(base):
+            for one in clss:
+                if base == one or (__token__(one) and base == __pick__(one)): return True
+            return False
+        if isinstance(node.func, ast.Name):
+            return __iscls__(node.func.id)
+        if isinstance(node.func, ast.Attribute):
+            base = __clsname__(node.func.value)
+            return base is not None and __iscls__(base)
+        if isinstance(node.func, ast.Call) and isinstance(node.func.func, ast.Name) and node.func.func.id == 'getattr' and len(node.func.args) >= 1 and len(node.func.args) <= 2:
+            base = __clsname__(node.func.args[0])
+            return base is not None and __iscls__(base)
         return False
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf, slabkeyf = [__mint__(used, seed, mint) for slot in range(61)]
     alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(16)]
@@ -6789,18 +6841,18 @@ def __vein__(code):
         if isinstance(node, ast.MatchSingleton):
             return node
         if isinstance(node, ast.MatchStar):
-            if node.name and __token__(node.name):
+            if node.name and node.name != "_" and __token__(node.name):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchAs):
             if node.pattern is not None:
                 node.pattern = __patt__(node.pattern)
-            if node.name and __token__(node.name):
+            if node.name and node.name != "_" and __token__(node.name):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchMapping):
             node.patterns = [__patt__(one) for one in node.patterns]
-            if node.rest and __token__(node.rest):
+            if node.rest and node.rest != "_" and __token__(node.rest):
                 node.rest = __pick__(node.rest)
             return node
         if isinstance(node, ast.MatchClass):
@@ -6905,6 +6957,11 @@ def __vein__(code):
     def __guard__(left, right, mark):
         return ast.Compare(left=ast.BinOp(left=ast.Name(id=left, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=right, ctx=ast.Load())), ops=[ast.Eq()], comparators=[mark])
     def __lambda__(body, args, vals, tag, vararg=None, kwarg=None, keys=None):
+        try:
+            for _n in ast.walk(body):
+                if isinstance(_n, (ast.Yield, ast.YieldFrom, ast.Await)):
+                    return body
+        except: pass
         left, right = __mint__(used, seed, mint), __mint__(used, seed, mint)
         a, b, c = __vault__(tag)
         raw.add(id(a)); raw.add(id(b)); raw.add(id(c))
@@ -7897,25 +7954,44 @@ def {load}(i):
                 goal = __pick__(name) if __token__(name) else name
                 bag.append(ast.Assign(targets=[ast.Name(id=goal, ctx=ast.Store())], value=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=base, ctx=ast.Load()), __tiny__(one.name)], keywords=[])))
             return bag
+        if hasattr(ast, 'TypeAlias') and isinstance(node, ast.TypeAlias):
+            if isinstance(getattr(node, 'name', None), ast.Name) and __token__(node.name.id):
+                node.name.id = __pick__(node.name.id)
+            for tp in getattr(node, 'type_params', []) or []:
+                n = getattr(tp, 'name', None)
+                if isinstance(n, str) and __token__(n):
+                    tp.name = __pick__(n)
+            node = __cast__(node, 'shape', set())
+            return node
         if isinstance(node, ast.FunctionDef):
+            if hasattr(node, 'type_params') and node.type_params:
+                for tp in node.type_params:
+                    n = getattr(tp, 'name', None)
+                    if isinstance(n, str) and __token__(n):
+                        tp.name = __pick__(n)
             if wall[0] > 0 and node.args.args and __token__(node.args.args[0].arg): own.add(__pick__(node.args.args[0].arg))
             if __token__(node.name):
                 node.name = __pick__(node.name)
             node.args = __args__(node.args)
             hold = __lock__(node.args)
             lock.append(hold); room[0] += 1
-            node = __cast__(node, 'shape', {'body'})
+            node = __cast__(node, 'shape', {'body', 'type_params'})
             node.body = __core__(node.body, 'shape', False)
             room[0] -= 1; lock.pop()
             return node
         if isinstance(node, ast.AsyncFunctionDef):
+            if hasattr(node, 'type_params') and node.type_params:
+                for tp in node.type_params:
+                    n = getattr(tp, 'name', None)
+                    if isinstance(n, str) and __token__(n):
+                        tp.name = __pick__(n)
             if wall[0] > 0 and node.args.args and __token__(node.args.args[0].arg): own.add(__pick__(node.args.args[0].arg))
             if __token__(node.name):
                 node.name = __pick__(node.name)
             node.args = __args__(node.args)
             hold = __lock__(node.args)
             lock.append(hold); room[0] += 1
-            node = __cast__(node, 'shape', {'body'})
+            node = __cast__(node, 'shape', {'body', 'type_params'})
             node.body = __core__(node.body, 'shape', False)
             room[0] -= 1; lock.pop()
             return node
@@ -7928,9 +8004,15 @@ def {load}(i):
             room[0] -= 1; lock.pop()
             return node
         if isinstance(node, ast.ClassDef):
+            if hasattr(node, 'type_params') and node.type_params:
+                for tp in node.type_params:
+                    n = getattr(tp, 'name', None)
+                    if isinstance(n, str) and __token__(n):
+                        tp.name = __pick__(n)
             if wall[0] == 0 and __token__(node.name):
                 node.name = __pick__(node.name)
-            node = __cast__(node, 'shape', {'body'})
+                own.add(node.name)
+            node = __cast__(node, 'shape', {'body', 'type_params'})
             wall[0] += 1
             node.body = __core__(node.body, 'shape', False)
             wall[0] -= 1
@@ -7941,17 +8023,17 @@ def {load}(i):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchStar):
-            if node.name and __token__(node.name):
+            if node.name and node.name != "_" and __token__(node.name):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchAs):
             node = __cast__(node, 'shape', set())
-            if node.name and __token__(node.name):
+            if node.name and node.name != "_" and __token__(node.name):
                 node.name = __pick__(node.name)
             return node
         if isinstance(node, ast.MatchMapping):
             node = __cast__(node, 'shape', set())
-            if node.rest and __token__(node.rest):
+            if node.rest and node.rest != "_" and __token__(node.rest):
                 node.rest = __pick__(node.rest)
             return node
         if isinstance(node, ast.Name):
@@ -8016,7 +8098,10 @@ def {load}(i):
         if isinstance(node, ast.Attribute) and isinstance(node.ctx, ast.Load):
             return ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__(node.attr)], keywords=[])
         if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load):
-            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[node.value, __ember__('__getitem__')], keywords=[]), args=[node.slice], keywords=[])
+            sl = __gloom__(node.slice)
+            if isinstance(sl, ast.Tuple):
+                sl.elts = [__gloom__(e) if not isinstance(e, ast.Starred) else ast.Starred(value=__gloom__(e.value), ctx=e.ctx) for e in sl.elts]
+            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[__gloom__(node.value), __ember__('__getitem__')], keywords=[]), args=[sl], keywords=[])
         if isinstance(node, ast.List) and isinstance(node.ctx, ast.Load):
             if node.elts and ((len(node.elts) + seed[21] + tick[0]) & 3) == 0:
                 name = __mint__(used, seed + b'list' + len(node.elts).to_bytes(2, 'little'), mint)
@@ -8049,11 +8134,32 @@ def {load}(i):
             return bag
         if isinstance(node, ast.Assign):
             if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and __owncall__(node.value): own.add(node.targets[0].id)
+            if len(node.targets) > 1:
+                __crimson__ = any(isinstance(t, (ast.Attribute, ast.Subscript)) for t in node.targets)
+                if __crimson__:
+                    __cattt__ = __gloom__(node.value)
+                    __yepppp__ = __mint__(used, seed + b'multiassign' + tick[0].to_bytes(4, 'little'), mint); tick[0]+=1
+                    __yep__ = ast.Assign(targets=[ast.Name(id=__yepppp__, ctx=ast.Store())], value=__cattt__)
+                    __ash__=[__yep__]
+                    for __meowww__ in node.targets:
+                        if isinstance(__meowww__, ast.Attribute) and isinstance(__meowww__.ctx, ast.Store):
+                            __gold__ = __pick__(__meowww__.attr) if isinstance(__meowww__.value, ast.Name) and __meowww__.value.id in own and __meowww__.attr in mark and __token__(__meowww__.attr) else __meowww__.attr
+                            __ash__.append(ast.Expr(value=ast.Call(func=ast.Name(id='setattr', ctx=ast.Load()), args=[__meowww__.value, __ember__(__gold__), ast.Name(id=__yepppp__, ctx=ast.Load())], keywords=[])))
+                        elif isinstance(__meowww__, ast.Subscript) and isinstance(__meowww__.ctx, ast.Store):
+                            __ash__.append(ast.Expr(value=ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[__meowww__.value, __ember__('__setitem__')], keywords=[]), args=[__meowww__.slice, ast.Name(id=__yepppp__, ctx=ast.Load())], keywords=[])))
+                        else:
+                            __ash__.append(ast.Assign(targets=[__meowww__], value=ast.Name(id=__yepppp__, ctx=ast.Load())))
+                    return __ash__
             node.value = __gloom__(node.value)
             return node
-        if isinstance(node, ast.AnnAssign) and node.value is not None:
-            if isinstance(node.target, ast.Name) and __owncall__(node.value): own.add(node.target.id)
-            node.value = __gloom__(node.value)
+        if isinstance(node, ast.AnnAssign):
+            if node.value is not None and isinstance(node.target, ast.Name) and __owncall__(node.value): own.add(node.target.id)
+            if node.annotation is not None:
+                node.annotation = __gloom__(node.annotation)
+            if node.value is not None:
+                node.value = __gloom__(node.value)
+            else:
+                node.value = None
             return node
         if isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Attribute):
             op = __anvil__(node.op)
@@ -8146,16 +8252,48 @@ def {load}(i):
                 item.context_expr = __gloom__(item.context_expr)
             return node
         if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            __netherite__=set()
+            for __gold__ in node.generators:
+                for __ash__ in ast.walk(__gold__.target):
+                    if isinstance(__ash__, ast.Name) and isinstance(__ash__.ctx, ast.Store):
+                        __netherite__.add(__ash__.id)
+            __yeppp__=set()
+            for __gold__ in node.generators:
+                def __cattt__(__yep__):
+                    if isinstance(__yep__, ast.Name) and isinstance(__yep__.ctx, ast.Store) and __token__(__yep__.id):
+                        __crimson__=__pick__(__yep__.id); __yep__.id=__crimson__; __yeppp__.add(__crimson__)
+                    elif isinstance(__yep__, (ast.Tuple, ast.List)):
+                        for __diamond__ in __yep__.elts: __cattt__(__diamond__)
+                    elif isinstance(__yep__, ast.Starred): __cattt__(__yep__.value)
+                __cattt__(__gold__.target)
+            __yeppppp__=__yeppp__.union(__netherite__); lock.append(__yeppppp__); __deepslate__.append(set())
             node.elt = __gloom__(node.elt)
-            for gen in node.generators:
-                gen.iter = __gloom__(gen.iter)
-                gen.ifs = [__gloom__(one) for one in gen.ifs]
+            for __gold__ in node.generators:
+                __gold__.iter = __gloom__(__gold__.iter)
+                __gold__.ifs = [__gloom__(one) for one in __gold__.ifs]
+            lock.pop(); __deepslate__.pop()
             return node
         if isinstance(node, ast.DictComp):
+            __netherite__=set()
+            for __gold__ in node.generators:
+                for __ash__ in ast.walk(__gold__.target):
+                    if isinstance(__ash__, ast.Name) and isinstance(__ash__.ctx, ast.Store):
+                        __netherite__.add(__ash__.id)
+            __yeppp__=set()
+            for __gold__ in node.generators:
+                def __cattt__(__yep__):
+                    if isinstance(__yep__, ast.Name) and isinstance(__yep__.ctx, ast.Store) and __token__(__yep__.id):
+                        __crimson__=__pick__(__yep__.id); __yep__.id=__crimson__; __yeppp__.add(__crimson__)
+                    elif isinstance(__yep__, (ast.Tuple, ast.List)):
+                        for __diamond__ in __yep__.elts: __cattt__(__diamond__)
+                    elif isinstance(__yep__, ast.Starred): __cattt__(__yep__.value)
+                __cattt__(__gold__.target)
+            __yeppppp__=__yeppp__.union(__netherite__); lock.append(__yeppppp__); __deepslate__.append(set())
             node.key = __gloom__(node.key); node.value = __gloom__(node.value)
-            for gen in node.generators:
-                gen.iter = __gloom__(gen.iter)
-                gen.ifs = [__gloom__(one) for one in gen.ifs]
+            for __gold__ in node.generators:
+                __gold__.iter = __gloom__(__gold__.iter)
+                __gold__.ifs = [__gloom__(one) for one in __gold__.ifs]
+            lock.pop(); __deepslate__.pop()
             return node
         if isinstance(node, ast.Match):
             node.subject = __gloom__(node.subject)
@@ -8194,7 +8332,8 @@ def {load}(i):
             if node.format_spec is not None: node.format_spec = __gloom__(node.format_spec)
             return node
         if isinstance(node, ast.Starred):
-            node.value = __gloom__(node.value)
+            if isinstance(node.ctx, ast.Load):
+                node.value = __gloom__(node.value)
             return node
         if isinstance(node, ast.Yield) and node.value is not None:
             node.value = __gloom__(node.value)
