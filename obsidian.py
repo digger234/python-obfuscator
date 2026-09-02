@@ -16,6 +16,7 @@ import time
 import secrets
 import tokenize
 import unicodedata
+import uuid
 import warnings
 import zlib
 import keyword
@@ -29,7 +30,7 @@ except:
 if sys.version_info < (3, 10):
     print("Python 3.10+ required")
     sys.exit(1)
-try: sys.setrecursionlimit(max(sys.getrecursionlimit(), 500000))
+try: sys.setrecursionlimit(min(max(sys.getrecursionlimit(), 10000), 200000))
 except: pass
 __nhincaidaubuoi__ = ((0x4e00, 0x9faf), (0x3400, 0x4dbf), (0x3041, 0x3096), (0x30a1, 0x30fa), (0xac00, 0xd7a3), (0x0400, 0x04ff), (0x0370, 0x03ff), (0x10a0, 0x10ff), (0x1200, 0x137f), (0x0e00, 0x0e7f), (0x0980, 0x09ff), (0x0a00, 0x0a7f), (0x0b00, 0x0b7f), (0x0c00, 0x0c7f), (0x0d00, 0x0d7f), (0x13a0, 0x13ff), (0x1400, 0x167f), (0x1680, 0x169f), (0x16a0, 0x16ff), (0x1700, 0x171f), (0x1780, 0x17ff), (0x1800, 0x18af), (0x1e00, 0x1eff), (0x1f00, 0x1fff), (0x2c00, 0x2c5f), (0x2d00, 0x2d2f), (0xa000, 0xa48f), (0xa500, 0xa63f), (0xa800, 0xa82f), (0x1000, 0x109f), (0x0f00, 0x0fff), (0xaa00, 0xaa5f), (0x0900, 0x097f), (0xa980, 0xa9df), (0x1b00, 0x1b7f))
 __sexgay__ = set(keyword.kwlist)
@@ -61,22 +62,27 @@ def __spark__(seed, low, high):
    fog = __mist__(seed, 8)
    return low + (int.from_bytes(fog, 'little') % (high - low + 1))
 def __hide__(text, seed):
-   mix = __grout__(seed + b'hidemix', 2)
-   rot = 7 + ((__spark__(seed + b'rot', 7, 87) ^ mix[0]) % 81)
-   span = 233 + ((__spark__(seed + b'span', 233, 997) ^ mix[1]) % 765)
-   tab = {ord(ch): chr(32 + ((ord(ch) - 32 + rot) % 95)) for ch in set(text) if 32 <= ord(ch) <= 126}
-   rows = tuple(part[::-1].translate(tab) for part in (text[at:at + span] for at in range(0, len(text), span)))
-   return rows, rot
-def __show__(rows, rot, name=None):
-   var = name or '__'
-   src = ''.join(chr(32 + i) for i in range(95))
-   dst = ''.join(chr(32 + ((i - rot) % 95)) for i in range(95))
-   salt = repr((rows, rot, var)).encode('utf-8', 'replace');uni=''.join(one for one, _ in __marble__(salt+b'showuni',2)).encode('utf-8','surrogatepass');salt += uni
-   salt += repr((__flint__(salt + b'showflint', 2), __hill__(salt + b'showhill', 3))).encode('utf-8','replace')
-   cls = __spell__('str', salt + b'showstr')
-   make = __spell__('maketrans', salt + b'showmake')
-   val=__rune__(set([var]),hashlib.sha256(salt+b'showv').digest(),b'v')
-   return f"(lambda {var}:''.join(map(lambda {val}:{val}.translate({var})[::-1],{rows!r})))({__cup__()}[{cls}].__dict__[{make}]({src!r},{dst!r}))"
+    span = 233 + ((__spark__(seed + b'span', 0, 764)) % 765)
+    rows = []; rots = []; key = hashlib.sha256(seed + b'hidechain').digest()
+    for at in range(0, len(text), span):
+        part = text[at:at + span]
+        rot = 1 + (int.from_bytes(hashlib.sha256(key + secrets.token_bytes(4) + (at & 0xffff).to_bytes(2, 'little')).digest()[:4], 'little') % 95)
+        tab = {ord(ch): chr(32 + ((ord(ch) - 32 + rot) % 95)) for ch in set(part) if 32 <= ord(ch) <= 126}
+        rows.append(part[::-1].translate(tab))
+        key = hashlib.sha256(key + rot.to_bytes(2, 'little') + part[::-1].translate(tab).encode('utf-8', 'replace')).digest()
+        rots.append(rot)
+    return tuple(rows), tuple(rots)
+def __show__(rows, rots, name=None):
+    var = name or '__'
+    src = ''.join(chr(32 + i) for i in range(95))
+    salt = repr((rows, rots, var)).encode('utf-8', 'replace');uni=''.join(one for one, _ in __marble__(salt+b'showuni',2)).encode('utf-8','surrogatepass');salt += uni
+    salt += repr((__flint__(salt + b'showflint', 2), __hill__(salt + b'showhill', 3))).encode('utf-8','replace')
+    cls = __spell__('str', salt + b'showstr')
+    make = __spell__('maketrans', salt + b'showmake')
+    val=__rune__(set([var]),hashlib.sha256(salt+b'showv').digest(),b'v')
+    val2=__rune__(set([var,val]),hashlib.sha256(salt+b'showv2').digest(),b'v')
+    val3=__rune__(set([var,val,val2]),hashlib.sha256(salt+b'showv3').digest(),b'v')
+    return f"''.join(map(lambda {val},{val2}:{val}.translate({val2})[::-1],{rows!r},({__cup__()}[{cls}].__dict__[{make}]({src!r},{src!r}[-{val3}:]+{src!r}[:-{val3}]) for {val3} in {rots!r})))"
 def __cup__():
    return __totem__
 def __aim__():
@@ -100,7 +106,11 @@ def __spell__(text, seed):
       for at in range(right):
          base = (0x30a1, 0xac00, 0x0400, 0x10a0)[(fog[(slot + at + 7) % len(fog)] + at) & 3]; bag.append(chr(base + (fog[(slot * 7 + at) % len(fog)] & 127)))
       rows.append(f"{bag!r}[{pos}]")
-   out = "(" + repr('%s' * len(rows)) + " % (" + ",".join(rows) + ("," if len(rows) == 1 else "") + "))"
+   rowsrc = ",".join(rows)
+   if fog[0] & 1:
+      out = "''.join((" + rowsrc + ("," if len(rows) == 1 else "") + "))"
+   else:
+      out = "(" + repr('%s' * len(rows)) + " % (" + rowsrc + ("," if len(rows) == 1 else "") + "))"
    if text and len(text) <= 16:
       uni=''.join(one for one, __meow__ in __marble__(seed + text.encode('utf-8', 'replace') + b'spelluni', 2)).encode('utf-8','surrogatepass');name=__sigil__(seed + text.encode('utf-8', 'replace') + b'spell' + uni, 1)[0];out=f"(lambda {name}:{name})({out})"
    return out
@@ -234,6 +244,7 @@ __walkbag__ = {}
 __gaskbag__ = {}
 __rawbag__ = {}
 __soulbag__ = {}
+__gend__ = [0]
 def __tuff__(code):
    mark = id(code); row = __tuffbag__.get(mark)
    if row is None:
@@ -262,7 +273,11 @@ def __purge__():
         except: pass
         try: gc.garbage.clear()
         except: pass
-        gc.collect(0); gc.collect(1); gc.collect(2)
+        __gend__[0] = (__gend__[0] + 1)
+        if __gend__[0] % 10 == 0:
+           gc.collect()
+        else:
+           gc.collect(0)
    except: pass
    try:
         ct = __import__('ctypes')
@@ -523,19 +538,20 @@ def __nexus__(raw, seed, plan, face, loom):
 def __mark__(code): return __glow__(code), __bloom__(code), __echo__(code), __magma__(code), __soul__(code), __wisp__(code)
 def __keys__(seed, spec):
    return tuple(__spark__(seed + tag, low, high) for tag, low, high in spec)
-def __brand__(blob):
-    return hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest(), hashlib.md5(blob).hexdigest(), __flare__(blob), zlib.adler32(blob) ^ zlib.crc32(blob)
-def __carapace__(raw, seed, kind):
+def __brand__(blob, crestk=None):
+    glass = __import__('hmac').new(crestk, blob, hashlib.sha256).hexdigest() if crestk else zlib.adler32(blob) ^ zlib.crc32(blob)
+    return hashlib.sha256(blob).hexdigest(), hashlib.sha1(blob).hexdigest(), hashlib.md5(blob).hexdigest(), __flare__(blob), glass
+def __carapace__(raw, seed, kind, crestk=None):
     salt = __mist__(seed + kind + b'salt', len(raw) or 1); off = __spark__(seed + kind + b'off', 0x3040, 0x30ff); lift = __spark__(seed + kind + b'lift', 0x120, 0x780); key = __spark__(seed + kind + b'key', 11, 251)
     wide = ''.join(chr((one ^ salt[slot]) + off) for slot, one in enumerate(raw)); ring = [((one ^ key) + lift) for one in raw]; text = raw.hex(); fog = __mist__(seed + kind + b'weave', len(text) or 1).hex()[:len(text)]
-    weave = ''.join(one + two for one, two in zip(fog, text)); veil = base64.b85encode(bytes(one ^ salt[slot] for slot, one in enumerate(raw))).decode('ascii'); shot, coal, soot, ember, glass = __brand__(raw)
+    weave = ''.join(one + two for one, two in zip(fog, text)); veil = base64.b85encode(bytes(one ^ salt[slot] for slot, one in enumerate(raw))).decode('ascii'); shot, coal, soot, ember, glass = __brand__(raw, crestk or __mist__(seed + kind + b'crest', 64))
     mask = __mist__(seed + kind + b'mask', len(raw) or 1)
     glyph = ''.join(chr((one ^ mask[slot]) + off + 257) for slot, one in enumerate(raw))
     maze = ''.join(chr((one ^ mask[slot]) + off + 257) + chr(0x3041 + ((mask[slot] + one + slot) % 80)) for slot, one in enumerate(raw))
     cord = tuple((one + key + slot * 3) & 255 for slot, one in enumerate(raw))
     path = base64.b85encode(bytes((one + key + slot) & 255 for slot, one in enumerate(raw))).decode('ascii')
-    crest = __crown__(raw)
-    return (kind.decode('ascii'), wide, off, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass, glyph, off + 257, mask.hex(), maze, cord, path, crest)
+    crest = __import__('hmac').new(crestk or __mist__(seed + kind + b'crest', 64), raw, hashlib.sha256).digest()
+    return (kind.decode('ascii'), wide, off ^ key, salt.hex(), weave, ring, lift, key, veil, shot, coal, soot, ember, glass, glyph, mask.hex(), maze, cord, path, crest)
 def __scarp__(text, seed):
     salt = __mist__(seed + b'scarp', 16)
     bag = []
@@ -1126,14 +1142,14 @@ def __label__(tree, seed):
 def __flow__(tree, seed):
     bag = []
     span = []
-    for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncWith, ast.BoolOp, ast.Compare, ast.For, ast.If, ast.IfExp, ast.Match, ast.Try, ast.While, ast.With)):
+    for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncWith, ast.BoolOp, ast.Compare, ast.For, ast.If, ast.IfExp, ast.Match, ast.Try, ast.TryStar, ast.While, ast.With)):
         if isinstance(node, (ast.If, ast.IfExp)):
             bag.append('if')
         elif isinstance(node, (ast.For, ast.AsyncFor)):
             bag.append('for')
         elif isinstance(node, ast.While):
             bag.append('while')
-        elif isinstance(node, ast.Try):
+        elif isinstance(node, (ast.Try, ast.TryStar)):
             bag.append('try'); span.append((len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody)))
         elif isinstance(node, (ast.With, ast.AsyncWith)):
             bag.append('with'); span.append((len(node.items), len(node.body)))
@@ -1547,8 +1563,8 @@ def __river__(tree, seed):
     return (len(rows), fog.hex())
 def __catch__(tree, seed):
     rows = []; tr = []; ex = []
-    for node in __sweep__(tree, (ast.ExceptHandler, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try):
+    for node in __sweep__(tree, (ast.ExceptHandler, ast.Raise, ast.Try, ast.TryStar)):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             row = (len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody)); tr.append(row); rows.append(('try',) + row)
         elif isinstance(node, ast.ExceptHandler):
             row = (type(node.type).__name__ if node.type else '', node.name or '', len(node.body)); ex.append(('except', row[0], row[1])); rows.append(('except',) + row)
@@ -1808,7 +1824,7 @@ def __expr__(tree, seed):
     return (len(rows), fog.hex())
 def __stmt__(tree, seed):
     rows = []
-    pick = (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.For, ast.AsyncFor, ast.While, ast.If, ast.With, ast.AsyncWith, ast.Try, ast.Return, ast.Raise, ast.Delete, ast.Assert, ast.Expr)
+    pick = (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.For, ast.AsyncFor, ast.While, ast.If, ast.With, ast.AsyncWith, ast.Try, ast.TryStar, ast.Return, ast.Raise, ast.Delete, ast.Assert, ast.Expr)
     for node in ast.walk(tree):
         if isinstance(node, pick): rows.append((type(node).__name__, getattr(node, 'lineno', 0), len(list(ast.iter_child_nodes(node)))))
     fog = __mix__(seed, (__hist__(rows), len(rows)))
@@ -2185,8 +2201,8 @@ def __fell__(tree, seed):
     return (len(rows), fog.hex())
 def __crux__(tree, seed):
     rows = []
-    for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncWith, ast.Await, ast.Break, ast.Continue, ast.For, ast.If, ast.Match, ast.Raise, ast.Return, ast.Try, ast.While, ast.With, ast.Yield, ast.YieldFrom)):
-        if isinstance(node, (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.With, ast.AsyncWith, ast.Match)):
+    for node in __sweep__(tree, (ast.AsyncFor, ast.AsyncWith, ast.Await, ast.Break, ast.Continue, ast.For, ast.If, ast.Match, ast.Raise, ast.Return, ast.Try, ast.TryStar, ast.While, ast.With, ast.Yield, ast.YieldFrom)):
+        if isinstance(node, (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.TryStar, ast.With, ast.AsyncWith, ast.Match)):
             rows.append((type(node).__name__, len(getattr(node, 'body', ())), len(getattr(node, 'orelse', ())), len(getattr(node, 'finalbody', ())), len(getattr(node, 'handlers', ())), getattr(node, 'lineno', 0)))
         elif isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise, ast.Yield, ast.YieldFrom, ast.Await)):
             rows.append((type(node).__name__, getattr(node, 'lineno', 0), getattr(node, 'col_offset', 0)))
@@ -2263,8 +2279,8 @@ def __keel__(tree, seed):
     return (len(rows), fog.hex())
 def __mast__(tree, seed):
     rows = []
-    for node in __sweep__(tree, (ast.Assert, ast.ExceptHandler, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try):
+    for node in __sweep__(tree, (ast.Assert, ast.ExceptHandler, ast.Raise, ast.Try, ast.TryStar)):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.ExceptHandler):
             rows.append(('ex', type(node.type).__name__ if node.type else '', len(node.name or ''), len(node.body), getattr(node, 'lineno', 0)))
@@ -2522,8 +2538,8 @@ def __crestbranch__(tree, seed):
     return (len(rows), fog.hex())
 def __cresttry__(tree, seed):
     rows = []
-    for node in __sweep__(tree, (ast.ExceptHandler, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try):
+    for node in __sweep__(tree, (ast.ExceptHandler, ast.Raise, ast.Try, ast.TryStar)):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
         elif isinstance(node, ast.ExceptHandler):
             rows.append(('except', type(node.type).__name__ if node.type else '', node.name or '', len(node.body), getattr(node, 'lineno', 0)))
@@ -2653,9 +2669,9 @@ def __cresttime__(tree, seed):
     return (len(rows), fog.hex())
 def __cresterr__(tree, seed):
     rows = []
-    for node in __sweep__(tree, (ast.ExceptHandler, ast.Try)):
+    for node in __sweep__(tree, (ast.ExceptHandler, ast.Try, ast.TryStar)):
         if isinstance(node, ast.ExceptHandler): rows.append((type(node.type).__name__ if node.type else '', node.name or '', len(node.body), getattr(node, 'lineno', 0)))
-        elif isinstance(node, ast.Try): rows.append(('try', len(node.body), len(node.handlers), len(node.finalbody), getattr(node, 'lineno', 0)))
+        elif isinstance(node, (ast.Try, ast.TryStar)): rows.append(('try', len(node.body), len(node.handlers), len(node.finalbody), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
 def __crestasync__(tree, seed):
@@ -2776,15 +2792,15 @@ def __kiv__(tree, code, seed):
             for one in node.names: rows.append(('alias', one.name, one.asname or '', len(node.names)))
         elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == '__import__': rows.append(('dyn', len(node.args), len(node.keywords), getattr(node, 'lineno', 0)))
     names = []
-    imp_names = []
+    __impname__ = []
     danger = []
     for node in __sweep__(tree, (ast.Name,)):
         if isinstance(node, ast.Name) and len(node.id) > 1: names.append(node.id)
     for one in __drip__(code):
-        imp_names.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
+        __impname__.extend(name for name in one.co_names if isinstance(name, str) and ('import' in name or name in ('sys','os','ctypes','marshal')))
         found = tuple(name for name in one.co_names if name.split('.')[0] in mods)
         danger.append((one.co_name, found, len(found)))
-    fog = __mix__(seed, (__hist__(rows), __hist__(imp_names), __hist__(names), tuple(danger[:256]), tuple(rows[:512]), len(rows)))
+    fog = __mix__(seed, (__hist__(rows), __hist__(__impname__), __hist__(names), tuple(danger[:256]), tuple(rows[:512]), len(rows)))
     return (len(rows), fog.hex())
 def __mav__(tree, code, seed):
     rows = []
@@ -2821,8 +2837,8 @@ def __pyr__(tree, code, seed):
     return (len(rows), fog.hex())
 def __qel__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.Assert, ast.ExceptHandler, ast.Raise, ast.Try)):
-        if isinstance(node, ast.Try):
+    for node in __sweep__(tree, (ast.Assert, ast.ExceptHandler, ast.Raise, ast.Try, ast.TryStar)):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), tuple(type(one).__name__ for one in node.body[:8]), getattr(node, 'lineno', 0)))
             for at, handler in enumerate(node.handlers): rows.append(('handler', at, type(handler.type).__name__ if handler.type else '', handler.name or '', len(handler.body)))
         elif isinstance(node, ast.ExceptHandler): rows.append(('except', type(node.type).__name__ if node.type else '', node.name or '', len(node.body), getattr(node, 'lineno', 0)))
@@ -3428,14 +3444,14 @@ def __allay__(tree, code, seed):
     return (len(rows) + len(stack), fog.hex())
 def __breeze__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.For, ast.If, ast.Match, ast.Try, ast.While, ast.With)):
+    for node in __sweep__(tree, (ast.For, ast.If, ast.Match, ast.Try, ast.TryStar, ast.While, ast.With)):
         if isinstance(node, ast.If):
             rows.append(('if', type(node.test).__name__, len(node.body), len(node.orelse), getattr(node, 'lineno', 0)))
         if isinstance(node, ast.For):
             rows.append(('for', type(node.target).__name__, type(node.iter).__name__, len(node.body), len(node.orelse), getattr(node, 'lineno', 0)))
         if isinstance(node, ast.While):
             rows.append(('while', type(node.test).__name__, len(node.body), len(node.orelse), getattr(node, 'lineno', 0)))
-        if isinstance(node, ast.Try):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             rows.append(('try', len(node.body), len(node.handlers), len(node.orelse), len(node.finalbody), getattr(node, 'lineno', 0)))
         if isinstance(node, ast.With):
             rows.append(('with', len(node.items), len(node.body), getattr(node, 'lineno', 0)))
@@ -3802,14 +3818,14 @@ def __pillager__(tree, code, seed):
     return (len(rows), fog.hex())
 def __guardian__(tree, code, seed):
     rows = []
-    for node in __sweep__(tree, (ast.AsyncFunctionDef, ast.ClassDef, ast.For, ast.FunctionDef, ast.If, ast.Module, ast.Try, ast.While, ast.With)):
+    for node in __sweep__(tree, (ast.AsyncFunctionDef, ast.ClassDef, ast.For, ast.FunctionDef, ast.If, ast.Module, ast.Try, ast.TryStar, ast.While, ast.With)):
         if isinstance(node, ast.Module):
             rows.append(('module', len(node.body), tuple(type(one).__name__ for one in node.body[:64])))
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             rows.append(('fnbody', node.name, len(node.body), tuple(type(one).__name__ for one in node.body[:64])))
         if isinstance(node, ast.ClassDef):
             rows.append(('clbody', node.name, len(node.body), tuple(type(one).__name__ for one in node.body[:64])))
-        if isinstance(node, (ast.If, ast.For, ast.While, ast.With, ast.Try)):
+        if isinstance(node, (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.TryStar)):
             rows.append(('body', type(node).__name__, len(getattr(node, 'body', [])), len(getattr(node, 'orelse', [])), getattr(node, 'lineno', 0)))
     raw = tuple((one.co_name, len(one.co_consts), len(one.co_names), hashlib.blake2s(one.co_code, digest_size=16).hexdigest()) for one in __drip__(code)[:256])
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:2048]), raw, len(rows)))
@@ -4519,7 +4535,7 @@ def __horse__(bag, seed):
 def __metal__(bag, seed):
     rows = []
     for node in __sweep__(bag['tree'], 'all'):
-        if isinstance(node, ast.Try):
+        if isinstance(node, (ast.Try, ast.TryStar)):
             rows.append((tuple(type(one).__name__ for one in node.body[:16]), tuple(type(one.type).__name__ if one.type else '' for one in node.handlers[:16]), tuple(type(one).__name__ for one in node.finalbody[:16]), getattr(node, 'lineno', 0)))
     fog = __mix__(seed, (__hist__(rows), tuple(rows[:1024]), len(rows)))
     return ('metal', len(rows), fog.hex())
@@ -4678,7 +4694,7 @@ def __agate__(bag, seed):
     return ('agate', len(rows), fog.hex())
 def __jade__(bag, seed):
     rows = []
-    roots = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.With, ast.AsyncWith, ast.Match)
+    roots = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.TryStar, ast.With, ast.AsyncWith, ast.Match)
     for node in __sweep__(bag['tree'], 'all'):
         if isinstance(node, roots):
             body = getattr(node, 'body', [])
@@ -5449,7 +5465,7 @@ def __guild__(t):
             subs |= __guild__(c)
         __clans__[t] = subs
     return subs
-def __blaze__(tree):
+def __blaze__(tree, cap=200000):
     hoard = {}
     allsample = []
     for i, node in enumerate(ast.walk(tree)):
@@ -5461,6 +5477,8 @@ def __blaze__(tree):
         lst.append((i, node))
         if i % 512 == 0:
             allsample.append(node)
+        if i >= cap:
+            break
     hoard['all'] = tuple(allsample)
     return hoard
 def __sweep__(tree, spec):
@@ -5497,7 +5515,11 @@ def __sweep__(tree, spec):
         return (one[1] for i, one in enumerate(merged) if i % step == 0)
     return (one[1] for one in merged)
 def __ore__(tree, code, seed):
-    full = tuple(ast.walk(tree)); codes = __drip__(code); wide = (len(full), len(codes))
+    _walk_ = ast.walk(tree); full = []; _i_ = 0
+    for _node_ in _walk_:
+        if _i_ >= 200000: break
+        full.append(_node_); _i_ += 1
+    full = tuple(full); codes = __drip__(code); wide = (len(full), len(codes))
     nodes = full; shape = __hist__(type(node).__name__ for node in full)
     bag = {'nodes': nodes, 'codes': codes, 'wide': wide, 'shape': shape, 'tree': tree}
     seq = ((b'oak', __oak__), (b'spruce', __spruce__), (b'birch', __birch__), (b'jungle', __jungle__), (b'acacia', __acacia__), (b'mangrove', __mangrove__), (b'cherry', __cherry__), (b'bamboo', __bamboo__), (b'cactus', __cactus__), (b'kelp', __kelp__), (b'shell', __shell__), (b'seagrass', __seagrass__), (b'mycelium', __mycelium__), (b'shroom', __shroom__), (b'azalea', __azalea__), (b'dripstone', __dripstone__), (b'sculk', __sculk__), (b'tufa', __tufa__), (b'calcite', __calcite__), (b'amethyst', __amethyst__), (b'granite', __granite__), (b'diorite', __diorite__), (b'andesite', __andesite__), (b'crag', __crag__), (b'blackstone', __blackstone__), (b'netherrack', __netherrack__), (b'glowstone', __glowstone__), (b'endstone', __endstone__), (b'purpur', __purpur__), (b'prismarine', __prismarine__), (b'terracotta', __terracotta__), (b'concrete', __concrete__), (b'lantern', __lantern__), (b'lamp', __lamp__), (b'campfire', __campfire__), (b'hammer', __hammer__), (b'furnace', __furnace__), (b'hopper', __hopper__), (b'dropper', __dropper__), (b'observer', __observer__), (b'piston', __piston__), (b'rail', __rail__), (b'minecart', __minecart__), (b'bee2', __bee2__), (b'camel2', __camel2__), (b'warden2', __warden2__), (b'allay2', __allay2__), (b'breeze2', __breeze2__), (b'sniffer2', __sniffer2__), (b'strider2', __strider2__), (b'hoglin2', __hoglin2__), (b'panda2', __panda2__), (b'llama2', __llama2__), (b'ocelot2', __ocelot2__), (b'ravager2', __ravager2__), (b'turtle2', __turtle2__), (b'phantom2', __phantom2__), (b'dolphin2', __dolphin2__), (b'fox2', __fox2__), (b'goat2', __goat2__), (b'parrot2', __parrot2__), (b'rabbit2', __rabbit2__), (b'salmon2', __salmon2__), (b'spider2', __spider2__), (b'vex2', __vex2__), (b'zombie2', __zombie2__), (b'creeper2', __creeper2__), (b'piglin2', __piglin2__), (b'ghast2', __ghast2__), (b'shulker2', __shulker2__), (b'ender2', __ender2__), (b'slime2', __slime2__), (b'magma2', __magma2__), (b'blaze2', __blaze2__), (b'stray2', __stray2__), (b'husk2', __husk2__), (b'drowned2', __drowned2__), (b'watch', __watch__), (b'sprite', __sprite__), (b'axolotl', __axolotl__), (b'armadillo', __armadillo__), (b'badger', __badger__), (b'bogged', __bogged__), (b'breezez', __breezez__), (b'cat', __cat__), (b'donkey', __donkey__), (b'frog', __frog__), (b'horse', __horse__), (b'metal', __metal__), (b'mooshroom', __mooshroom__), (b'mule', __mule__), (b'polar', __polar__), (b'snow', __snow__), (b'wolf', __wolf__), (b'zoglin', __zoglin__), (b'brute', __brute__), (b'silver', __silver__), (b'copper', __copper__), (b'wax', __wax__), (b'glint', __glint__), (b'echoes', __echoes__), (b'golem', __golem__), (b'ravine', __ravine__), (b'geode', __geode__), (b'spire', __spire__), (b'agate', __agate__), (b'jade', __jade__), (b'quartz', __quartz__), (b'mica', __mica__))
@@ -5600,7 +5622,7 @@ def __pare__(tree):
     def __drop__(x,first):
         if first and isinstance(x,ast.Expr) and isinstance(x.value,ast.Constant) and isinstance(x.value.value,str):
             return False
-        return isinstance(x,(ast.Pass,ast.Assert)) or isinstance(x,ast.Expr) and (isinstance(x.value,ast.Constant) or __pure__(x.value))
+        return isinstance(x,(ast.Pass,)) or isinstance(x,ast.Assert) and __pure__(x.test) and (x.msg is None or __pure__(x.msg)) or isinstance(x,ast.Expr) and (isinstance(x.value,ast.Constant) or __pure__(x.value))
     def __same__(a,b):
         try: return ast.dump(a,include_attributes=False)==ast.dump(b,include_attributes=False)
         except: return False
@@ -5662,7 +5684,7 @@ def __pare__(tree):
                 ok,v=__raw__(x.value)
                 if ok and __litok__(v): tab[x.target.id]=v
         elif isinstance(x,ast.AugAssign): __cutn__(tab,__keyn__(x.target))
-        elif isinstance(x,(ast.For,ast.AsyncFor,ast.While,ast.If,ast.With,ast.AsyncWith,ast.Try,ast.Match)): __cutn__(tab,__storen__(x))
+        elif isinstance(x,(ast.For,ast.AsyncFor,ast.While,ast.If,ast.With,ast.AsyncWith,ast.Try,ast.TryStar,ast.Match)): __cutn__(tab,__storen__(x))
         elif isinstance(x,ast.With):
             for y in x.items:
                 if y.optional_vars is not None: __cutn__(tab,__keyn__(y.optional_vars))
@@ -5674,13 +5696,15 @@ def __pare__(tree):
         elif isinstance(x,ast.Delete):
             for y in x.targets: __cutn__(tab,__keyn__(y))
     def __hard__(x):
-        return isinstance(x,(ast.Global,ast.Nonlocal,ast.Try,ast.Raise,ast.Match,ast.AsyncFor,ast.AsyncWith))
+        return isinstance(x,(ast.Global,ast.Nonlocal,ast.Try,ast.TryStar,ast.Raise,ast.Match,ast.AsyncFor,ast.AsyncWith))
     def __lane__(rows):
         if len(rows)>12: return rows
         tab={};bag=[]
         for x in rows:
             if __hard__(x):
                 tab.clear();bag.append(x);continue
+            if isinstance(x,(ast.For,ast.AsyncFor,ast.While)):
+                __cutn__(tab,__storen__(x))
             if not isinstance(x,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)):
                 x=__swap__(x,tab)
             bag.append(x);__bindn__(tab,x)
@@ -6498,7 +6522,7 @@ def __pare__(tree):
             n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];return n
         if isinstance(n,ast.AsyncFor): n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];return n
         if isinstance(n,(ast.With,ast.AsyncWith)): n.body=__bod__(n.body);return n
-        if isinstance(n,ast.Try):
+        if isinstance(n,(ast.Try,ast.TryStar)):
             n.body=__bod__(n.body);n.orelse=__bod__(n.orelse) if n.orelse else [];n.finalbody=__bod__(n.finalbody) if n.finalbody else []
             for x in n.handlers: x.body=__bod__(x.body)
             return n
@@ -6763,6 +6787,8 @@ def __vein__(code):
             return False
         if name.startswith('__') and name.endswith('__'):
             return False
+        if wall[0] > 0 and name.startswith('__') and not name.endswith('__'):
+            return False
         if not name.isidentifier() or __import__('keyword').iskeyword(name):
             return False
         return True
@@ -6790,6 +6816,8 @@ def __vein__(code):
                 return True
         return False
     def __tiny__(text):
+        if len(text) & 1 and all(ord(one) < 128 for one in text):
+            return ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='bytes', ctx=ast.Load()), args=[ast.List(elts=[ast.Constant(ord(one)) for one in text], ctx=ast.Load())], keywords=[]), attr='decode', ctx=ast.Load()), args=[], keywords=[])
         return ast.Call(func=ast.Attribute(value=ast.Constant(''), attr='join', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='map', ctx=ast.Load()), args=[ast.Name(id='chr', ctx=ast.Load()), ast.Tuple(elts=[ast.Constant(ord(one)) for one in text], ctx=ast.Load())], keywords=[])], keywords=[])
     def __impcall__(mod, vals=None):
         keys = [ast.keyword(arg='fromlist', value=ast.Tuple(elts=[__tiny__(one) for one in vals], ctx=ast.Load()))] if vals else []
@@ -6814,7 +6842,7 @@ def __vein__(code):
             return base is not None and __iscls__(base)
         return False
     blob, keep, load, proof, tint, rune, dawn, dusk, kiln, loom, reef, wave, mire, sootf, brimf, crustf, ashf, flaref, cask, spinef, huskf, barkf, pearlf, mazef, cordf, pathf, lockf, rayf, beadf, combf, silkf, knotf, amberf, glazef, sentryf, veilf, nockf, snagf, wardf, chafff, opbox, biobox, bookf, evalf, boolf, strf, typef, intf, bytesf, varsf, callf, listf, mapf, impf, bytef, lenf, inputf, joinf, hexf, globf, slabkeyf = [__mint__(used, seed, mint) for slot in range(61)]
-    alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(16)]
+    alts = [__mint__(used, seed + b'alt' + slot.to_bytes(2, 'little'), mint) for slot in range(32)]
     tick = [0]
     gate = [0]
     lam = [0]
@@ -6954,12 +6982,14 @@ def __vein__(code):
         return left, right, left ^ right
     def __crash__():
         return ast.Subscript(value=ast.Tuple(elts=[], ctx=ast.Load()), slice=ast.Constant(0), ctx=ast.Load())
+    def __deadbeef__():
+        return ast.Compare(left=ast.BinOp(left=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Call(func=ast.Attribute(value=ast.Attribute(value=ast.Attribute(value=ast.List(elts=[], ctx=ast.Load()), attr='__class__', ctx=ast.Load()), attr='__base__', ctx=ast.Load()), attr='__subclasses__', ctx=ast.Load()), args=[], keywords=[])], keywords=[]), op=ast.Mult(), right=ast.Constant(0)), ops=[ast.Eq()], comparators=[ast.Constant(1)])
     def __guard__(left, right, mark):
         return ast.Compare(left=ast.BinOp(left=ast.Name(id=left, ctx=ast.Load()), op=ast.BitXor(), right=ast.Name(id=right, ctx=ast.Load())), ops=[ast.Eq()], comparators=[mark])
     def __lambda__(body, args, vals, tag, vararg=None, kwarg=None, keys=None):
         try:
-            for _n in ast.walk(body):
-                if isinstance(_n, (ast.Yield, ast.YieldFrom, ast.Await)):
+            for __yieldfind__ in ast.walk(body):
+                if isinstance(__yieldfind__, (ast.Yield, ast.YieldFrom, ast.Await)):
                     return body
         except: pass
         left, right = __mint__(used, seed, mint), __mint__(used, seed, mint)
@@ -7024,12 +7054,12 @@ def __vein__(code):
         slag = __mint__(used, seed, mint)
         rock = __spark__(seed + b'dale' + tick[0].to_bytes(4, 'little'), 10**6, 10**9)
         utext = ''.join(chr(__spark__(seed + b'daleu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x3041, 0x30fa)) for s in range(10))
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assert(test=ast.Constant(False), msg=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock))], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Assert(test=ast.Constant(False), msg=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock))], orelse=[])
     def __scree__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
         rock = __spark__(seed + b'scree' + tick[0].to_bytes(4, 'little'), 10**4, 10**7)
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.AugAssign(target=ast.Name(id=slag, ctx=ast.Store()), op=ast.Add(), value=ast.Constant(0)), ast.AugAssign(target=ast.Name(id=slag, ctx=ast.Store()), op=ast.Mult(), value=ast.Constant(1))], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.AugAssign(target=ast.Name(id=slag, ctx=ast.Store()), op=ast.Add(), value=ast.Constant(0)), ast.AugAssign(target=ast.Name(id=slag, ctx=ast.Store()), op=ast.Mult(), value=ast.Constant(1))], orelse=[])
     def __cliff__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7037,13 +7067,13 @@ def __vein__(code):
         glass = __mint__(used, seed, mint)
         utext = ''.join(chr(__spark__(seed + b'cliffu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0xac00, 0xd7a3)) for s in range(5))
         rock = __spark__(seed + b'cliff' + tick[0].to_bytes(4, 'little'), 10**5, 10**8)
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.ClassDef(name=slag, bases=[], keywords=[], body=[ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=glass, ctx=ast.Store())], value=ast.Constant(rock))], decorator_list=[])], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.ClassDef(name=slag, bases=[], keywords=[], body=[ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=glass, ctx=ast.Store())], value=ast.Constant(rock))], decorator_list=[])], orelse=[])
     def __reef__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
         coal = __mint__(used, seed, mint)
         utext = ''.join(chr(__spark__(seed + b'reefu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x0400, 0x04ff)) for s in range(7))
-        return ast.While(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=slag, ctx=ast.Load())], keywords=[]))], orelse=[])
+        return ast.While(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Expr(value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=slag, ctx=ast.Load())], keywords=[]))], orelse=[])
     def __dune__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7052,7 +7082,7 @@ def __vein__(code):
         utext = ''.join(chr(__spark__(seed + b'duneu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x1200, 0x137f)) for s in range(8))
         inner = ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext))
         outer = ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(rock))
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Try(body=[inner], handlers=[], orelse=[], finalbody=[outer])], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Try(body=[inner], handlers=[], orelse=[], finalbody=[outer])], orelse=[])
     def __fjord__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7062,7 +7092,7 @@ def __vein__(code):
         right = ''.join(chr(__spark__(seed + b'fjordr' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0xa500, 0xa63f)) for s in range(7))
         body = [ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(left)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(right))]
         hand = ast.ExceptHandler(type=ast.Name(id='MemoryError', ctx=ast.Load()), name=moss, body=[ast.Expr(value=ast.Call(func=ast.Name(id='str', ctx=ast.Load()), args=[ast.Name(id=moss, ctx=ast.Load())], keywords=[]))])
-        return ast.If(test=ast.Constant(False), body=[ast.Try(body=[ast.Raise(exc=ast.Call(func=ast.Name(id='MemoryError', ctx=ast.Load()), args=[ast.Constant(left)], keywords=[]), cause=None)], handlers=[hand], orelse=body, finalbody=[])], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Try(body=[ast.Raise(exc=ast.Call(func=ast.Name(id='MemoryError', ctx=ast.Load()), args=[ast.Constant(left)], keywords=[]), cause=None)], handlers=[hand], orelse=body, finalbody=[])], orelse=[])
     def __karst__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7070,7 +7100,7 @@ def __vein__(code):
         gem = __spark__(seed + b'karst' + tick[0].to_bytes(4, 'little'), 10**6, 10**9)
         ash = ''.join(chr(__spark__(seed + b'karstu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x1e00, 0x1eff)) for s in range(9))
         call = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.IfExp(test=ast.Compare(left=ast.Name(id=slag, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(gem)]), body=ast.Constant(ash), orelse=ast.Constant(gem))), args=[ast.Constant(gem + 1)], keywords=[])
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=call)], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=call)], orelse=[])
     def __moraine__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7078,20 +7108,20 @@ def __vein__(code):
         raw = tuple(__spark__(seed + b'moraine' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 1000, 9999) for s in range(4))
         seq = ast.Tuple(elts=[ast.Constant(one) for one in raw], ctx=ast.Load())
         body = [ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Call(func=ast.Name(id='sum', ctx=ast.Load()), args=[ast.Name(id=slag, ctx=ast.Load())], keywords=[]))]
-        return ast.If(test=ast.Constant(False), body=[ast.For(target=ast.Name(id=slag, ctx=ast.Store()), iter=ast.Tuple(elts=[seq], ctx=ast.Load()), body=body, orelse=[ast.Pass()])], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.For(target=ast.Name(id=slag, ctx=ast.Store()), iter=ast.Tuple(elts=[seq], ctx=ast.Load()), body=body, orelse=[ast.Pass()])], orelse=[])
     def __talus__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
         coal = __mint__(used, seed, mint)
         raw = ''.join(chr(__spark__(seed + b'talus' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0xaa00, 0xaa5f)) for s in range(8))
-        test = ast.BoolOp(op=ast.And(), values=[ast.Compare(left=ast.Constant(1), ops=[ast.Eq()], comparators=[ast.Constant(2)]), ast.Call(func=ast.Name(id='all', ctx=ast.Load()), args=[ast.List(elts=[ast.Constant(False), ast.Constant(True)], ctx=ast.Load())], keywords=[])])
+        test = __deadbeef__()
         return ast.If(test=test, body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(raw)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Name(id=slag, ctx=ast.Load())], keywords=[]))], orelse=[])
     def __cairn__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
         coal = __mint__(used, seed, mint)
         utext = ''.join(chr(__spark__(seed + b'cairnu' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x0e00, 0x0e7f)) for s in range(6))
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Call(func=ast.Name(id='type', ctx=ast.Load()), args=[ast.Constant(None)], keywords=[]))], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(utext)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Call(func=ast.Name(id='type', ctx=ast.Load()), args=[ast.Constant(None)], keywords=[]))], orelse=[])
     def __delta__():
         tick[0] += 1
         slag = __mint__(used, seed, mint)
@@ -7100,7 +7130,7 @@ def __vein__(code):
         right = ''.join(chr(__spark__(seed + b'deltar' + tick[0].to_bytes(4, 'little') + s.to_bytes(2, 'little'), 0x3041, 0x30fa)) for s in range(4))
         case = ast.match_case(pattern=ast.MatchSequence(patterns=[ast.MatchAs(name=None)]), guard=None, body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(__spark__(seed + b'deltav' + tick[0].to_bytes(4, 'little'), 10**5, 10**8)))])
         last = ast.match_case(pattern=ast.MatchAs(name=None), guard=None, body=[ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(left))])
-        return ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Match(subject=ast.List(elts=[ast.Constant(right)], ctx=ast.Load()), cases=[case, last])], orelse=[])
+        return ast.If(test=__deadbeef__(), body=[ast.Match(subject=ast.List(elts=[ast.Constant(right)], ctx=ast.Load()), cases=[case, last])], orelse=[])
     def __cinder__():
         tick[0] += 1
         bag = []
@@ -7109,7 +7139,7 @@ def __vein__(code):
         glass = __mint__(used, seed, mint)
         rock = __spark__(seed + b'junk' + tick[0].to_bytes(4, 'little'), 10**7, 10**9)
         text = ['obsidian', 'glass', 'ash', 'vein'][__spark__(seed + b'text' + tick[0].to_bytes(4, 'little'), 0, 3)]
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(text)), ast.Assign(targets=[ast.Name(id=glass, ctx=ast.Store())], value=ast.Tuple(elts=[ast.Name(id=slag, ctx=ast.Load()), ast.Name(id=coal, ctx=ast.Load())], ctx=ast.Load())), ast.Expr(value=ast.Call(func=ast.Name(id='str', ctx=ast.Load()), args=[ast.Name(id=glass, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
+        bag.append(ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=slag, ctx=ast.Store())], value=ast.Constant(rock)), ast.Assign(targets=[ast.Name(id=coal, ctx=ast.Store())], value=ast.Constant(text)), ast.Assign(targets=[ast.Name(id=glass, ctx=ast.Store())], value=ast.Tuple(elts=[ast.Name(id=slag, ctx=ast.Load()), ast.Name(id=coal, ctx=ast.Load())], ctx=ast.Load())), ast.Expr(value=ast.Call(func=ast.Name(id='str', ctx=ast.Load()), args=[ast.Name(id=glass, ctx=ast.Load())], keywords=[]))], orelse=[ast.Pass()]))
         bag.append(__seam__())
         bag.append(__gorge__())
         slag2 = __mint__(used, seed, mint)
@@ -7133,36 +7163,36 @@ def __vein__(code):
             slag6 = __mint__(used, seed, mint); coal6 = __mint__(used, seed, mint); glass6 = __mint__(used, seed, mint)
             grit6 = ''.join(chr(__spark__(seed + b'antiu' + tick[0].to_bytes(4, 'little') + slot.to_bytes(2, 'little'), 0xac00, 0xd7a3)) for slot in range(6))
             mist6 = ast.Call(func=ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag6)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Call(func=ast.Attribute(value=ast.Constant(''), attr='join', ctx=ast.Load()), args=[ast.Call(func=ast.Name(id='map', ctx=ast.Load()), args=[ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=coal6)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Call(func=ast.Attribute(value=ast.Constant('{}'), attr='format', ctx=ast.Load()), args=[ast.BinOp(left=ast.Name(id=coal6, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(64))], keywords=[])), ast.Name(id=slag6, ctx=ast.Load())], keywords=[])], keywords=[])), args=[ast.Tuple(elts=[ast.Constant(ord(one) ^ 64) for one in grit6], ctx=ast.Load())], keywords=[])
-            bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=glass6, ctx=ast.Store())], value=mist6)], orelse=[]))
+            bag.append(ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=glass6, ctx=ast.Store())], value=mist6)], orelse=[]))
         else:
             slag7 = __mint__(used, seed, mint); coal7 = __mint__(used, seed, mint)
             gem7 = ''.join(chr(__spark__(seed + b'chain' + tick[0].to_bytes(4, 'little') + slot.to_bytes(2, 'little'), 0x0400, 0x04ff)) for slot in range(5))
             mist7 = ast.Lambda(args=ast.arguments(posonlyargs=[], args=[ast.arg(arg=slag7)], vararg=None, kwonlyargs=[], kw_defaults=[], kwarg=None, defaults=[]), body=ast.Name(id=slag7, ctx=ast.Load()))
             chain7 = ast.Call(func=mist7, args=[ast.Call(func=mist7, args=[ast.Call(func=mist7, args=[ast.Constant(gem7)], keywords=[])], keywords=[])], keywords=[])
-            bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=coal7, ctx=ast.Store())], value=chain7)], orelse=[]))
+            bag.append(ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=coal7, ctx=ast.Store())], value=chain7)], orelse=[]))
         tick[0] += 1
         rubbles = __rubble__(seed + tick[0].to_bytes(4, 'little'), 3)
         pebbles = __pebble__(seed + tick[0].to_bytes(4, 'little'), 2, 6)
         cobbled = __cobble__(rubbles[0], seed + tick[0].to_bytes(4, 'little'), 2)
         slag3 = __mint__(used, seed, mint)
         coal3 = __mint__(used, seed, mint)
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Tuple(elts=[ast.Name(id=slag3, ctx=ast.Store()), ast.Name(id=coal3, ctx=ast.Store())], ctx=ast.Store())], value=ast.Tuple(elts=[ast.Constant(rubbles[1]), ast.Constant(pebbles[0])], ctx=ast.Load()))], orelse=[]))
+        bag.append(ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Tuple(elts=[ast.Name(id=slag3, ctx=ast.Store()), ast.Name(id=coal3, ctx=ast.Store())], ctx=ast.Store())], value=ast.Tuple(elts=[ast.Constant(rubbles[1]), ast.Constant(pebbles[0])], ctx=ast.Load()))], orelse=[]))
         slag4 = __mint__(used, seed, mint)
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Try(body=[ast.Assign(targets=[ast.Name(id=slag4, ctx=ast.Store())], value=ast.Constant(rubbles[2]))], handlers=[ast.ExceptHandler(type=None, name=None, body=[ast.Pass()])], orelse=[], finalbody=[])], orelse=[]))
+        bag.append(ast.If(test=__deadbeef__(), body=[ast.Try(body=[ast.Assign(targets=[ast.Name(id=slag4, ctx=ast.Store())], value=ast.Constant(rubbles[2]))], handlers=[ast.ExceptHandler(type=None, name=None, body=[ast.Pass()])], orelse=[], finalbody=[])], orelse=[]))
         names = __basalt__(seed + tick[0].to_bytes(4, 'little'), 2, used)
         kiln = __kiln__(seed + tick[0].to_bytes(4, 'little'), 2, 3)
         batch = __batch__([names[0], names[1]], seed)
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Assign(targets=[ast.Name(id=names[0], ctx=ast.Store())], value=ast.Constant(str(kiln))), ast.Assign(targets=[ast.Name(id=names[1], ctx=ast.Store())], value=ast.Constant(str(batch)))], orelse=[]))
+        bag.append(ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=names[0], ctx=ast.Store())], value=ast.Constant(str(kiln))), ast.Assign(targets=[ast.Name(id=names[1], ctx=ast.Store())], value=ast.Constant(str(batch)))], orelse=[]))
         slag5 = __mint__(used, seed, mint)
-        bag.append(ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.If(test=ast.Constant(False), body=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(cobbled))], orelse=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(pebbles[1]))])], orelse=[]))
+        bag.append(ast.If(test=__deadbeef__(), body=[ast.If(test=__deadbeef__(), body=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(cobbled))], orelse=[ast.Assign(targets=[ast.Name(id=slag5, ctx=ast.Store())], value=ast.Constant(pebbles[1]))])], orelse=[]))
         tick[0]+=1;frosta=__mint__(used,seed,mint);frostb=__mint__(used,seed,mint);frostv1=__spark__(seed+b'frost1v'+tick[0].to_bytes(4,'little'),1,9999);frostv2=__spark__(seed+b'frost1x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=frosta,ctx=ast.Store())],value=ast.Constant(frostv1)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=frosta,ctx=ast.Load()),op=ast.BitXor(),right=ast.Name(id=frosta,ctx=ast.Load())),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=frostb,ctx=ast.Store())],value=ast.Constant(frostv2)),ast.Assign(targets=[ast.Name(id=frostb,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=frostb,ctx=ast.Load()),op=ast.Add(),right=ast.Constant(0))),ast.AugAssign(target=ast.Name(id=frostb,ctx=ast.Store()),op=ast.Mult(),value=ast.Constant(1))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
         tick[0]+=1;frostc=__mint__(used,seed,mint);frostd=__mint__(used,seed,mint);frostv3=__spark__(seed+b'frost2v'+tick[0].to_bytes(4,'little'),1,9999);frostv4=__spark__(seed+b'frost2x'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.Try(body=[ast.Assign(targets=[ast.Name(id=frostc,ctx=ast.Store())],value=ast.Constant(frostv3)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=frostc,ctx=ast.Load()),op=ast.Mult(),right=ast.Name(id=frostc,ctx=ast.Load())),ops=[ast.GtE()],comparators=[ast.Constant(0)]),body=[ast.Assign(targets=[ast.Name(id=frostd,ctx=ast.Store())],value=ast.Constant(frostv4)),ast.AugAssign(target=ast.Name(id=frostd,ctx=ast.Store()),op=ast.BitAnd(),value=ast.Constant(0xffffffff))],orelse=[])],handlers=[ast.ExceptHandler(type=None,name=None,body=[ast.Pass()])],orelse=[],finalbody=[]))
         tick[0]+=1;junkvar=__mint__(used,seed,mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=junkvar,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='urandom',ctx=ast.Load()),args=[ast.Constant(64)],keywords=[])),ast.Assign(targets=[ast.Name(id=junkvar,ctx=ast.Store())],value=ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id='__import__',ctx=ast.Load()),args=[ast.Constant('os')],keywords=[]),attr='getpid',ctx=ast.Load()),args=[],keywords=[]))],orelse=[]))
         tick[0]+=1;mpatha=__mint__(used,seed,mint);mpathb=__mint__(used,seed,mint);mpathc=__mint__(used,seed,mint);mpathv=__spark__(seed+b'mpath'+tick[0].to_bytes(4,'little'),0,9999);mpathx=__spark__(seed+b'mpath2'+tick[0].to_bytes(4,'little'),100,9999);mpathy=__spark__(seed+b'mpath3'+tick[0].to_bytes(4,'little'),100,9999);mpbody1=[ast.Assign(targets=[ast.Name(id=mpathb,ctx=ast.Store())],value=ast.Constant(frostv2)),ast.Assign(targets=[ast.Name(id=mpathb,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='len',ctx=ast.Load()),args=[ast.Call(func=ast.Name(id='str',ctx=ast.Load()),args=[ast.Name(id=mpathb,ctx=ast.Load())],keywords=[])],keywords=[]))];mpbody2=[ast.Assign(targets=[ast.Name(id=mpathc,ctx=ast.Store())],value=ast.Constant(frostv3)),ast.Assign(targets=[ast.Name(id=mpathc,ctx=ast.Store())],value=ast.Call(func=ast.Name(id='type',ctx=ast.Load()),args=[ast.Name(id=mpathc,ctx=ast.Load())],keywords=[]))];bag.append(ast.If(test=ast.Compare(left=ast.Constant(False),ops=[ast.Is()],comparators=[ast.Constant(True)]),body=[ast.Assign(targets=[ast.Name(id=mpatha,ctx=ast.Store())],value=ast.Constant(mpathv)),ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=mpatha,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(0)]),body=mpbody1,orelse=[ast.If(test=ast.Compare(left=ast.BinOp(left=ast.Name(id=mpatha,ctx=ast.Load()),op=ast.Mod(),right=ast.Constant(3)),ops=[ast.Eq()],comparators=[ast.Constant(1)]),body=mpbody2,orelse=[ast.Pass()])])],orelse=[]))
-        tick[0]+=1;slag8=__mint__(used,seed,mint);coal8=__mint__(used,seed,mint);rock8=__spark__(seed+b'opaque1'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag8,ctx=ast.Store())],value=ast.Constant(rock8)),ast.Assign(targets=[ast.Name(id=coal8,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag8,ctx=ast.Load()),op=ast.Mult(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal8,ctx=ast.Load()),ops=[ast.GtE()],comparators=[ast.Constant(1)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
-        tick[0]+=1;slag9=__mint__(used,seed,mint);coal9=__mint__(used,seed,mint);rock9=__spark__(seed+b'opaque2'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag9,ctx=ast.Store())],value=ast.Constant(rock9)),ast.Assign(targets=[ast.Name(id=coal9,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag9,ctx=ast.Load()),op=ast.BitAnd(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal9,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(rock9)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
-        tick[0]+=1;slag10=__mint__(used,seed,mint);coal10=__mint__(used,seed,mint);rock10=__spark__(seed+b'opaque3'+tick[0].to_bytes(4,'little'),2,99);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.Assign(targets=[ast.Name(id=slag10,ctx=ast.Store())],value=ast.Constant(rock10)),ast.Assign(targets=[ast.Name(id=coal10,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag10,ctx=ast.Load()),op=ast.Pow(),right=ast.Constant(1))),ast.If(test=ast.Compare(left=ast.Name(id=coal10,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Name(id=slag10,ctx=ast.Load())]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
-        tick[0]+=1;blaze2=__mint__(used,seed,mint);creeper2=__mint__(used,seed,mint);ender2=__spark__(seed+b'excp1'+tick[0].to_bytes(4,'little'),1000,9999);ghast2=__mint__(used,seed+b'excp2',mint);piston2=__mint__(used,seed+b'xinit',mint);wither2=__mint__(used,seed+b'xtrace',mint);spider2=__mint__(used,seed+b'xcode',mint);skeleton2=__mint__(used,seed+b'xts',mint);bag.append(ast.If(test=ast.Compare(left=ast.Constant(True),ops=[ast.Is()],comparators=[ast.Constant(False)]),body=[ast.ClassDef(name=blaze2,bases=[ast.Name(id='Exception',ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=piston2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self'),ast.arg(arg=creeper2)],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Store())],value=ast.Name(id=creeper2,ctx=ast.Load())),ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=skeleton2,ctx=ast.Store())],value=ast.Constant(ender2))],decorator_list=[],returns=None)],decorator_list=[]),ast.ClassDef(name=ghast2,bases=[ast.Name(id=blaze2,ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=wither2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self')],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Return(value=ast.BinOp(left=ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Load()),op=ast.BitXor(),right=ast.Constant(ender2)))],decorator_list=[],returns=None)],decorator_list=[])],orelse=[]))
+        tick[0]+=1;slag8=__mint__(used,seed,mint);coal8=__mint__(used,seed,mint);rock8=__spark__(seed+b'opaque1'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=__deadbeef__(),body=[ast.Assign(targets=[ast.Name(id=slag8,ctx=ast.Store())],value=ast.Constant(rock8)),ast.Assign(targets=[ast.Name(id=coal8,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag8,ctx=ast.Load()),op=ast.Mult(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal8,ctx=ast.Load()),ops=[ast.GtE()],comparators=[ast.Constant(1)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;slag9=__mint__(used,seed,mint);coal9=__mint__(used,seed,mint);rock9=__spark__(seed+b'opaque2'+tick[0].to_bytes(4,'little'),1,9999);bag.append(ast.If(test=__deadbeef__(),body=[ast.Assign(targets=[ast.Name(id=slag9,ctx=ast.Store())],value=ast.Constant(rock9)),ast.Assign(targets=[ast.Name(id=coal9,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag9,ctx=ast.Load()),op=ast.BitAnd(),right=ast.Constant(0))),ast.If(test=ast.Compare(left=ast.Name(id=coal9,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Constant(rock9)]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;slag10=__mint__(used,seed,mint);coal10=__mint__(used,seed,mint);rock10=__spark__(seed+b'opaque3'+tick[0].to_bytes(4,'little'),2,99);bag.append(ast.If(test=__deadbeef__(),body=[ast.Assign(targets=[ast.Name(id=slag10,ctx=ast.Store())],value=ast.Constant(rock10)),ast.Assign(targets=[ast.Name(id=coal10,ctx=ast.Store())],value=ast.BinOp(left=ast.Name(id=slag10,ctx=ast.Load()),op=ast.Pow(),right=ast.Constant(1))),ast.If(test=ast.Compare(left=ast.Name(id=coal10,ctx=ast.Load()),ops=[ast.Eq()],comparators=[ast.Name(id=slag10,ctx=ast.Load())]),body=[ast.Pass()],orelse=[ast.Pass()])],orelse=[]))
+        tick[0]+=1;blaze2=__mint__(used,seed,mint);creeper2=__mint__(used,seed,mint);ender2=__spark__(seed+b'excp1'+tick[0].to_bytes(4,'little'),1000,9999);ghast2=__mint__(used,seed+b'excp2',mint);piston2=__mint__(used,seed+b'xinit',mint);wither2=__mint__(used,seed+b'xtrace',mint);spider2=__mint__(used,seed+b'xcode',mint);skeleton2=__mint__(used,seed+b'xts',mint);bag.append(ast.If(test=__deadbeef__(),body=[ast.ClassDef(name=blaze2,bases=[ast.Name(id='Exception',ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=piston2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self'),ast.arg(arg=creeper2)],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Store())],value=ast.Name(id=creeper2,ctx=ast.Load())),ast.Assign(targets=[ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=skeleton2,ctx=ast.Store())],value=ast.Constant(ender2))],decorator_list=[],returns=None)],decorator_list=[]),ast.ClassDef(name=ghast2,bases=[ast.Name(id=blaze2,ctx=ast.Load())],keywords=[],body=[ast.FunctionDef(name=wither2,args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='self')],vararg=None,kwonlyargs=[],kw_defaults=[],kwarg=None,defaults=[]),body=[ast.Return(value=ast.BinOp(left=ast.Attribute(value=ast.Name(id='self',ctx=ast.Load()),attr=spider2,ctx=ast.Load()),op=ast.BitXor(),right=ast.Constant(ender2)))],decorator_list=[],returns=None)],decorator_list=[])],orelse=[]))
         return bag
     def __evoker__(body):
         if len(body)<2:
@@ -7473,7 +7503,11 @@ def __vein__(code):
             return __lambda__(ast.BinOp(left=ast.Name(id=name, ctx=ast.Load()), op=ast.BitXor(), right=ast.Constant(key)), [name], [ast.Constant(val ^ key)], b'int')
         off = 193 + ((abs(val) * 1315423911 + seed[0] + tick[0]) % 1048573); key = 257 + ((abs(val) * 2654435761 + seed[1] + tick[0]) % 65521); ash = 89 + ((abs(val) * 2246822519 + seed[2] + tick[0]) % 65519); mul = 3 + ((abs(val) + seed[3] + tick[0]) % 193); bit = 1 + ((abs(val) + seed[4] + tick[0]) % 5); xor = 521 + ((abs(val) + seed[5] + tick[0]) % 131071); salt = 1009 + ((abs(val) + seed[6] + tick[0]) % 104729); ring = 3 + ((abs(val) + seed[7] + tick[0]) % 251)
         core = ((((((((val + off) ^ key) + ash) * mul) << bit) ^ xor) + salt) * ring)
-        expr = ast.BinOp(left=ast.Constant(core), op=ast.FloorDiv(), right=ast.Constant(ring))
+        mixk = (1 << 40) | ((abs(val) * 1048573 + seed[8] + tick[0]) % (1 << 40)); mixx = (abs(val) * 2654435761 + seed[9] + tick[0]) & ((1 << 40) - 1)
+        core = (core * mixk) + mixx
+        expr = ast.BinOp(left=ast.Constant(core), op=ast.Sub(), right=ast.Constant(mixx))
+        expr = ast.BinOp(left=expr, op=ast.FloorDiv(), right=ast.Constant(mixk))
+        expr = ast.BinOp(left=expr, op=ast.FloorDiv(), right=ast.Constant(ring))
         expr = ast.BinOp(left=expr, op=ast.Sub(), right=ast.Constant(salt))
         expr = ast.BinOp(left=expr, op=ast.BitXor(), right=ast.Constant(xor))
         expr = ast.BinOp(left=expr, op=ast.RShift(), right=ast.Constant(bit))
@@ -7492,6 +7526,12 @@ def __vein__(code):
         if ((abs(val) + seed[32 % len(seed)] + tick[0]) & 7) == 6:
             sh = 1 + ((abs(val) + seed[33 % len(seed)] + tick[0]) % 5)
             expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.LShift(), right=ast.Constant(sh)), op=ast.RShift(), right=ast.Constant(sh))
+        if ((abs(val) + seed[14 % len(seed)] + tick[0]) & 7) == 4:
+            __NemRong__ = hashlib.sha256(seed + str(val).encode('utf-8', 'surrogatepass') + tick[0].to_bytes(4, 'little')).digest()
+            __BanhMi__ = (int.from_bytes(__NemRong__[:8], 'little') & ((1 << 48) - 1)) | 1
+            __BunCha__ = int.from_bytes(__NemRong__[8:16], 'little') % 65521 + 1
+            expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.BitXor(), right=ast.Constant(__BanhMi__)), op=ast.BitXor(), right=ast.Constant(__BanhMi__))
+            expr = ast.BinOp(left=ast.BinOp(left=expr, op=ast.Mult(), right=ast.Constant(__BunCha__)), op=ast.FloorDiv(), right=ast.Constant(__BunCha__))
         return expr
     def __float__(val):
         out = ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id='float', ctx=ast.Load()), __ember__('fromhex')], keywords=[]), args=[__stray__(val.hex())], keywords=[])
@@ -7529,7 +7569,9 @@ def __vein__(code):
                 coded.append((0, bytes(byte ^ keyfog[slot & 63] for slot, byte in enumerate(one))))
         raw = marshal.dumps(tuple(coded))
         tally = len(coded)
-        core = __carapace__(zlib.compress(raw, 9), seed + b'slab', b'b')
+        comp = zlib.compress(raw, 9 if len(raw) < 524288 else 1)
+        cap = 7168
+        core = tuple(__carapace__(comp[at:at + cap], seed + b'slab' + at.to_bytes(4, 'little'), b'b', keyfog) for at in range(0, len(comp) or 1, cap))
         test = __mist__(seed + b'proof', 48)
         gold = base64.b85encode(test).decode('ascii')
         check = zlib.crc32(test) + zlib.adler32(test)
@@ -7546,9 +7588,11 @@ def __vein__(code):
 {keep}=None
 {tint}={{}}
 def {joinf}(row):
- {joinout}=''
- for {joinidx},{joinval} in enumerate(row):{joinout}+=str({joinval})[-1]
- return {joinout}[::-1]
+ row=tuple(row)[::-1]
+ {joinout}=[]
+ for {joinidx} in row:
+  {joinout}.append(str({joinidx})[-1])
+ return ''.join({joinout})
 {biobox}=__import__({__alias__('builtins')})
 {bookf}={biobox}.__dict__[{__alias__('vars')}]({biobox})
 {globf}={bookf}[{__alias__('globals')}]()
@@ -7635,13 +7679,7 @@ def {pathf}(d,f):
  row={impf}({__alias__('base64')}).b85decode(d)
  return bytes(((one-f-slot)&255) for slot,one in enumerate(row))
 def {lockf}(ash):
- glow=0
- bend=0
- for slot,byte in enumerate(ash):
-  glow=(glow+byte+slot)&0xffffffff
-  bend^=((byte+1)*(slot+3))&0xffffffff
-  bend=((bend<<5)|(bend>>27))&0xffffffff
- return (len(ash),sum(ash)&0xffffffff,ash[:1],ash[-1:],glow,bend)
+ return {impf}({__alias__('hmac')}).new({slabkeyf},ash,{impf}({__alias__('hashlib')}).sha256).digest()
 def {rayf}(q):
  rows=q[1::2]
  return (len(rows),sum(ord(one) for one in rows)&0xffffffff,rows[:1],rows[-1:])
@@ -7687,7 +7725,7 @@ def {reef}(blob):
   slot += 16
  return glow
 def {wave}(blob):
- return ({impf}({__alias__('hashlib')}).sha256(blob).hexdigest(),{reef}(blob),{impf}({__alias__('zlib')}).adler32(blob)^{impf}({__alias__('zlib')}).crc32(blob))
+ return ({impf}({__alias__('hashlib')}).sha256(blob).hexdigest(),{reef}(blob),{impf}({__alias__('hmac')}).new({slabkeyf},blob,{impf}({__alias__('hashlib')}).sha256).hexdigest())
 def {sentryf}():
  sys={impf}({__alias__('sys')})
  built={impf}({__alias__('builtins')})
@@ -7754,7 +7792,9 @@ def {chafff}():
   if mod!='builtins' and getattr(obj,'__module__',mod)!=mod:
    raise RuntimeError('bad')
  return 1
-def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,a,n,q,c,d,x):
+def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,n,q,c,d,x):
+  o=o^f
+  a=o+257
   rows={mire}(v,o)
   spin={sootf}(u)
   (rows[0]!=spin[0] or rows[0]!=len(bytes.fromhex(p)) or rows[0]!=len({impf}({__alias__('base64')}).b85decode(t))) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
@@ -7786,13 +7826,12 @@ def {rune}(k,v,o,p,r,u,l,f,t,h,s,e,g,m,y,a,n,q,c,d,x):
   lace={silkf}(ash)
   lace[0]!=rows[0] and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
   {glazef}(ash,{amberf}(ash))
-  spin={spinef}(ash)
-  (spin[0]^spin[1])!=m and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
   rows={wave}(ash)
   (rows[0]!=h or rows[1]!=g or rows[2]!=m) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
   return ash if k=='b' else ash.decode('utf-8')
 def {load}(i):
  global {keep}
+ __anhdomixi__()
  if {keep} is None:
     {sentryf}()
     {veilf}()
@@ -7801,7 +7840,7 @@ def {load}(i):
     {wardf}()
     {chafff}()
     row={impf}({__alias__('base64')}).b85decode({proof});({impf}({__alias__('zlib')}).crc32(row)+{impf}({__alias__('zlib')}).adler32(row)!={check}) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
-    {keep}=tuple({barkf}({impf}({__alias__('zlib')}).decompress({rune}(*{blob}))))
+    {keep}=tuple({barkf}({impf}({__alias__('zlib')}).decompress(b''.join({rune}(*one) for one in {blob}))))
     len({keep})!={tally} and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
  i=((i-{crisp})^{mask})-{bend}
  (i<0 or i>=len({keep})) and (__meow__ for __meow__ in ()).throw(RuntimeError('bad'))
@@ -7845,13 +7884,13 @@ def {load}(i):
                 if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 8 and ((seed[sisil]+tick[0])&7)!=5:
                     gate[0] += 1
                     tail = __ledge__(tail)
-                if room[0] > 0 and gate[0] < 6 and 1 < len(tail) < 6 and ((seed[(sisil+16)%len(seed)] + tick[0]) & 3) == 0:
+                if room[0] > 0 and gate[0] < 4 and 1 < len(tail) < 6 and ((seed[(sisil+16)%len(seed)] + tick[0]) & 3) == 0:
                     gate[0] += 1
                     tail = __tunnel__(tail)
-                if room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 10 and ((seed[(sisil+18)%len(seed)] + tick[0]) & 3) == 2:
+                if room[0] > 0 and gate[0] < 4 and 2 < len(tail) < 8 and ((seed[(sisil+18)%len(seed)] + tick[0]) & 3) == 2:
                     gate[0] += 1
                     tail = __evoker__(tail)
-                elif room[0] > 0 and gate[0] < 8 and 2 < len(tail) < 6 and ((seed[(sisil+19)%len(seed)] + tick[0]) & 3) == 1:
+                elif room[0] > 0 and gate[0] < 4 and 2 < len(tail) < 6 and ((seed[(sisil+19)%len(seed)] + tick[0]) & 3) == 1:
                     gate[0] += 1
                     tail = __tomek__(tail)
                 tail = __ridge__(tail)
@@ -8092,6 +8131,18 @@ def {load}(i):
                 for key in node.keywords:
                     if key.arg and key.arg in para and __token__(key.arg): key.arg = __pick__(key.arg)
             return node
+        if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load) and isinstance(node.value, ast.Name) and (node.value.id in clss or (node.value.id in dust and node.value.id not in bind)):
+            sl = node.slice
+            if isinstance(sl, ast.Tuple):
+                sl.elts = [__shape__(e) if not isinstance(e, ast.Starred) else ast.Starred(value=__shape__(e.value), ctx=e.ctx) for e in sl.elts]
+            else:
+                sl = __shape__(sl)
+            val = node.value
+            if (not (wall[0] > 0 and room[0] == 0) or val.id in mark) and not __held__(val.id) and __token__(val.id):
+                val.id = __pick__(val.id)
+            if isinstance(val.ctx, ast.Load) and val.id in dust and val.id not in bind:
+                val = ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[ast.Name(id=biobox, ctx=ast.Load()), __ember__(val.id)], keywords=[])
+            return ast.Call(func=ast.Call(func=ast.Name(id='getattr', ctx=ast.Load()), args=[val, __ember__('__class_getitem__')], keywords=[]), args=[sl], keywords=[])
         node = __cast__(node, 'shape', set())
         if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id in own and node.attr in mark and __token__(node.attr):
             node.attr = __pick__(node.attr)
@@ -8133,7 +8184,8 @@ def {load}(i):
                     bag.append(ast.Delete(targets=[target]))
             return bag
         if isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and __owncall__(node.value): own.add(node.targets[0].id)
+            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                if __owncall__(node.value) or (isinstance(node.value, ast.Name) and node.value.id in own): own.add(node.targets[0].id)
             if len(node.targets) > 1:
                 __crimson__ = any(isinstance(t, (ast.Attribute, ast.Subscript)) for t in node.targets)
                 if __crimson__:
@@ -8353,7 +8405,8 @@ def {load}(i):
             return node
         node = __cast__(node, 'stone', set())
         if isinstance(node, ast.If) and not node.orelse:
-            node.orelse = [ast.If(test=ast.Compare(left=ast.Constant(False), ops=[ast.Is()], comparators=[ast.Constant(True)]), body=[ast.Pass()], orelse=[ast.Pass()])]
+            __netherrack__ = ast.Compare(left=ast.Call(func=ast.Name(id='len', ctx=ast.Load()), args=[ast.Tuple(elts=[], ctx=ast.Load())], keywords=[]), ops=[ast.Eq()], comparators=[ast.Constant(0)])
+            node.orelse = [ast.If(test=__netherrack__, body=[ast.Pass()], orelse=[ast.Pass()])]
         if isinstance(node, ast.While) and not node.orelse:
             node.orelse = [ast.Pass()]
         if isinstance(node, ast.For) and not node.orelse:
@@ -8946,8 +8999,10 @@ def {runf}():
     hint, debug, anlz, vm, cmd, host, key, decomp, sbx, mac, mods, api, dll, net, proc, env, pool = bank['hint'], bank['debug'], bank['anlz'], bank['vm'], bank['cmd'], bank['host'], bank['key'], bank['decomp'], bank['sbx'], bank['mac'], bank['mods'], bank['api'], bank['dll'], bank['net'], bank['proc'], bank['env'], bank['pool']
     bag = {one: base64.b85encode(zlib.compress(chr(0).join(two).encode('utf-8','surrogatepass'),9)).decode('ascii') for one,two in {'hint':hint,'debug':debug,'anlz':anlz,'vm':vm,'cmd':cmd,'host':host,'key':key,'decomp':decomp,'sbx':sbx,'mac':mac,'mods':mods,'api':api,'dll':dll,'net':net,'proc':proc,'env':env,'pool':pool,'evir':evir,'vague':vague,'apth':apth,'bn':bn,'root':root}.items()}
     pref = (hashlib.sha256(flag.encode()).hexdigest().upper(),'Z'+hashlib.sha256(flag.encode()).hexdigest().upper())[hashlib.sha256(flag.encode()).hexdigest()[:12].upper()[0].isdigit()][:12]
+    __ingot__ = hashlib.sha256(flag.encode() + uuid.getnode().to_bytes(6,'big')).hexdigest()[:8].upper()
+    pref = ''.join(chr((ord(pref[i]) ^ ord(__ingot__[i % len(__ingot__)])) % 26 + 65) if i < len(pref) else pref[i] for i in range(len(pref)))
     outer = f"""import base64,bz2,ctypes,gc,hashlib,inspect,linecache,lzma,marshal,os,platform,socket,ssl,subprocess,sys,threading,time,traceback,uuid,zlib
-try:sys.setrecursionlimit(max(sys.getrecursionlimit(),99999999))
+try:sys.setrecursionlimit(min(max(sys.getrecursionlimit(),10000),200000))
 except:pass
 def __toiyeupnha__(row):return tuple(zlib.decompress(base64.b85decode(row)).decode('utf-8','surrogatepass').split(chr(0))) if row else ()
 __iloveyou__=False;__runtag__=0;hint=__toiyeupnha__({bag['hint']!r});debug=__toiyeupnha__({bag['debug']!r});anlz=__toiyeupnha__({bag['anlz']!r});vm=__toiyeupnha__({bag['vm']!r});cmd=__toiyeupnha__({bag['cmd']!r});host=__toiyeupnha__({bag['host']!r});key=__toiyeupnha__({bag['key']!r});decomp=__toiyeupnha__({bag['decomp']!r});sbx=__toiyeupnha__({bag['sbx']!r});mac=__toiyeupnha__({bag['mac']!r});mods=__toiyeupnha__({bag['mods']!r});api=__toiyeupnha__({bag['api']!r});dll=__toiyeupnha__({bag['dll']!r});net=__toiyeupnha__({bag['net']!r});proc=__toiyeupnha__({bag['proc']!r});env=__toiyeupnha__({bag['env']!r});pool=__toiyeupnha__({bag['pool']!r});evir=__toiyeupnha__({bag['evir']!r});vague=__toiyeupnha__({bag['vague']!r});apth=__toiyeupnha__({bag['apth']!r});bn=__toiyeupnha__({bag['bn']!r});root=__toiyeupnha__({bag['root']!r})
@@ -8957,12 +9012,34 @@ __ngauvcl__={coresrc};__manhvcl__={leftk};__meowmeow__={rightk};__meocute__={mis
 try:
  if getattr(sys,'argv',['x'])[0] in ('-c','-'):os._exit(1)
  if 'python_d' in os.path.basename(getattr(sys,'executable','') or '').lower() or 'debug build' in getattr(sys,'version','').lower():os._exit(1)
- __bundaumamtom__={pref!r}+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__khogadetem__=os.read(__JackBoCon__,os.path.getsize(__SonTungMTP__));__khogadetem__=hashlib.sha256(__khogadetem__[:len(__khogadetem__)//2]).hexdigest()+hashlib.sha256(__khogadetem__[len(__khogadetem__)//2:]+os.path.abspath(sys.executable).encode()).hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
+ __bundaumamtom__={pref!r}+hashlib.sha256((__dmconcholeminh__+__iloveyoupnha__).encode()).hexdigest()[:24];__SonTungMTP__=os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''));__JackBoCon__=os.open(__SonTungMTP__,os.O_RDONLY);__BunDauMamTom__=os.path.getsize(__SonTungMTP__);__PhoBo__=__BunDauMamTom__//2;__BanhXeo__=hashlib.sha256();__GoiCuon__=hashlib.sha256();__ComTam__=0
+ while __ComTam__<__BunDauMamTom__:
+  __BunBoHue__=os.read(__JackBoCon__,1048576)
+  if not __BunBoHue__:break
+  __ComTam__+=len(__BunBoHue__)
+  if __ComTam__-len(__BunBoHue__)<__PhoBo__:
+   __CanhChua__=max(0,__PhoBo__-(__ComTam__-len(__BunBoHue__)));__BanhXeo__.update(__BunBoHue__[:__CanhChua__]);__GoiCuon__.update(__BunBoHue__[__CanhChua__:])
+  else:__GoiCuon__.update(__BunBoHue__)
+ __GoiCuon__.update(os.path.abspath(sys.executable).encode());__khogadetem__=__BanhXeo__.hexdigest()+__GoiCuon__.hexdigest();os.close(__JackBoCon__);__concacchungmay=hashlib.sha256((__iloveyoupnha__+__dmconcholeminh__).encode()).hexdigest();__sexgay__=__concacchungmay+':'+str(os.getppid())+':'+__khogadetem__;__ComeMyWay__=__concacchungmay+':'+str(os.getpid())+':'+__khogadetem__;__WayWayWay__=os.environ.get(__bundaumamtom__)
  if __WayWayWay__ is None:
   __buffviewchosontung__=os.environ.copy();__buffviewchosontung__[__bundaumamtom__]=__ComeMyWay__;__concacditmemay__=[sys.executable,os.path.abspath(globals().get('__file__') or (sys.argv[0] if getattr(sys,'argv',None) else ''))]+list(getattr(sys,'argv',())[1:])
   os._exit(subprocess.call(__concacditmemay__,env=__buffviewchosontung__))
  if __WayWayWay__!=__sexgay__:os._exit(1)
  os.environ.pop(__bundaumamtom__,None)
+ if os.name=='nt':
+  __enyw__=ctypes.windll.kernel32
+  __olym__=__enyw__.GetEnvironmentStringsW()
+  if __olym__:
+   __bnw__=0
+   while True:
+    __qwy__=ctypes.wstring_at(__olym__+__bnw__)
+    if __qwy__=='':break
+    __kwm__=__qwy__.find('=')
+    if __kwm__>0:
+     __vny__=__qwy__[:__kwm__]
+     (__vny__.startswith({pref!r}) or __vny__==__bundaumamtom__) and __enyw__.SetEnvironmentVariableW(__vny__,None)
+    __bnw__+=2*(len(__qwy__)+1)
+   __enyw__.FreeEnvironmentStringsW(__olym__)
  for __nhincaidaubuoi__ in tuple(os.environ):
   __nhincaidaubuoi__.startswith({pref!r}) and os.environ.pop(__nhincaidaubuoi__,None)
 except SystemExit:raise
@@ -9133,6 +9210,12 @@ def __varrrrr__(name,home,need):
  rows=need if isinstance(need,tuple) else (need,)
  if getattr(hold,'__module__',None) not in rows:return __ditmemay__()
  if hasattr(hold,'__wrapped__') or (hasattr(hold,'__closure__') and hold.__closure__):return __ditmemay__()
+ if hasattr(hold,'__code__'):
+  try:
+   __glowstone__=hold.__code__
+   __ghosth__=hashlib.sha256(__glowstone__.co_code).digest()[0]
+   if __glowstone__.co_argcount<0 or __glowstone__.co_stacksize<0:return __ditmemay__()
+  except:return __ditmemay__()
  return hold
 def __checkvar__():
  built=__import__('builtins')
@@ -9253,6 +9336,8 @@ def __mixifood__():
   if not mine or (main and os.path.abspath(mine)!=os.path.abspath(main)):return __ditmemay__()
   way=os.path.abspath(mine)
   if not os.path.isfile(way):return __ditmemay__()
+  __sculk__=getattr(sys.modules.get('__main__'),'__spec__',None)
+  if __sculk__ and getattr(__sculk__,'origin',None) and os.path.abspath(str(__sculk__.origin))!=way:return __ditmemay__()
   with open(way,'rb') as row:
    got=row.read()
   if not got or b"__OWNER__='yep'" not in got[:96] or b"yep's obfuscator" not in got[:160] or b"__OBFUSCATED__" not in got[:224]:return __ditmemay__()
@@ -9296,6 +9381,9 @@ def __mixifood__():
  except:pass
  try:
   frame=sys._getframe();deep=0
+  if frame is None:
+   try: frame=ctypes.pythonapi.PyEval_GetFrame()
+   except: pass
   while frame and deep<96:
    code=getattr(frame,'f_code',None);fname=os.path.basename(str(getattr(code,'co_filename',''))).lower();cname=str(getattr(code,'co_name','')).lower();rows.append(fname+' '+cname)
    for word in mods+decomp:
@@ -9459,7 +9547,6 @@ def __neko__():
    except:pass
    haz=' '.join(hard);soft=' '.join(loose);known=sum(2 for one in mark if one in raw or one in haz or one in soft);odd=sum(1 for one in vague if one in haz or one in soft)
    return bool(hard) or known>0 or (odd>3 and any(one in soft for one in apth))
-  if not vibe():return 0
   dis=__import__('dis');pdb=__import__('pdb');code=__import__('code');trace=__import__('trace');bdb=__import__('bdb')
   try:gc.get_referrers=lambda *a,**k:[];gc.get_referents=lambda *a,**k:[];gc.get_objects=lambda *a,**k:[]
   except:pass
@@ -9486,22 +9573,21 @@ def __neko__():
    def recv(self,size,flag=0):
     if getattr(self,'_no',False):return b'HTTP/1.1 200 OK\\r\\n\\r\\n{{}}'
     return self._raw.recv(size,flag)
-  def nsock(*a,**k):
-   raw=sock(*a,**k)
-   if not vibe():return raw
-   one=net();one._raw=raw;one._no=False;return one
-  def ndns(name,*a,**k):
-   try:
-    raw=str(name).lower()
-    if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return '127.0.0.1'
-   except:pass
-   return dns(name,*a,**k)
-  def naddr(name,*a,**k):
-   try:
-    raw=str(name).lower()
-    if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('127.0.0.1',443))]
-   except:pass
-   return addr(name,*a,**k)
+   def nsock(*a,**k):
+    raw=sock(*a,**k)
+    one=net();one._raw=raw;one._no=False;return one
+   def ndns(name,*a,**k):
+    try:
+     raw=str(name).lower()
+     if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return '127.0.0.1'
+    except:pass
+    return dns(name,*a,**k)
+   def naddr(name,*a,**k):
+    try:
+     raw=str(name).lower()
+     if any(one in raw for one in host) or (vibe() and any(one in raw for one in vague)):return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('127.0.0.1',443))]
+    except:pass
+    return addr(name,*a,**k)
   class pbox:
    def communicate(self,input=None,timeout=None):return (b'',b'')
    def wait(self,timeout=None):return 0
@@ -9544,9 +9630,18 @@ def __neko__():
    except:pass
    return windll(name,*a,**k)
   socket.socket=nsock
+  try:socket.__dict__['socket']=nsock
+  except:pass
+  socket.SocketType=nsock
+  try:socket.__dict__['SocketType']=nsock
+  except:pass
   try:dis.dis=lambda *a,**k:None;dis.disassemble=lambda *a,**k:None;dis.get_instructions=lambda *a,**k:iter(());dis.Bytecode=lambda *a,**k:();pdb.set_trace=lambda *a,**k:None;pdb.pm=lambda *a,**k:None;pdb.Pdb=type('Pdb',(),{{'set_trace':lambda *a,**k:None,'run':lambda *a,**k:None}});code.compile_command=lambda *a,**k:None;code.InteractiveConsole=lambda *a,**k:type('Ic',(),{{'interact':lambda *a,**k:None}})();trace.Trace=lambda *a,**k:type('Tr',(),{{'run':lambda *a,**k:None,'runctx':lambda *a,**k:None,'results':lambda *a,**k:None}})();bdb.Bdb=type('Bd',(),{{'set_trace':lambda *a,**k:None,'run':lambda *a,**k:None,'quit':lambda *a,**k:None}})
   except:pass
   socket.gethostbyname=ndns;socket.getaddrinfo=naddr
+  try:socket.__dict__['gethostbyname']=ndns;socket.__dict__['getaddrinfo']=naddr
+  except:pass
+  (vibe() and hasattr(ssl,'SSLSocket') and hasattr(ssl,'__dict__') and (ssl.__dict__.__setitem__('SSLSocket',nsock) or True))
+  (vibe() and hasattr(ssl,'SSLSocket') and setattr(ssl,'SSLSocket',nsock))
   if pop:sub.Popen=npop
   if run:sub.run=nrun
   os.system=nsys
@@ -9582,7 +9677,8 @@ def __auditv__():
     if name not in ('__class__','__repr__','__str__','__bytes__','__len__','__iter__','__getattribute__'):row.__setitem__('v',1)
     return object.__getattribute__(self,name)
   box=Box()
-  sys.audit('marshal.loads',box);sys.audit('exec',box);sys.audit('compile',box)
+  try:aud=ctypes.pythonapi.PySys_Audit;aud.restype=ctypes.c_int;aud.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.py_object];aud(b'marshal.loads',b'O',box);aud(b'exec',b'O',box);aud(b'compile',b'O',box)
+  except:pass
   row.get('v') and __ditmemay__()
  except Exception:return __ditmemay__()
  return 0
@@ -9636,6 +9732,21 @@ def __depvcl__():
  __sengtraan__=b'';__RTX5090__=None
  try:
   __lmaoo__((lambda a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p:(a(),b(),c(),d(),e(),f(),g(),h(),i(),j(),k(),l(),m(),n(),o(),p()))(__uwu__,__thichvarko__,__varconcac__,__checkvar__,__owo__,__OwO__,__haha__,__hihi__,__hoho__,__hahaha__,__hihihi__,__anhdomixi__,__mixifood__,__meme__,__auditv__,__neko__))
+  def __beaconn__():
+   try:
+    if os.name=='nt':
+     if ctypes.windll.kernel32.IsDebuggerPresent():__ditmemay__()
+     slot=ctypes.c_int(0);ctypes.windll.kernel32.CheckRemoteDebuggerPresent(ctypes.windll.kernel32.GetCurrentProcess(),ctypes.byref(slot))
+     if slot.value:__ditmemay__()
+    buf=ctypes.create_string_buffer(256);ctypes.c_uint.from_buffer(buf,0x30).value=0x00100010
+    ok=ctypes.windll.kernel32.GetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),buf)
+    if ok:
+     drs=[int.from_bytes(buf[o:o+8],'little') for o in (0x48,0x50,0x58,0x60)]
+     if any(drs):
+      for o in (0x48,0x50,0x58,0x60,0x68,0x70):buf[o:o+8]=bytes(8)
+      ctypes.windll.kernel32.SetThreadContext(ctypes.windll.kernel32.GetCurrentThread(),buf)
+   except:pass
+  __beaconn__()
   __roll__(__concac__());__roll__(__yepppppp__);__roll__(__meoooo__);__roll__(__deptrai__)
   __iloveyou__ and __baoloi__();__sengtraan__=__lmao__(__tooldepphet__,((__runtag__^__yepppppp__^__meoooo__^__deptrai__^len(__ngauvcl__))&0xffffffff));(len(__sengtraan__)^(zlib.crc32(__sengtraan__)&0xffff))&0xffff!=__SFPRINT__ and (__meow__ for __meow__ in ()).throw(SystemExit);__seth__=(((zlib.crc32(__sengtraan__[:len(__sengtraan__)//2])^zlib.crc32(__sengtraan__[len(__sengtraan__)//2:]))&0xffffffff)^__runtag__^len(__sengtraan__))&0xffffffff;__iloveyou__ and __baoloi__();__RTX5090__=__lmao__(__alovu__,__sengtraan__,__seth__);__sengtraan__=b'';__uwu__();__seth__=((hashlib.sha256(__RTX5090__.co_code).digest()[0]<<24)^(zlib.crc32(__RTX5090__.co_code[:len(__RTX5090__.co_code)//2])^zlib.crc32(__RTX5090__.co_code[len(__RTX5090__.co_code)//2:]))&0xffffffff^__runtag__^len(__RTX5090__.co_consts)^0xA5A55A5A)&0xffffffff;__iloveyou__ and __baoloi__();__lmao__(__nhinconcac__,__RTX5090__,__seth__)
  finally:
@@ -9833,6 +9944,8 @@ def __chorus__(seed, used=None):
    return rows
 def __head__(code, seed, brick, clay):
    pref = (hashlib.sha256(clay.encode()).hexdigest().upper(),'Z'+hashlib.sha256(clay.encode()).hexdigest().upper())[hashlib.sha256(clay.encode()).hexdigest()[:12].upper()[0].isdigit()][:12]
+   __ingot__ = hashlib.sha256(clay.encode() + uuid.getnode().to_bytes(6,'big')).hexdigest()[:8].upper()
+   pref = ''.join(chr((ord(pref[i]) ^ ord(__ingot__[i % len(__ingot__)])) % 26 + 65) if i < len(pref) else pref[i] for i in range(len(pref)))
    outenv = pref+hashlib.sha256((brick+clay).encode()).hexdigest()[:24]
    concac = hashlib.sha256((clay+brick).encode()).hexdigest()
    okey = outenv
@@ -9904,7 +10017,7 @@ def __cowl__(code, seed):
 def __crystal__(tree, path, used):
    path = os.path.basename(path)
    face = hashlib.sha256((path + secrets.token_hex(16)).encode('utf-8', 'replace')).hexdigest()
-   code = compile(tree, face, 'exec', optimize=2, dont_inherit=True)
+   code = compile(tree, face, 'exec', optimize=0, dont_inherit=True)
    code = __scrub__(code, hashlib.sha256(face.encode('utf-8','replace') + path.encode('utf-8','replace')).digest())
    code = __saltcode__(code, hashlib.sha256(face.encode('utf-8','replace') + path.encode('utf-8','replace') + b'usercode').digest())
    stem = marshal.dumps(code)
@@ -9998,6 +10111,9 @@ def __folder__(path):
    for one in rows:
       rel = os.path.relpath(one, path); dst = os.path.join(outroot, rel); os.makedirs(os.path.dirname(dst), exist_ok=True)
       got = __forge__(one, dst); src += got[2]; size += got[3]; done += 1
+      for __PhoGa__ in (__beacon__, __shapebag__, __walkbag__, __gaskbag__):
+         try: __PhoGa__.clear()
+         except: pass
    return outroot, time.time() - st, src, size, done
 def __clean__(rows):
    seen = set()
